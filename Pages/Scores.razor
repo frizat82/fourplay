@@ -1,0 +1,60 @@
+﻿@page "/scores"
+
+<PageTitle>Scores</PageTitle>
+
+<MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((@_scores != null ? "invisible" : ""))" />
+
+<h1>Week @_scores?.Week?.Number</h1>
+<MudGrid>
+    <MudSpacer />
+    @foreach (var score in _scores.Events.OrderBy(x => x.Date))
+    {
+        @foreach (var scoreEvent in score.Competitions.OrderBy(x => x.Competitors[0].Team.Abbreviation))
+        {
+            <MudItem xs="4">
+                <MudPaper class="pa-3" Elevation="15">
+                    <MudPaper class="pa-3" Elevation="15">
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Row="true">
+
+                            <MudAvatar Image="@scoreEvent.Competitors[0].Team.Logo.ToString()" Size="Size.Medium" />
+                            <MudText Typo="Typo.h6">@scoreEvent.Competitors[0].Score</MudText>
+
+
+                                <MudText>@DisplayDetails(@scoreEvent)</MudText>
+
+                                <MudText Typo="Typo.h6">@scoreEvent.Competitors[1].Score</MudText>
+                                <MudAvatar Image="@scoreEvent.Competitors[1].Team.Logo.ToString()" Size="Size.Medium" />
+
+                            </MudStack>
+                        </MudPaper>
+                        <MudPaper class="pa-2 ma-2" Elevation="5">
+                            <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
+                                <MudIcon Icon="@Icons.Material.Filled.GppGood" Color="Color.Success" />
+                                <MudText>
+                                    @scoreEvent.Competitors[0].Team.Abbreviation
+                            </MudText>
+                            <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">10
+                            </MudPaper>
+                            <MudBadge Content="100" Color="Color.Primary" Overlap="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                            </MudBadge>
+                        </MudStack>
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
+                            <MudIcon Icon="@Icons.Material.Filled.GppGood" Color="Color.Success" />
+                            <MudText>
+                                @scoreEvent.Competitors[1].Team.Abbreviation
+                            </MudText>
+                            <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">10
+                            </MudPaper>
+                            <MudBadge Content="100" Color="Color.Primary" Overlap="true">
+                                <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                            </MudBadge>
+                        </MudStack>
+                    </MudPaper>
+                </MudPaper>
+            </MudItem>
+
+        }
+
+    }
+    </MudGrid>

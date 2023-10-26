@@ -1,0 +1,57 @@
+﻿@page "/picks"
+@using fourplay.Data
+@inject ESPNApiService ESPN
+
+<PageTitle>FourPlay Picks</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (scores == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+    <thead>
+        <tr>
+            <th>Home</th>
+            <th>Score</th>
+            <th>Away</th>
+            <th>Score</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var score in scores.Events)
+            {
+                <tr>
+                    @foreach (var scoreEvent in score.Competitions)
+                    {
+                        <td>
+                            <img src="@scoreEvent.Competitors[0].Team.Logo" alt="Icon" style="width: 50px; height: 50px;" />
+                            @scoreEvent.Competitors[0].Team.ShortDisplayName
+                        </td>
+                        <td>@scoreEvent.Competitors[0].Score</td>
+                        <td>
+                            <img src="@scoreEvent.Competitors[1].Team.Logo" alt="Icon" style="width: 50px; height: 50px;" />
+                            @scoreEvent.Competitors[1].Team.ShortDisplayName
+                        </td>
+                        <td>@scoreEvent.Competitors[1].Score</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private ESPNScores? scores;
+
+    protected override async Task OnInitializedAsync()
+    {
+        scores = await ESPN.GetScores();
+    }
+}

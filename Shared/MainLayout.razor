@@ -1,0 +1,44 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider IsDarkMode="true" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<PageTitle>Four Who?</PageTitle>
+<!--
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4 auth">
+            <LoginDisplay />
+            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+@Body
+        </article>
+    </main>
+</div>-->
+
+
+
+<MudLayout>
+    <MudAppBar Elevation="0" Class="mud-primary">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+            OnClick="@(_ => DrawerToggle())" />
+        <MudText Typo="Typo.h6">Betty's House</MudText>
+        <MudSpacer />
+        <LoginDisplay />
+    </MudAppBar>
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <NavMenu> </NavMenu>
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer Class="my-4 pt-16">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
