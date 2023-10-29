@@ -10,24 +10,47 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using NodaTime;
+using System.Data.Entity;
 
 namespace fourplay.Pages;
 
 public partial class Scores : ComponentBase {
     [Inject]
     private IESPNApiService? _espn { get; set; } = default!;
+    [Inject]
+    private ApplicationDbContext? _db { get; set; } = default!;
     private ESPNScores? _scores = null;
-
+    private System.Timers.Timer _timer = new System.Timers.Timer();
+    private List<NFLSpreads>? _odds = null;
     protected override async Task OnInitializedAsync() {
-        /*var timer = new Timer(x =>
-        {
-            InvokeAsync(() =>
-            {
-                _scores = await _espn.GetScores();
-                StateHasChanged();
-            }
-        }, null, TimeSpan.Zero, TimeSpan.FromMinutes(6));
-        */
+        _scores = await _espn.GetScores();
+        _odds = _db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
+        RunTimer();
+        _timer.Elapsed += TimeElapsed;
+        _timer.Interval = TimeSpan.FromMinutes(5).TotalMilliseconds;
+        _timer.AutoReset = true;
+        _timer.Enabled = true;
+
+    }
+
+    private async void TimeElapsed(object? sender, System.Timers.ElapsedEventArgs e) {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected async void RunTimer() {
+        _scores = await _espn.GetScores();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing) {
+        if (disposing) {
+            _timer.Dispose();
+        }
     }
 
     private DateTime ConvertTimeToCST(DateTime utcDateTime) {
@@ -50,9 +73,20 @@ public partial class Scores : ComponentBase {
             return "FINAL";
         }
         else if (competition.Status.Type.Name == TypeName.StatusScheduled) {
-            return competition.Date.ToString("ddd h:mm");
+            return competition.Date.ToLocalTime().ToString("ddd h:mm");
+        }
+        else if (competition.Status.Type.Name == TypeName.StatusInProgress) {
+            return $"Q{competition.Status.Period} {competition.Status.DisplayClock}";
         }
         return null;
     }
-    private string BufferTeamName(string abbreviation) => (abbreviation + " ").Substring(0, 3);
+    private double? GetSpread(string teamAbbr) {
+        var spread = _odds.FirstOrDefault(x => x.HomeTeam == teamAbbr);
+        if (spread is not null)
+            return (spread.FourPlayHomeSpread == 0 ? spread.HomeTeamSpread : spread.FourPlayHomeSpread);
+        spread = _odds.FirstOrDefault(x => x.AwayTeam == teamAbbr);
+        if (spread is not null)
+            return (spread.FourPlayAwaySpread == 0 ? spread.AwayTeamSpread : spread.FourPlayAwaySpread);
+        return null;
+    }
 }

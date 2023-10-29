@@ -11,25 +11,35 @@ using Quartz.Impl;
 using Quartz.Impl.AdoJobStore;
 using MudBlazor.Services;
 using System.Data.SQLite;
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog((context, services, configuration) => configuration
+                .WriteTo.Console()
+                    .MinimumLevel.Override("Quartz", Serilog.Events.LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
+                .ReadFrom.Services(services));
 builder.Services.AddMudServices();
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(new SQLiteConnection(connectionString)));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
-builder.Services.AddHttpClient<IESPNApiService, ESPNApiService>(x =>
-{
+builder.Services.AddHttpClient<IESPNApiService, ESPNApiService>(x => {
     x.BaseAddress = new Uri("http://site.api.espn.com");
 });
-builder.Services.AddHttpClient<ISportslineOddsService, SportslineOddsService>(x =>
-{
+builder.Services.AddHttpClient<ISportslineOddsService, SportslineOddsService>(x => {
     x.BaseAddress = new Uri("https://www.sportsline.com");
     // Set headers
     x.DefaultRequestHeaders.Add("authority", "www.sportsline.com");
@@ -48,67 +58,65 @@ builder.Services.AddHttpClient<ISportslineOddsService, SportslineOddsService>(x 
     x.DefaultRequestHeaders.Add("x-correlation-id", "51f96c9b-8cf4-4e98-9460-d1c0025198c0");
 });
 builder.Services.AddMemoryCache();
-builder.Services.AddAuthentication().AddGoogle(googleOptions =>
-    {
-        googleOptions.ClientId = builder.Configuration["Google:ClientId"];
-        googleOptions.ClientSecret = builder.Configuration["Google:ClientSecret"];
-    });
+builder.Services.AddAuthentication().AddGoogle(googleOptions => {
+    googleOptions.ClientId = builder.Configuration["Google:ClientId"];
+    googleOptions.ClientSecret = builder.Configuration["Google:ClientSecret"];
+    //googleOptions.ClaimActions.MapJsonKey("urn:google:image", "picture");
+});
 // Quartz
 builder.Services.AddScoped<IJob, NFLScoresJob>();
 builder.Services.AddScoped<IJob, NFLSpreadJob>();
 builder.Services.AddScoped<IJob, StartupJob>();
-builder.Services.AddQuartz(q =>
-    {
-        q.UseMicrosoftDependencyInjectionJobFactory();
-        // quickest way to create a job with single trigger is to use ScheduleJob
-        // (requires version 3.2)
-        q.ScheduleJob<StartupJob>(trigger => trigger.WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
-        q.ScheduleJob<NFLSpreadJob>(trigger => trigger
-            .WithIdentity("NFL Spreads")
-            .WithCronSchedule("0 0 10 ? * THU") // Fire at 10:00 AM every Thursday
-        );
-        q.ScheduleJob<NFLScoresJob>(trigger => trigger
-        .WithIdentity("NFL Scores")
+builder.Services.AddScoped<IJob, UserManagerJob>();
+builder.Services.AddQuartz(q => {
+    q.UseMicrosoftDependencyInjectionJobFactory();
+    // quickest way to create a job with single trigger is to use ScheduleJob
+    // (requires version 3.2)
+    q.ScheduleJob<UserManagerJob>(trigger => trigger.WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
+    q.ScheduleJob<StartupJob>(trigger => trigger.WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
+    q.ScheduleJob<NFLSpreadJob>(trigger => trigger
+        .WithIdentity("NFL Spreads")
         .WithCronSchedule("0 0 10 ? * THU") // Fire at 10:00 AM every Thursday
+    );
+    q.ScheduleJob<NFLScoresJob>(trigger => trigger
+    .WithIdentity("NFL Scores")
+    .WithCronSchedule("0 0 10 ? * THU") // Fire at 10:00 AM every Thursday
 );
-        /*
-        // convert time zones using converter that can handle Windows/Linux differences
-        q.UseTimeZoneConverter();
+    /*
+    // convert time zones using converter that can handle Windows/Linux differences
+    q.UseTimeZoneConverter();
 
-        // auto-interrupt long-running job
-        q.UseJobAutoInterrupt(options =>
-        {
-            // this is the default
-            options.DefaultMaxRunTime = TimeSpan.FromMinutes(5);
+    // auto-interrupt long-running job
+    q.UseJobAutoInterrupt(options =>
+    {
+        // this is the default
+        options.DefaultMaxRunTime = TimeSpan.FromMinutes(5);
+    });
+    */
+    // example of persistent job store using JSON serializer as an example
+
+    q.UsePersistentStore(s => {
+        // Use for SQLite database
+        s.UseSQLite(sqlLiteOptions => {
+            sqlLiteOptions.UseDriverDelegate<SQLiteDelegate>();
+            sqlLiteOptions.ConnectionString = connectionString;
+            sqlLiteOptions.TablePrefix = "QRTZ_";
         });
-        */
-        // example of persistent job store using JSON serializer as an example
-
-        q.UsePersistentStore(s =>
+        s.PerformSchemaValidation = true; // default
+        s.UseProperties = true; // preferred, but not default
+        s.RetryInterval = TimeSpan.FromSeconds(15);
+        s.UseNewtonsoftJsonSerializer();
+        /*s.UseClustering(c =>
         {
-            // Use for SQLite database
-            s.UseSQLite(sqlLiteOptions =>
-            {
-                sqlLiteOptions.UseDriverDelegate<SQLiteDelegate>();
-                sqlLiteOptions.ConnectionString = connectionString;
-                sqlLiteOptions.TablePrefix = "QRTZ_";
-            });
-            s.PerformSchemaValidation = true; // default
-            s.UseProperties = true; // preferred, but not default
-            s.RetryInterval = TimeSpan.FromSeconds(15);
-            s.UseNewtonsoftJsonSerializer();
-            /*s.UseClustering(c =>
-            {
-                c.CheckinMisfireThreshold = TimeSpan.FromSeconds(20);
-                c.CheckinInterval = TimeSpan.FromSeconds(10);
-            });*/
-        });
-
+            c.CheckinMisfireThreshold = TimeSpan.FromSeconds(20);
+            c.CheckinInterval = TimeSpan.FromSeconds(10);
+        });*/
     });
 
+});
+
 // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
-builder.Services.AddQuartzHostedService(options =>
-{
+builder.Services.AddQuartzHostedService(options => {
     // when shutting down we want jobs to complete gracefully
     options.WaitForJobsToComplete = true;
 });
@@ -116,12 +124,10 @@ builder.Services.AddQuartzHostedService(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+if (app.Environment.IsDevelopment()) {
     app.UseMigrationsEndPoint();
 }
-else
-{
+else {
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();

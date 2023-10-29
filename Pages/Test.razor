@@ -1,0 +1,118 @@
+﻿@page "/test"
+@using fourplay.Data
+@inject IESPNApiService ESPN
+
+<PageTitle>FourPlay Picks</PageTitle>
+
+<h1>Test</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (scores == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <MudTable Items="@scores.Events.SelectMany(x => x.Competitions)" Breakpoint="Breakpoint.Sm" T="Competition">
+    <HeaderContent>
+        <MudTh>Home</MudTh>
+        <MudTh>Score</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh>Score</MudTh>
+        <MudTh>Away</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+
+        <MudTd> <img src="@context.Competitors[0].Team.Logo" alt="Icon" style="width: 50px; height: 50px;" />
+        </MudTd>
+        <MudTd>@context.Competitors[0].Score</MudTd>
+                <MudTd>@DisplayDetails(@context)</MudTd>
+                <MudTd>@context.Competitors[1].Score</MudTd>
+                <MudTd> <img src="@context.Competitors[1].Team.Logo" alt="Icon" style="width: 50px; height: 50px;" />
+                </MudTd>
+
+            </RowTemplate>
+            <ChildRowContent>
+                <MudTr>
+                    <td colspan="4">
+                        <MudCard Elevation="0">
+                            <MudCardContent Class="pa-0">
+                                <MudTable
+                                    Items="@scores.Events.SelectMany(x => x.Competitions).Where(x => x.Competitors[0].Team.Abbreviation == @context.Competitors[0].Team.Abbreviation)"
+                                    Context="SubContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+                                    <HeaderContent>
+                                        <MudTh>Blood</MudTh>
+                                        <MudTh>Home</MudTh>
+                                        <MudTh>Spread</MudTh>
+                                        <MudTh>Picks</MudTh>
+                                        <MudTh>Away</MudTh>
+                                        <MudTh>Spread</MudTh>
+                                        <MudTh>Picks</MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate>
+                                        <MudTd>
+                                            <MudIcon Icon="@Icons.Material.Filled.GppGood" Color="Color.Success" />
+                                        </MudTd>
+                                        <MudTd> @SubContext.Competitors[0].Team.Abbreviation</MudTd>
+                                        <MudTd> @GetSpread(@SubContext.Competitors[0].Team.Abbreviation)</MudTd>
+                                        <MudTd>
+                                            <MudBadge Content="100" Color="Color.Primary" Overlap="true">
+                                                <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                                            </MudBadge>
+                                        </MudTd>
+                                        <MudTd> @SubContext.Competitors[1].Team.Abbreviation</MudTd>
+                                        <MudTd> @GetSpread(@SubContext.Competitors[1].Team.Abbreviation)</MudTd>
+                                        <MudTd>
+                                            <MudBadge Content="100" Color="Color.Primary" Overlap="true">
+                                                <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                                            </MudBadge>
+                                        </MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+                            </MudCardContent>
+                        </MudCard>
+                    </td>
+                </MudTr>
+            </ChildRowContent>
+        </MudTable>
+}
+
+@code {
+    private ESPNScores? scores;
+    [Inject]
+    private ApplicationDbContext? _db { get; set; } = default!;
+    private List<NFLSpreads>? _odds = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        scores = await ESPN.GetScores();
+        _odds = _db.NFLSpreads.Where(x => x.Season == scores!.Season.Year && x.NFLWeek == scores.Week.Number).ToList();
+    }
+    private string DisplayDetails(Competition? competition)
+    {
+        if (competition.Status.Type.Name == TypeName.StatusFinal)
+        {
+            return "FINAL";
+        }
+        else if (competition.Status.Type.Name == TypeName.StatusScheduled)
+        {
+            return competition.Date.ToLocalTime().ToString("ddd h:mm");
+        }
+        else if (competition.Status.Type.Name == TypeName.StatusInProgress)
+        {
+            return $"Q{competition.Status.Period} {competition.Status.DisplayClock}";
+        }
+        return null;
+    }
+    private double? GetSpread(string teamAbbr)
+    {
+        var spread = _odds.FirstOrDefault(x => x.HomeTeam == teamAbbr);
+        if (spread is not null)
+            return (spread.FourPlayHomeSpread == 0 ? spread.HomeTeamSpread : spread.FourPlayHomeSpread);
+        spread = _odds.FirstOrDefault(x => x.AwayTeam == teamAbbr);
+        if (spread is not null)
+            return (spread.FourPlayAwaySpread == 0 ? spread.AwayTeamSpread : spread.FourPlayAwaySpread);
+        return null;
+    }
+}

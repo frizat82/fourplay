@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
-public class NFLPicks
-{
+public class NFLPicks {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
+    public Guid LeagueInfoId { get; set; }
     // Foreign key to the AspNetUsers table
     public string UserId { get; set; }
     public IdentityUser User { get; set; }
