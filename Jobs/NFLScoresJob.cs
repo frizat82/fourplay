@@ -1,8 +1,6 @@
 using fourplay.Data;
 using Quartz;
 using Serilog;
-using System;
-using System.Threading.Tasks;
 [DisallowConcurrentExecution]
 public class NFLScoresJob : IJob {
     private readonly IESPNApiService _espn;
@@ -29,7 +27,7 @@ public class NFLScoresJob : IJob {
                             var dbScore = new NFLScores();
                             var ht = result.Competitors.Where(x => x.HomeAway == HomeAway.Home).First();
                             var at = result.Competitors.Where(x => x.HomeAway == HomeAway.Away).First();
-                            dbScore.Id = Guid.NewGuid();
+                            //dbScore.Id = Guid.NewGuid();
                             dbScore.HomeTeam = ht.Team.Abbreviation;
                             dbScore.AwayTeam = at.Team.Abbreviation;
                             dbScore.HomeTeamScore = ht.Score;

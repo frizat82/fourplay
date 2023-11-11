@@ -1,25 +1,30 @@
 ﻿@page "/scores"
 
 <PageTitle>Scores</PageTitle>
-
-<MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((@_scores != null ? "invisible" : ""))" />
-
-@if (_scores is not null)
-{
-    <h1>Week @_scores?.Week?.Number</h1>
+<MudContainer>
     <MudGrid>
-        <MudSpacer />
-        @foreach (var score in _scores?.Events?.OrderBy(x => x.Date))
+        <MudItem xs="12">
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true"
+                Class="@((@_scores != null ? "invisible" : ""))" />
+        </MudItem>
+        @if (_scores is not null && _leagueId > 0)
         {
-            @foreach (var scoreEvent in score.Competitions.OrderBy(x => x.Competitors[0].Team.Abbreviation))
-            {
-                <MudItem xs="4">
-                    <MudPaper class="pa-3" Elevation="15">
-                        <MudPaper class="pa-3" Elevation="15">
-                            <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Row="true">
 
-                                <MudImage Src="@scoreEvent.Competitors[0].Team.Logo.ToString()" Width="50" />
-                                <MudText Typo="Typo.h6">@scoreEvent.Competitors[0].Score</MudText>
+            <MudItem xs="12">
+                <MudText Align="Align.Center" Typo="Typo.h3">Week @_scores?.Week?.Number</MudText>
+            </MudItem>
+            <MudSpacer />
+            @foreach (var score in _scores?.Events?.OrderBy(x => x.Date))
+            {
+                @foreach (var scoreEvent in score.Competitions.OrderBy(x => x.Competitors[0].Team.Abbreviation))
+                {
+                    <MudItem xs="12" lg="4">
+                        <MudPaper class="pa-3" Elevation="15">
+                            <MudPaper class="pa-3" Elevation="15">
+                                <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Row="true">
+
+                                    <MudImage Src="@scoreEvent.Competitors[0].Team.Logo.ToString()" Width="50" />
+                                    <MudText Typo="Typo.h6">@scoreEvent.Competitors[0].Score</MudText>
 
 
                                     <MudText>@DisplayDetails(@scoreEvent)</MudText>
@@ -31,35 +36,41 @@
                             </MudPaper>
                             <MudPaper class="pa-2 ma-2" Elevation="5">
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
-                                    <MudIcon Icon="@Icons.Material.Filled.GppGood" Color="Color.Success" />
+                                    <MudIcon Icon="@GetIcon(scoreEvent.Competitors[0], scoreEvent.Competitors[1])"
+                                        Color="@GetColor(scoreEvent.Competitors[0], scoreEvent.Competitors[1])" />
                                     <MudText>
                                         @scoreEvent.Competitors[0].Team.Abbreviation
-                                </MudText>
-                                <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
-                                    @GetSpread(@scoreEvent.Competitors[0].Team.Abbreviation)
-                                </MudPaper>
-                                <MudBadge Content="100" Color="Color.Primary" Overlap="true">
-                                    <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
-                                </MudBadge>
-                            </MudStack>
-                            <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
-                                <MudIcon Icon="@Icons.Material.Filled.GppGood" Color="Color.Success" />
-                                <MudText>
-                                    @scoreEvent.Competitors[1].Team.Abbreviation
-                                </MudText>
-                                <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
-                                    @GetSpread(@scoreEvent.Competitors[1].Team.Abbreviation)
-                                </MudPaper>
-                                <MudBadge Content="100" Color="Color.Primary" Overlap="true">
-                                    <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
-                                </MudBadge>
-                            </MudStack>
+                                    </MudText>
+                                    <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
+                                        @GetSpread(@scoreEvent.Competitors[0].Team.Abbreviation)
+                                    </MudPaper>
+                                    <MudBadge Content="@GetUserPicks(@scoreEvent.Competitors[0].Team.Abbreviation)"
+                                        Color="Color.Primary" Overlap="true">
+                                        <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                                    </MudBadge>
+                                </MudStack>
+                                <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
+                                    <MudIcon Icon="@GetIcon(scoreEvent.Competitors[1], scoreEvent.Competitors[0])"
+                                        Color="@GetColor(scoreEvent.Competitors[1], scoreEvent.Competitors[0])" />
+                                    <MudText>
+                                        @scoreEvent.Competitors[1].Team.Abbreviation
+                                    </MudText>
+                                    <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
+                                        @GetSpread(@scoreEvent.Competitors[1].Team.Abbreviation)
+                                    </MudPaper>
+                                    <MudBadge Content="@GetUserPicks(@scoreEvent.Competitors[0].Team.Abbreviation)"
+                                        Color="Color.Primary" Overlap="true">
+                                        <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                                    </MudBadge>
+                                </MudStack>
+                            </MudPaper>
                         </MudPaper>
-                    </MudPaper>
-                </MudItem>
+                    </MudItem>
+
+                }
 
             }
 
         }
-        </MudGrid>
-}
+    </MudGrid>
+</MudContainer>

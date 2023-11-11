@@ -1,17 +1,15 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using fourplay.Areas.Identity;
 using fourplay.Data;
 using Quartz;
-using Quartz.Impl;
 using Quartz.Impl.AdoJobStore;
 using MudBlazor.Services;
 using System.Data.SQLite;
 using Serilog;
+using Blazored.LocalStorage;
+using System.Security.Claims;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -31,7 +29,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(new SQLiteConnection(connectionString)));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddRoles<IdentityRole>()
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false).AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
@@ -61,8 +59,49 @@ builder.Services.AddMemoryCache();
 builder.Services.AddAuthentication().AddGoogle(googleOptions => {
     googleOptions.ClientId = builder.Configuration["Google:ClientId"];
     googleOptions.ClientSecret = builder.Configuration["Google:ClientSecret"];
-    //googleOptions.ClaimActions.MapJsonKey("urn:google:image", "picture");
+    // Add Picture Support
+    googleOptions.Events.OnCreatingTicket = context => {
+        var picture = context.User.GetProperty("picture").GetString();
+        context.Identity.AddClaim(new Claim("picture", picture));
+        return Task.CompletedTask;
+    };
+    // Only if we use GOOGLE FALLBACK
+    googleOptions.Events.OnTicketReceived = async context => {
+        void AccessDenied() {
+            context.Response.Redirect("/Auth/Unauthorized");
+            context.Fail("You are not allowed");
+            context.HandleResponse();
+        }
+        var roleManager = context.HttpContext.RequestServices.GetRequiredService<RoleManager<IdentityRole>>();
+        var result = await roleManager.RoleExistsAsync("Administrator");
+        var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+        if (result) {
+            claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Administrator"));
+        }
+        context.Success();
+    };
+    /*
+    googleOptions.Events.OnRedirectToAuthorizationEndpoint = context => {
+        // this will avoid automatic re-login when signing out
+        context.Response.Redirect(context.RedirectUri + "&prompt=consent");
+        return Task.CompletedTask;
+    };*/
 });
+builder.Services.AddAuthorization(options =>
+      options.AddPolicy("User",
+      policy => policy.RequireClaim(ClaimTypes.Email, new[] { "markmjohnson@gmail.com" })));
+/*
+// If this is done we need to add ROLE support above
+builder.Services.AddAuthorization(options =>
+    options.FallbackPolicy = new AuthorizationPolicyBuilder(
+            GoogleDefaults.AuthenticationScheme
+        )
+        .RequireAuthenticatedUser()
+        .RequireClaim(ClaimTypes.Email, new[] { "markmjohnson@gmail.com" })
+        .Build()
+);*/
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddScoped<ILoginHelper, LoginHelper>();
 // Quartz
 builder.Services.AddScoped<IJob, NFLScoresJob>();
 builder.Services.AddScoped<IJob, NFLSpreadJob>();
@@ -76,11 +115,12 @@ builder.Services.AddQuartz(q => {
     q.ScheduleJob<StartupJob>(trigger => trigger.WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
     q.ScheduleJob<NFLSpreadJob>(trigger => trigger
         .WithIdentity("NFL Spreads")
-        .WithCronSchedule("0 0 10 ? * THU") // Fire at 10:00 AM every Thursday
+        .WithCronSchedule("0 0 10 ? * THU", x => x.WithMisfireHandlingInstructionFireAndProceed()) // Fire at 10:00 AM every Thursday
+
     );
     q.ScheduleJob<NFLScoresJob>(trigger => trigger
     .WithIdentity("NFL Scores")
-    .WithCronSchedule("0 0 10 ? * THU") // Fire at 10:00 AM every Thursday
+    .WithCronSchedule("0 0 10 ? * THU", x => x.WithMisfireHandlingInstructionFireAndProceed()) // Fire at 10:00 AM every Thursday
 );
     /*
     // convert time zones using converter that can handle Windows/Linux differences

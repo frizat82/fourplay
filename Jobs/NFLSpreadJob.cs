@@ -1,10 +1,6 @@
 using fourplay.Data;
 using Quartz;
 using Serilog;
-using SportslineOdds;
-using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
 
 [DisallowConcurrentExecution]
 public class NFLSpreadJob : IJob {
@@ -26,7 +22,7 @@ public class NFLSpreadJob : IJob {
         if (odds?.Data != null) {
             foreach (var result in odds?.Data?.Odds?.OddsCompetitions) {
                 var spread = new NFLSpreads();
-                spread.Id = Guid.NewGuid();
+                //spread.Id = Guid.NewGuid();
                 var ht = result.HomeTeam;
                 var at = result.AwayTeam;
                 if (Helpers.NFLTeamAbbrMapping.ContainsKey(ht.Abbr))
@@ -46,9 +42,12 @@ public class NFLSpreadJob : IJob {
                 if (cleanAwaySpread == "FK") {
                     Log.Error("Error");
                 }
-                spread.HomeTeamSpread = Double.Parse(cleanHomeSpread);
-                spread.AwayTeamSpread = Double.Parse(cleanAwaySpread);
-
+                if (!Double.TryParse(cleanHomeSpread, out var parsedSpread))
+                    continue;
+                spread.HomeTeamSpread = parsedSpread;
+                if (!Double.TryParse(cleanAwaySpread, out parsedSpread))
+                    continue;
+                spread.AwayTeamSpread = parsedSpread;
                 var matchedGame = newGames.Where(x => x.Date == spread.GameTime).SelectMany(x => x.Competitors).Where(y => y.HomeAway == HomeAway.Home).FirstOrDefault(z => z.Team.Abbreviation == spread.HomeTeam);
                 if (matchedGame is not null) {
                     spread.NFLWeek = (int)scoreboard.Week.Number;

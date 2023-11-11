@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class NFLSpreads
-{
+public class NFLSpreads {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public int Season { get; set; }
     public int NFLWeek { get; set; }
     public string HomeTeam { get; set; }

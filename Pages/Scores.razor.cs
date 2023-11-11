@@ -1,16 +1,7 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using fourplay.Data;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using NodaTime;
-using System.Data.Entity;
 
 namespace fourplay.Pages;
 
@@ -22,6 +13,8 @@ public partial class Scores : ComponentBase {
     private ESPNScores? _scores = null;
     private System.Timers.Timer _timer = new System.Timers.Timer();
     private List<NFLSpreads>? _odds = null;
+    [Inject] Blazored.LocalStorage.ILocalStorageService _localStorage { get; set; }
+    private int _leagueId = 0;
     protected override async Task OnInitializedAsync() {
         _scores = await _espn.GetScores();
         _odds = _db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
@@ -30,9 +23,34 @@ public partial class Scores : ComponentBase {
         _timer.Interval = TimeSpan.FromMinutes(5).TotalMilliseconds;
         _timer.AutoReset = true;
         _timer.Enabled = true;
-
     }
-
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if (firstRender) {
+            var leagueId = await _localStorage.GetItemAsync<int>("leagueId");
+            if (leagueId > 0)
+                _leagueId = leagueId;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    public string GetIcon(Competitor baseTeam, Competitor compareTeam) {
+        var spread = GetSpread(baseTeam.Team.Abbreviation);
+        if ((baseTeam.Score + spread - compareTeam.Score) > 0)
+            return Icons.Material.Filled.GppGood;
+        else
+            return Icons.Material.Filled.GppBad;
+    }
+    public Color GetColor(Competitor baseTeam, Competitor compareTeam) {
+        var spread = GetSpread(baseTeam.Team.Abbreviation);
+        if ((baseTeam.Score + spread - compareTeam.Score) > 0)
+            return Color.Success;
+        else
+            return Color.Error;
+    }
+    public async Task<int> GetUserPicks(string teamAbbr) {
+        var picks = _db.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
+        && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr);
+        return picks.Count();
+    }
     private async void TimeElapsed(object? sender, System.Timers.ElapsedEventArgs e) {
         await InvokeAsync(StateHasChanged);
     }
@@ -81,12 +99,18 @@ public partial class Scores : ComponentBase {
         return null;
     }
     private double? GetSpread(string teamAbbr) {
-        var spread = _odds.FirstOrDefault(x => x.HomeTeam == teamAbbr);
-        if (spread is not null)
-            return (spread.FourPlayHomeSpread == 0 ? spread.HomeTeamSpread : spread.FourPlayHomeSpread);
-        spread = _odds.FirstOrDefault(x => x.AwayTeam == teamAbbr);
-        if (spread is not null)
-            return (spread.FourPlayAwaySpread == 0 ? spread.AwayTeamSpread : spread.FourPlayAwaySpread);
+        if (_leagueId != 0) {
+            var spread = _odds.FirstOrDefault(x => x.HomeTeam == teamAbbr);
+            var leagueSpread = _db.LeagueInfo.FirstOrDefault(x => x.Id == _leagueId && x.Season == _scores!.Season.Year);
+            if (leagueSpread is not null) {
+                if (spread is not null)
+                    return spread.FourPlayHomeSpread == 0 ? spread.HomeTeamSpread + leagueSpread.Juice : spread.FourPlayHomeSpread;
+                spread = _odds.FirstOrDefault(x => x.AwayTeam == teamAbbr);
+                if (spread is not null)
+                    return spread.FourPlayAwaySpread == 0 ? spread.AwayTeamSpread + leagueSpread.Juice : spread.FourPlayAwaySpread;
+            }
+        }
         return null;
+
     }
 }

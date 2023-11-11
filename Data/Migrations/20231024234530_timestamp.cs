@@ -1,10 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace fourplay.Data.Migrations
-{
+namespace fourplay.Data.Migrations {
     /// <inheritdoc />
     public partial class timestamp : Migration
     {
