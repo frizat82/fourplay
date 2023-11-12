@@ -55,10 +55,10 @@ public partial class Picks : ComponentBase {
             var leagueSpread = _db.LeagueInfo.FirstOrDefault(x => x.Id == _leagueId && x.Season == _scores!.Season.Year);
             if (leagueSpread is not null) {
                 if (spread is not null)
-                    return spread.FourPlayHomeSpread == 0 ? spread.HomeTeamSpread + leagueSpread.Juice : spread.FourPlayHomeSpread;
+                    return spread.HomeTeamSpread + leagueSpread.Juice;
                 spread = _odds.FirstOrDefault(x => x.AwayTeam == teamAbbr);
                 if (spread is not null)
-                    return spread.FourPlayAwaySpread == 0 ? spread.AwayTeamSpread + leagueSpread.Juice : spread.FourPlayAwaySpread;
+                    return spread.AwayTeamSpread + leagueSpread.Juice;
             }
         }
         return null;
