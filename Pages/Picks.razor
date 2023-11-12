@@ -13,15 +13,17 @@
                 <MudText Align="Align.Center" Typo="Typo.h3">Week @_scores?.Week?.Number</MudText>
             </MudItem>
             <MudSpacer />
-
-            <MudItem xs="12">
-                <MudButton Variant="Variant.Filled" Color="Color.Tertiary" Disabled="@(!IsDisabled())"
-                    OnClick="SubmitPicks">Submit Picks
-                </MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(!IsDisabled())"
-                    OnClick="@((e) => _picks.Clear())">Clear Picks
-                </MudButton>
-            </MudItem>
+            @if (!IsPicksLocked())
+            {
+                <MudItem xs="12">
+                    <MudButton Variant="Variant.Filled" Color="Color.Tertiary" Disabled="@(!IsDisabled())"
+                        OnClick="SubmitPicks">Submit Picks
+                    </MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(!IsDisabled())"
+                        OnClick="@((e) => _picks.Clear())">Clear Picks
+                    </MudButton>
+                </MudItem>
+            }
             <MudSpacer />
             @foreach (var score in _scores?.Events?.OrderBy(x => x.Date))
             {
@@ -51,14 +53,15 @@
                                 </MudStack>
                             </MudPaper>
                             <MudDivider></MudDivider>
-                            <div>Vs.</div>
+                            <MudSpacer />
+                            <MudIcon Icon="@Icons.Material.Filled.AlternateEmail" />
                             <MudDivider></MudDivider>
                             <MudPaper class="pa-2 ma-2" Elevation="5">
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Row="true">
                                     <MudImage Src="@scoreEvent.Competitors[1].Team.Logo.ToString()" Width="50" />
                                     <MudPaper Elevation="0">
                                         <MudText Typo="Typo.h6" Class="d-flex justify-end flex-grow-1 gap-4 pr-4">
-                                            @GetSpread(@scoreEvent.Competitors[0].Team.Abbreviation)
+                                            @GetSpread(@scoreEvent.Competitors[1].Team.Abbreviation)
                                         </MudText>
                                     </MudPaper>
                                     @if (IsSelected(@scoreEvent.Competitors[1].Team.Abbreviation))

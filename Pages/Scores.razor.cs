@@ -15,10 +15,11 @@ public partial class Scores : ComponentBase {
     private List<NFLSpreads>? _odds = null;
     [Inject] Blazored.LocalStorage.ILocalStorageService _localStorage { get; set; }
     private int _leagueId = 0;
+    [Inject] IDialogService _dialogService { get; set; }
     protected override async Task OnInitializedAsync() {
         _scores = await _espn.GetScores();
         _odds = _db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
-        RunTimer();
+        await RunTimer();
         _timer.Elapsed += TimeElapsed;
         _timer.Interval = TimeSpan.FromMinutes(5).TotalMilliseconds;
         _timer.AutoReset = true;
@@ -32,34 +33,34 @@ public partial class Scores : ComponentBase {
             await InvokeAsync(StateHasChanged);
         }
     }
-    public string GetIcon(Competitor baseTeam, Competitor compareTeam) {
+    public string GetIcon(Competition competition, Competitor baseTeam, Competitor compareTeam) {
         var spread = GetSpread(baseTeam.Team.Abbreviation);
+        if (!IsGameStarted(competition)) return Icons.Material.Filled.GppGood;
         if ((baseTeam.Score + spread - compareTeam.Score) > 0)
             return Icons.Material.Filled.GppGood;
         else
             return Icons.Material.Filled.GppBad;
     }
-    public Color GetColor(Competitor baseTeam, Competitor compareTeam) {
+    public Color GetColor(Competition competition, Competitor baseTeam, Competitor compareTeam) {
         var spread = GetSpread(baseTeam.Team.Abbreviation);
+        if (!IsGameStarted(competition)) return Color.Success;
         if ((baseTeam.Score + spread - compareTeam.Score) > 0)
             return Color.Success;
         else
             return Color.Error;
     }
-    public async Task<int> GetUserPicks(string teamAbbr) {
+    public int GetUserPicks(string teamAbbr) {
         var picks = _db.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
         && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr);
         return picks.Count();
     }
-    private async void TimeElapsed(object? sender, System.Timers.ElapsedEventArgs e) {
-        await InvokeAsync(StateHasChanged);
-    }
+    private void TimeElapsed(object? sender, System.Timers.ElapsedEventArgs e) => RunTimer();
 
-    protected async void RunTimer() {
+    protected async Task RunTimer() {
         _scores = await _espn.GetScores();
         await InvokeAsync(StateHasChanged);
     }
-
+    private bool IsGameStarted(Competition competition) => competition.Status.Type.Name != TypeName.StatusScheduled;
     public void Dispose() {
         Dispose(true);
         GC.SuppressFinalize(this);
@@ -104,10 +105,10 @@ public partial class Scores : ComponentBase {
             var leagueSpread = _db.LeagueInfo.FirstOrDefault(x => x.Id == _leagueId && x.Season == _scores!.Season.Year);
             if (leagueSpread is not null) {
                 if (spread is not null)
-                    return spread.FourPlayHomeSpread == 0 ? spread.HomeTeamSpread + leagueSpread.Juice : spread.FourPlayHomeSpread;
+                    return spread.HomeTeamSpread + leagueSpread.Juice;
                 spread = _odds.FirstOrDefault(x => x.AwayTeam == teamAbbr);
                 if (spread is not null)
-                    return spread.FourPlayAwaySpread == 0 ? spread.AwayTeamSpread + leagueSpread.Juice : spread.FourPlayAwaySpread;
+                    return spread.AwayTeamSpread + leagueSpread.Juice;
             }
         }
         return null;

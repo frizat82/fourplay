@@ -133,6 +133,8 @@ public class ESPNApiService : IESPNApiService {
                 response.EnsureSuccessStatusCode();
                 if (response.IsSuccessStatusCode) {
                     var responseString = await response.Content.ReadAsStringAsync();
+                    if (String.IsNullOrEmpty(responseString))
+                        return new ESPNScores();
                     var options = new JsonSerializerOptions {
                         PropertyNameCaseInsensitive = true
                     };

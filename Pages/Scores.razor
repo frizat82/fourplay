@@ -36,8 +36,8 @@
                             </MudPaper>
                             <MudPaper class="pa-2 ma-2" Elevation="5">
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
-                                    <MudIcon Icon="@GetIcon(scoreEvent.Competitors[0], scoreEvent.Competitors[1])"
-                                        Color="@GetColor(scoreEvent.Competitors[0], scoreEvent.Competitors[1])" />
+                                    <MudIcon Icon="@GetIcon(scoreEvent, scoreEvent.Competitors[0], scoreEvent.Competitors[1])"
+                                        Color="@GetColor(scoreEvent, scoreEvent.Competitors[0], scoreEvent.Competitors[1])" />
                                     <MudText>
                                         @scoreEvent.Competitors[0].Team.Abbreviation
                                     </MudText>
@@ -50,15 +50,15 @@
                                     </MudBadge>
                                 </MudStack>
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
-                                    <MudIcon Icon="@GetIcon(scoreEvent.Competitors[1], scoreEvent.Competitors[0])"
-                                        Color="@GetColor(scoreEvent.Competitors[1], scoreEvent.Competitors[0])" />
+                                    <MudIcon Icon="@GetIcon(scoreEvent, scoreEvent.Competitors[1], scoreEvent.Competitors[0])"
+                                        Color="@GetColor(scoreEvent, scoreEvent.Competitors[1], scoreEvent.Competitors[0])" />
                                     <MudText>
                                         @scoreEvent.Competitors[1].Team.Abbreviation
                                     </MudText>
                                     <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
                                         @GetSpread(@scoreEvent.Competitors[1].Team.Abbreviation)
                                     </MudPaper>
-                                    <MudBadge Content="@GetUserPicks(@scoreEvent.Competitors[0].Team.Abbreviation)"
+                                    <MudBadge Content="@GetUserPicks(@scoreEvent.Competitors[1].Team.Abbreviation)"
                                         Color="Color.Primary" Overlap="true">
                                         <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
                                     </MudBadge>

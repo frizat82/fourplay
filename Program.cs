@@ -24,6 +24,9 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
                 .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
                 .ReadFrom.Services(services));
 builder.Services.AddMudServices();
+// Listen 
+//builder.WebHost.UseUrls("http://localhost:5000");
+
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -115,7 +118,7 @@ builder.Services.AddQuartz(q => {
     q.ScheduleJob<StartupJob>(trigger => trigger.WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
     q.ScheduleJob<NFLSpreadJob>(trigger => trigger
         .WithIdentity("NFL Spreads")
-        .WithCronSchedule("0 0 10 ? * THU", x => x.WithMisfireHandlingInstructionFireAndProceed()) // Fire at 10:00 AM every Thursday
+        .WithCronSchedule("0 0 14 ? * THU", x => x.WithMisfireHandlingInstructionFireAndProceed()) // Fire at 10:00 AM every Thursday
 
     );
     q.ScheduleJob<NFLScoresJob>(trigger => trigger
@@ -184,5 +187,6 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
 
 app.Run();

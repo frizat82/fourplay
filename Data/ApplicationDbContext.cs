@@ -56,7 +56,7 @@ public class ApplicationDbContext : IdentityDbContext {
                         .HasForeignKey(e => e.LeagueId)
                         .IsRequired();
             entity.HasKey(e => e.Id);
-            entity.HasIndex(x => new { x.UserId, x.NFLWeek }).IsUnique(true);
+            entity.HasIndex(x => new { x.UserId, x.LeagueId, x.NFLWeek, x.Season, x.Team }).IsUnique(true);
             entity.Property(e => e.DateCreated).HasColumnType("datetime")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
