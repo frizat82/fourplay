@@ -42,8 +42,8 @@ public partial class Event {
     [JsonPropertyName("competitions")]
     public Competition[] Competitions { get; set; }
 
-    [JsonPropertyName("links")]
-    public EventLink[] Links { get; set; }
+    //[JsonPropertyName("links")]
+    //public EventLink[] Links { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [JsonPropertyName("weather")]
@@ -952,8 +952,8 @@ public partial class Calendar {
     [JsonPropertyName("endDate")]
     public string EndDate { get; set; }
 
-    [JsonPropertyName("entries")]
-    public Entry[] Entries { get; set; }
+    //[JsonPropertyName("entries")]
+    //public Entry[] Entries { get; set; }
 }
 
 public partial class Entry {
@@ -1046,7 +1046,7 @@ public partial class Week {
     public Team[] TeamsOnBye { get; set; }
 }
 
-public enum MarketEnum { National };
+public enum MarketEnum { National, Away, Home };
 
 public enum HomeAway { Away, Home };
 
@@ -1074,7 +1074,7 @@ public enum Text { Clubhouse, Roster, Schedule, Statistics };
 
 public enum Lang { En };
 
-public enum MarketType { National };
+public enum MarketType { National, Home, Away };
 
 public enum Region { Us };
 
@@ -1156,7 +1156,10 @@ internal class MarketEnumConverter : JsonConverter<MarketEnum> {
         if (value == "national") {
             return MarketEnum.National;
         }
-        throw new Exception("Cannot unmarshal type MarketEnum");
+        if (value == "away") {
+            return MarketEnum.Away;
+        }
+        else return MarketEnum.Home;
     }
 
     public override void Write(Utf8JsonWriter writer, MarketEnum value, JsonSerializerOptions options) {
@@ -1164,7 +1167,7 @@ internal class MarketEnumConverter : JsonConverter<MarketEnum> {
             JsonSerializer.Serialize(writer, "national", options);
             return;
         }
-        throw new Exception("Cannot marshal type MarketEnum");
+        return;
     }
 
     public static readonly MarketEnumConverter Singleton = new MarketEnumConverter();
@@ -1193,7 +1196,7 @@ internal class HomeAwayConverter : JsonConverter<HomeAway> {
                 JsonSerializer.Serialize(writer, "home", options);
                 return;
         }
-        throw new Exception("Cannot marshal type HomeAway");
+        return;
     }
 
     public static readonly HomeAwayConverter Singleton = new HomeAwayConverter();
@@ -1232,7 +1235,7 @@ internal class LeaderAbbreviationConverter : JsonConverter<LeaderAbbreviation> {
             case "RYDS":
                 return LeaderAbbreviation.Ryds;
         }
-        throw new Exception("Cannot unmarshal type LeaderAbbreviation");
+        return LeaderAbbreviation.Pyds;
     }
 
     public override void Write(Utf8JsonWriter writer, LeaderAbbreviation value, JsonSerializerOptions options) {
@@ -1247,7 +1250,7 @@ internal class LeaderAbbreviationConverter : JsonConverter<LeaderAbbreviation> {
                 JsonSerializer.Serialize(writer, "RYDS", options);
                 return;
         }
-        throw new Exception("Cannot marshal type LeaderAbbreviation");
+        return;
     }
 
     public static readonly LeaderAbbreviationConverter Singleton = new LeaderAbbreviationConverter();
@@ -1281,7 +1284,7 @@ internal class DisplayNameConverter : JsonConverter<DisplayName> {
                 JsonSerializer.Serialize(writer, "Rushing Leader", options);
                 return;
         }
-        throw new Exception("Cannot marshal type DisplayName");
+        return;
     }
 
     public static readonly DisplayNameConverter Singleton = new DisplayNameConverter();
@@ -1315,7 +1318,7 @@ internal class RelEnumConverter : JsonConverter<RelEnum> {
                 JsonSerializer.Serialize(writer, "playercard", options);
                 return;
         }
-        throw new Exception("Cannot marshal type RelEnum");
+        return;
     }
 
     public static readonly RelEnumConverter Singleton = new RelEnumConverter();
@@ -1408,7 +1411,7 @@ internal class LeaderNameConverter : JsonConverter<LeaderName> {
                 JsonSerializer.Serialize(writer, "rushingYards", options);
                 return;
         }
-        throw new Exception("Cannot marshal type LeaderName");
+        return;
     }
 
     public static readonly LeaderNameConverter Singleton = new LeaderNameConverter();
@@ -1442,7 +1445,7 @@ internal class ShortDisplayNameConverter : JsonConverter<ShortDisplayName> {
                 JsonSerializer.Serialize(writer, "RUSH", options);
                 return;
         }
-        throw new Exception("Cannot marshal type ShortDisplayName");
+        return;
     }
 
     public static readonly ShortDisplayNameConverter Singleton = new ShortDisplayNameConverter();
@@ -1459,7 +1462,7 @@ internal class RecordAbbreviationConverter : JsonConverter<RecordAbbreviation> {
             case "Game":
                 return RecordAbbreviation.Game;
         }
-        throw new Exception("Cannot unmarshal type RecordAbbreviation");
+        return RecordAbbreviation.Any;
     }
 
     public override void Write(Utf8JsonWriter writer, RecordAbbreviation value, JsonSerializerOptions options) {
@@ -1471,7 +1474,7 @@ internal class RecordAbbreviationConverter : JsonConverter<RecordAbbreviation> {
                 JsonSerializer.Serialize(writer, "Game", options);
                 return;
         }
-        throw new Exception("Cannot marshal type RecordAbbreviation");
+        return;
     }
 
     public static readonly RecordAbbreviationConverter Singleton = new RecordAbbreviationConverter();
@@ -1490,7 +1493,7 @@ internal class RecordNameConverter : JsonConverter<RecordName> {
             case "overall":
                 return RecordName.Overall;
         }
-        throw new Exception("Cannot unmarshal type RecordName");
+        return RecordName.Home;
     }
 
     public override void Write(Utf8JsonWriter writer, RecordName value, JsonSerializerOptions options) {
@@ -1505,7 +1508,7 @@ internal class RecordNameConverter : JsonConverter<RecordName> {
                 JsonSerializer.Serialize(writer, "overall", options);
                 return;
         }
-        throw new Exception("Cannot marshal type RecordName");
+        return;
     }
 
     public static readonly RecordNameConverter Singleton = new RecordNameConverter();
@@ -1524,7 +1527,7 @@ internal class RecordTypeConverter : JsonConverter<RecordType> {
             case "total":
                 return RecordType.Total;
         }
-        throw new Exception("Cannot unmarshal type RecordType");
+        return RecordType.Home;
     }
 
     public override void Write(Utf8JsonWriter writer, RecordType value, JsonSerializerOptions options) {
@@ -1539,7 +1542,7 @@ internal class RecordTypeConverter : JsonConverter<RecordType> {
                 JsonSerializer.Serialize(writer, "total", options);
                 return;
         }
-        throw new Exception("Cannot marshal type RecordType");
+        return;
     }
 
     public static readonly RecordTypeConverter Singleton = new RecordTypeConverter();
@@ -1588,7 +1591,7 @@ internal class RecordTypeDetailConverter : JsonConverter<RecordTypeDetail> {
                 JsonSerializer.Serialize(writer, "team", options);
                 return;
         }
-        throw new Exception("Cannot marshal type RecordTypeDetail");
+        return;
     }
 
     public static readonly RecordTypeDetailConverter Singleton = new RecordTypeDetailConverter();
@@ -1609,7 +1612,7 @@ internal class TextConverter : JsonConverter<Text> {
             case "Statistics":
                 return Text.Statistics;
         }
-        throw new Exception("Cannot unmarshal type Text");
+        return Text.Clubhouse;
     }
 
     public override void Write(Utf8JsonWriter writer, Text value, JsonSerializerOptions options) {
@@ -1627,7 +1630,7 @@ internal class TextConverter : JsonConverter<Text> {
                 JsonSerializer.Serialize(writer, "Statistics", options);
                 return;
         }
-        throw new Exception("Cannot marshal type Text");
+        return;
     }
 
     public static readonly TextConverter Singleton = new TextConverter();
@@ -1641,7 +1644,7 @@ internal class LangConverter : JsonConverter<Lang> {
         if (value == "en") {
             return Lang.En;
         }
-        throw new Exception("Cannot unmarshal type Lang");
+        return Lang.En;
     }
 
     public override void Write(Utf8JsonWriter writer, Lang value, JsonSerializerOptions options) {
@@ -1649,7 +1652,7 @@ internal class LangConverter : JsonConverter<Lang> {
             JsonSerializer.Serialize(writer, "en", options);
             return;
         }
-        throw new Exception("Cannot marshal type Lang");
+        return;
     }
 
     public static readonly LangConverter Singleton = new LangConverter();
@@ -1663,7 +1666,10 @@ internal class MarketTypeConverter : JsonConverter<MarketType> {
         if (value == "National") {
             return MarketType.National;
         }
-        throw new Exception("Cannot unmarshal type MarketType");
+        if (value == "Away") {
+            return MarketType.Away;
+        }
+        return MarketType.Home;
     }
 
     public override void Write(Utf8JsonWriter writer, MarketType value, JsonSerializerOptions options) {
@@ -1671,7 +1677,7 @@ internal class MarketTypeConverter : JsonConverter<MarketType> {
             JsonSerializer.Serialize(writer, "National", options);
             return;
         }
-        throw new Exception("Cannot marshal type MarketType");
+        return;
     }
 
     public static readonly MarketTypeConverter Singleton = new MarketTypeConverter();
@@ -1685,7 +1691,7 @@ internal class RegionConverter : JsonConverter<Region> {
         if (value == "us") {
             return Region.Us;
         }
-        throw new Exception("Cannot unmarshal type Region");
+        return Region.Us;
     }
 
     public override void Write(Utf8JsonWriter writer, Region value, JsonSerializerOptions options) {
@@ -1693,7 +1699,7 @@ internal class RegionConverter : JsonConverter<Region> {
             JsonSerializer.Serialize(writer, "us", options);
             return;
         }
-        throw new Exception("Cannot marshal type Region");
+        return;
     }
 
     public static readonly RegionConverter Singleton = new RegionConverter();
@@ -1710,7 +1716,7 @@ internal class ShortNameConverter : JsonConverter<ShortName> {
             case "Web":
                 return ShortName.Web;
         }
-        throw new Exception("Cannot unmarshal type ShortName");
+        return ShortName.Tv;
     }
 
     public override void Write(Utf8JsonWriter writer, ShortName value, JsonSerializerOptions options) {
@@ -1722,7 +1728,7 @@ internal class ShortNameConverter : JsonConverter<ShortName> {
                 JsonSerializer.Serialize(writer, "Web", options);
                 return;
         }
-        throw new Exception("Cannot marshal type ShortName");
+        return;
     }
 
     public static readonly ShortNameConverter Singleton = new ShortNameConverter();
@@ -1771,7 +1777,7 @@ internal class ShortTextConverter : JsonConverter<ShortText> {
                 JsonSerializer.Serialize(writer, "Weather", options);
                 return;
         }
-        throw new Exception("Cannot marshal type ShortText");
+        return;
     }
 
     public static readonly ShortTextConverter Singleton = new ShortTextConverter();
@@ -1792,7 +1798,7 @@ internal class DeviceConverter : JsonConverter<Device> {
             case "tablet":
                 return Device.Tablet;
         }
-        throw new Exception("Cannot unmarshal type Device");
+        return Device.Desktop;
     }
 
     public override void Write(Utf8JsonWriter writer, Device value, JsonSerializerOptions options) {
@@ -1810,7 +1816,7 @@ internal class DeviceConverter : JsonConverter<Device> {
                 JsonSerializer.Serialize(writer, "tablet", options);
                 return;
         }
-        throw new Exception("Cannot marshal type Device");
+        return;
     }
 
     public static readonly DeviceConverter Singleton = new DeviceConverter();
@@ -1846,9 +1852,6 @@ internal class NoteTypeConverter : JsonConverter<NoteType> {
 
     public override void Write(Utf8JsonWriter writer, NoteType value, JsonSerializerOptions options) {
         switch (value) {
-            case NoteType.The07073:
-                JsonSerializer.Serialize(writer, "07073", options);
-                return;
             case NoteType.Boxscore:
                 JsonSerializer.Serialize(writer, "boxscore", options);
                 return;
@@ -1874,7 +1877,7 @@ internal class NoteTypeConverter : JsonConverter<NoteType> {
                 JsonSerializer.Serialize(writer, "summary", options);
                 return;
         }
-        throw new Exception("Cannot marshal type NoteType");
+        return;
     }
 
     public static readonly NoteTypeConverter Singleton = new NoteTypeConverter();
@@ -1964,7 +1967,7 @@ internal class DescriptionConverter : JsonConverter<Description> {
                 JsonSerializer.Serialize(writer, "Scheduled", options);
                 return;
         }
-        throw new Exception("Cannot marshal type Description");
+        return;
     }
 
     public static readonly DescriptionConverter Singleton = new DescriptionConverter();
@@ -2005,7 +2008,7 @@ internal class TypeNameConverter : JsonConverter<TypeName> {
                 JsonSerializer.Serialize(writer, "STATUS_SCHEDULED", options);
                 return;
         }
-        throw new Exception("Cannot marshal type TypeName");
+        return;
     }
 
     public static readonly TypeNameConverter Singleton = new TypeNameConverter();
@@ -2039,7 +2042,7 @@ internal class StateConverter : JsonConverter<State> {
                 JsonSerializer.Serialize(writer, "pre", options);
                 return;
         }
-        throw new Exception("Cannot marshal type State");
+        return;
     }
 
     public static readonly StateConverter Singleton = new StateConverter();
@@ -2053,7 +2056,7 @@ internal class TypeAbbreviationConverter : JsonConverter<TypeAbbreviation> {
         if (value == "STD") {
             return TypeAbbreviation.Std;
         }
-        throw new Exception("Cannot unmarshal type TypeAbbreviation");
+        return TypeAbbreviation.Std;
     }
 
     public override void Write(Utf8JsonWriter writer, TypeAbbreviation value, JsonSerializerOptions options) {
@@ -2061,7 +2064,7 @@ internal class TypeAbbreviationConverter : JsonConverter<TypeAbbreviation> {
             JsonSerializer.Serialize(writer, "STD", options);
             return;
         }
-        throw new Exception("Cannot marshal type TypeAbbreviation");
+        return;
     }
 
     public static readonly TypeAbbreviationConverter Singleton = new TypeAbbreviationConverter();
@@ -2075,7 +2078,7 @@ internal class LanguageConverter : JsonConverter<Language> {
         if (value == "en-US") {
             return Language.EnUs;
         }
-        throw new Exception("Cannot unmarshal type Language");
+        return Language.EnUs;
     }
 
     public override void Write(Utf8JsonWriter writer, Language value, JsonSerializerOptions options) {
@@ -2083,7 +2086,7 @@ internal class LanguageConverter : JsonConverter<Language> {
             JsonSerializer.Serialize(writer, "en-US", options);
             return;
         }
-        throw new Exception("Cannot marshal type Language");
+        return;
     }
 
     public static readonly LanguageConverter Singleton = new LanguageConverter();
@@ -2161,7 +2164,7 @@ internal class RelUnionConverter : JsonConverter<RelUnion> {
             JsonSerializer.Serialize(writer, value.Integer.Value.ToString(), options);
             return;
         }
-        throw new Exception("Cannot marshal type RelUnion");
+        return;
     }
 
     public static readonly RelUnionConverter Singleton = new RelUnionConverter();
@@ -2177,7 +2180,7 @@ internal class SlugConverter : JsonConverter<Slug> {
         }
         else if (value == "pre-sesaon")
             return Slug.PreSeason;
-        throw new Exception("Cannot unmarshal type Slug");
+        return Slug.PreSeason;
     }
 
     public override void Write(Utf8JsonWriter writer, Slug value, JsonSerializerOptions options) {
@@ -2185,7 +2188,7 @@ internal class SlugConverter : JsonConverter<Slug> {
             JsonSerializer.Serialize(writer, "regular-season", options);
             return;
         }
-        throw new Exception("Cannot marshal type Slug");
+        return;
     }
 
     public static readonly SlugConverter Singleton = new SlugConverter();

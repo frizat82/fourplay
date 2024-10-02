@@ -46,7 +46,9 @@
                                     </MudPaper>
                                     <MudBadge Content="@GetUserPicks(@scoreEvent.Competitors[0].Team.Abbreviation)"
                                         Color="Color.Primary" Overlap="true">
-                                        <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                                        <MudIconButton
+                                            OnClick="@((_) => ShowDialog(@scoreEvent.Competitors[0].Team.Abbreviation, @scoreEvent.Competitors[0].Team.Logo.ToString()))"
+                                            Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
                                     </MudBadge>
                                 </MudStack>
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
@@ -60,7 +62,9 @@
                                     </MudPaper>
                                     <MudBadge Content="@GetUserPicks(@scoreEvent.Competitors[1].Team.Abbreviation)"
                                         Color="Color.Primary" Overlap="true">
-                                        <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                                        <MudIconButton
+                                            OnClick="@((_) => ShowDialog(@scoreEvent.Competitors[1].Team.Abbreviation, @scoreEvent.Competitors[1].Team.Logo.ToString()))"
+                                            Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
                                     </MudBadge>
                                 </MudStack>
                             </MudPaper>

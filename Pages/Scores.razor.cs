@@ -50,12 +50,26 @@ public partial class Scores : ComponentBase {
             return Color.Error;
     }
     public int GetUserPicks(string teamAbbr) {
-        var picks = _db.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
+        var picks = _db?.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
         && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr);
         return picks.Count();
     }
     private void TimeElapsed(object? sender, System.Timers.ElapsedEventArgs e) => RunTimer();
-
+    private void ShowDialog(string teamAbbr, string logo) {
+        var usrNames = _db?.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
+        && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr).Select(y => y.User.NormalizedUserName).ToList();
+        if (usrNames.Count > 0) {
+            var parameters = new DialogParameters<PickDialog> {
+            { x => x.UserNames, usrNames },
+            { x => x.TeamAbbr, teamAbbr},
+            {x => x.Logo, logo}
+        };
+            _dialogService.Show<PickDialog>("User Picks", parameters, new DialogOptions {
+                CloseOnEscapeKey = true,
+                NoHeader = true, CloseButton = false
+            });
+        }
+    }
     protected async Task RunTimer() {
         _scores = await _espn.GetScores();
         await InvokeAsync(StateHasChanged);

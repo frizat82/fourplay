@@ -65,7 +65,7 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions => {
     // Add Picture Support
     googleOptions.Events.OnCreatingTicket = context => {
         var picture = context.User.GetProperty("picture").GetString();
-        context.Identity.AddClaim(new Claim("picture", picture));
+        context.Identity?.AddClaim(new Claim("picture", picture));
         return Task.CompletedTask;
     };
     // Only if we use GOOGLE FALLBACK
@@ -77,9 +77,9 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions => {
         }
         var roleManager = context.HttpContext.RequestServices.GetRequiredService<RoleManager<IdentityRole>>();
         var result = await roleManager.RoleExistsAsync("Administrator");
-        var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+        var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
         if (result) {
-            claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Administrator"));
+            claimsIdentity?.AddClaim(new Claim(ClaimTypes.Role, "Administrator"));
         }
         context.Success();
     };

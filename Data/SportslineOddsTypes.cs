@@ -307,7 +307,7 @@ public enum CompetitionStatus { Scheduled, InProgress, Final };
 
 public enum Label { AtsWL, OU, PtDiff, WL };
 
-public enum BookName { Bet365NewJersey, Consensus, DraftKings, FanDuel, WilliamHillNewJersey };
+public enum BookName { Bet365NewJersey, Consensus, DraftKings, FanDuel, WilliamHillNewJersey, Unknown };
 
 public enum BookId { Consensus, SrBook18149, SrBook18186, SrBook28901, SrBook32219 };
 
@@ -497,6 +497,10 @@ internal class BookNameConverter : JsonConverter<BookName> {
                 return BookName.FanDuel;
             case "WilliamHillNewJersey":
                 return BookName.WilliamHillNewJersey;
+            case "WilliamHill":
+                return BookName.WilliamHillNewJersey;
+            default:
+                return BookName.Unknown;
         }
         throw new Exception("Cannot unmarshal type BookName");
     }
@@ -617,6 +621,8 @@ internal class SourceConverter : JsonConverter<Source> {
             case "CONSENSUS":
                 return Source.Consensus;
             case "MARKET":
+                return Source.Market;
+            case "TEAM_MARKET":
                 return Source.Market;
         }
         throw new Exception("Cannot unmarshal type Source");

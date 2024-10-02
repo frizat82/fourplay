@@ -1,5 +1,13 @@
 <MudDialog>
     <DialogContent>
-        Dialog Content
+            Team: @TeamAbbr  <MudImage Src="@Logo" Width="50" />
+            <MudList>
+        @foreach (var user in @UserNames)
+        {
+    <MudListItem>
+           @user
+        </MudListItem>
+        }
+            </MudList>
     </DialogContent>
 </MudDialog>
