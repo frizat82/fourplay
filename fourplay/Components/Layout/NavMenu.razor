@@ -1,0 +1,39 @@
+﻿@implements IDisposable
+
+<MudNavMenu>
+    <AuthorizeView>
+    <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
+    <MudNavLink Href="/picks" Match="NavLinkMatch.Prefix">Picks</MudNavLink>
+    <MudNavLink Href="/leagues" Match="NavLinkMatch.Prefix">Leagues</MudNavLink>
+    <MudNavGroup Title="Settings" Expanded="true">
+       <MudNavLink Href="Account/Manage" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">@context.User.Identity?.Name</MudNavLink>
+    </MudNavGroup>
+    <MudNavLink Href="/scores" Match="NavLinkMatch.Prefix">Scores</MudNavLink>
+    </AuthorizeView>
+    <NotAuthorized>
+    <MudNavLink Href="Account/Login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Password">Login</MudNavLink>
+    </NotAuthorized>
+</MudNavMenu>
+
+@code {
+    private string? currentUrl;
+    [Inject] NavigationManager NavigationManager {get;set;}
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+}

@@ -1,0 +1,21 @@
+@page "/leagues"
+
+<PageTitle>Leagues</PageTitle>
+<MudContainer>
+    <MudGrid>
+        <MudItem xs="12">
+            <MudText Align="Align.Center" Typo="Typo.h3">Pick a League</MudText>
+        </MudItem>
+        <MudSpacer />
+        <MudItem lg="6" xs="12">
+            <MudPaper class="pa-3" Elevation="0">
+                <MudList T="int" SelectedValueChanged="OnSelectedValuesChanged" SelectedValue="@_selectedValue" SelectionMode="SelectionMode.SingleSelection" Color="@Color.Info">
+                    @foreach (var league in _leagues)
+                    {
+                        <MudListItem Text="@league.LeagueName" Value="@league.Id" Icon="@Icons.Material.Filled.Inbox" />
+                    }
+                </MudList>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
