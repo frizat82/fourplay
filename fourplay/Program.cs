@@ -9,8 +9,12 @@ using fourplay.Components.Account;
 using fourplay.Data;
 using Quartz;
 using Quartz.Impl.AdoJobStore;
+using Microsoft.AspNetCore.Authentication;
 using Serilog;
-
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Cookies;
+Environment.SetEnvironmentVariable("DOTNET_hostBuilder:reloadConfigOnChange", "false");
 var builder = WebApplication.CreateBuilder(args);
 
 // Serilog
@@ -43,11 +47,12 @@ builder.Services.AddAuthentication(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options => {
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
     options.UseSqlite(connectionString);
     options.EnableSensitiveDataLogging(true);
     options.EnableDetailedErrors(true);
-    });
+});
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -58,10 +63,12 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-builder.Services.AddHttpClient<IESPNApiService, ESPNApiService>(x => {
+builder.Services.AddHttpClient<IESPNApiService, ESPNApiService>(x =>
+{
     x.BaseAddress = new Uri("http://site.api.espn.com");
 });
-builder.Services.AddHttpClient<ISportslineOddsService, SportslineOddsService>(x => {
+builder.Services.AddHttpClient<ISportslineOddsService, SportslineOddsService>(x =>
+{
     x.BaseAddress = new Uri("https://www.sportsline.com");
     // Set headers
     x.DefaultRequestHeaders.Add("authority", "www.sportsline.com");
@@ -80,18 +87,23 @@ builder.Services.AddHttpClient<ISportslineOddsService, SportslineOddsService>(x 
     x.DefaultRequestHeaders.Add("x-correlation-id", "51f96c9b-8cf4-4e98-9460-d1c0025198c0");
 });
 builder.Services.AddMemoryCache();
-builder.Services.AddAuthentication().AddGoogle(googleOptions => {
+builder.Services.AddAuthentication().AddGoogle(googleOptions =>
+{
     googleOptions.ClientId = builder.Configuration["Google:ClientId"];
     googleOptions.ClientSecret = builder.Configuration["Google:ClientSecret"];
     // Add Picture Support
-    googleOptions.Events.OnCreatingTicket = (context) => {
+    googleOptions.Events.OnCreatingTicket = (context) =>
+    {
         var picture = context.User.GetProperty("picture").GetString();
         context.Identity?.AddClaim(new Claim("picture", picture));
         return Task.CompletedTask;
     };
     // Only if we use GOOGLE FALLBACK
-    googleOptions.Events.OnTicketReceived = async context => {
-        void AccessDenied() {
+    googleOptions.Events.OnTicketReceived = async context =>
+    {
+        var validEmails = new[] { "markmjohnson@gmail.com" };
+        void AccessDenied()
+        {
             context.Response.Redirect("/Auth/Unauthorized");
             context.Fail("You are not allowed");
             context.HandleResponse();
@@ -99,10 +111,45 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions => {
         var roleManager = context.HttpContext.RequestServices.GetRequiredService<RoleManager<IdentityRole>>();
         var result = await roleManager.RoleExistsAsync("Administrator");
         var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
-        if (result) {
-            claimsIdentity?.AddClaim(new Claim(ClaimTypes.Role, "Administrator"));
+        var email = claimsIdentity.Claims.FirstOrDefault(x => x.Type.Contains("email"));
+        if (email is null) {
+            context.Fail("Invalid User");
+            //await SignInManager.SignOutAsync();
+            //await context.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            //IdentityManager.RedirectTo("/");
+            // Clear the authentication cookies
+            await context.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+            // Redirect to the homepage
+            context.Response.Redirect("/");
+
+            // Prevent further processing of the authentication ticket
+            context.HandleResponse();
+            return;
         }
+        if (result)
+        {
+            if (email.Value == "markmjohnson@gmail.com")
+            {
+                claimsIdentity?.AddClaim(new Claim(ClaimTypes.Role, "Administrator"));
+            }
+        }
+        if (!validEmails.Contains(email.Value)) {
+            context.Fail("Invalid User");
+            //await SignInManager.SignOutAsync();
+            //await context.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            //IdentityManager.RedirectTo("/");
+            // Clear the authentication cookies
+            await context.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+            // Redirect to the homepage
+            context.Response.Redirect("/");
+
+            // Prevent further processing of the authentication ticket
+            context.HandleResponse();
+        } else {
         context.Success();
+        }
     };
     /*
     googleOptions.Events.OnRedirectToAuthorizationEndpoint = context => {
@@ -111,10 +158,12 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions => {
         return Task.CompletedTask;
     };*/
 });
+/*
 builder.Services.AddAuthorization(options =>
       options.AddPolicy("User",
       policy => policy.RequireClaim(ClaimTypes.Email, new[] { "markmjohnson@gmail.com" })));
-/*
+*/
+
 // If this is done we need to add ROLE support above
 builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = new AuthorizationPolicyBuilder(
@@ -123,7 +172,7 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .RequireClaim(ClaimTypes.Email, new[] { "markmjohnson@gmail.com" })
         .Build()
-);*/
+);
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<ILoginHelper, LoginHelper>();
 // Quartz
@@ -131,7 +180,8 @@ builder.Services.AddScoped<IJob, NFLScoresJob>();
 builder.Services.AddScoped<IJob, NFLSpreadJob>();
 builder.Services.AddScoped<IJob, StartupJob>();
 builder.Services.AddScoped<IJob, UserManagerJob>();
-builder.Services.AddQuartz(q => {
+builder.Services.AddQuartz(q =>
+{
     q.UseMicrosoftDependencyInjectionJobFactory();
     // quickest way to create a job with single trigger is to use ScheduleJob
     // (requires version 3.2)
@@ -158,25 +208,26 @@ builder.Services.AddQuartz(q => {
     });
     */
     // example of persistent job store using JSON serializer as an example
-/*
-    q.UsePersistentStore(s => {
-        // Use for SQLite database
-        s.UseSQLite(sqlLiteOptions => {
-            sqlLiteOptions.UseDriverDelegate<SQLiteDelegate>();
-            sqlLiteOptions.ConnectionString = connectionString;
-            sqlLiteOptions.TablePrefix = "QRTZ_";
+    /*
+        q.UsePersistentStore(s => {
+            // Use for SQLite database
+            s.UseSQLite(sqlLiteOptions => {
+                sqlLiteOptions.UseDriverDelegate<SQLiteDelegate>();
+                sqlLiteOptions.ConnectionString = connectionString;
+                sqlLiteOptions.TablePrefix = "QRTZ_";
+            });
+            s.PerformSchemaValidation = true; // default
+            s.UseProperties = true; // preferred, but not default
+            s.RetryInterval = TimeSpan.FromSeconds(15);
+            s.UseNewtonsoftJsonSerializer();
         });
-        s.PerformSchemaValidation = true; // default
-        s.UseProperties = true; // preferred, but not default
-        s.RetryInterval = TimeSpan.FromSeconds(15);
-        s.UseNewtonsoftJsonSerializer();
-    });
 
-*/
+    */
 });
 
 // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
-builder.Services.AddQuartzHostedService(options => {
+builder.Services.AddQuartzHostedService(options =>
+{
     // when shutting down we want jobs to complete gracefully
     options.WaitForJobsToComplete = true;
 });

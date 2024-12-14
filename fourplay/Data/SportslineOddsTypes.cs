@@ -303,7 +303,7 @@ public enum Sport { Football };
 
 public enum Status { C };
 
-public enum CompetitionStatus { Scheduled, InProgress, Final };
+public enum CompetitionStatus { Scheduled, InProgress, Final, ToBeDetermined };
 
 public enum Label { AtsWL, OU, PtDiff, WL };
 
@@ -427,6 +427,9 @@ internal class CompetitionStatusConverter : JsonConverter<CompetitionStatus> {
         }
         if (value == "FINAL") {
             return CompetitionStatus.Final;
+        }
+         if (value == "TBD") {
+            return CompetitionStatus.ToBeDetermined;
         }
         throw new Exception("Cannot unmarshal type CompetitionStatus");
     }

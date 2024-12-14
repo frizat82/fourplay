@@ -1,7 +1,8 @@
 using fourplay.Data;
 using Microsoft.AspNetCore.Components;
 namespace fourplay.Components.Pages;
-
+using Microsoft.AspNetCore.Authorization;
+[Authorize]
 public partial class Picks : ComponentBase {
     [Inject]
     private IESPNApiService? _espn { get; set; } = default!;
@@ -75,7 +76,12 @@ public partial class Picks : ComponentBase {
             _picks.Add(teamAbbreviation);
         }
     }
-
+  private string? DisplayDetails(Competition? competition) {
+        if (competition.Status.Type.Name == TypeName.StatusScheduled) {
+            return competition.Date.ToLocalTime().ToString("ddd, MMMM dd HH:mm");
+        }
+        return "          ";
+    }
     private bool IsSelected(string teamAbbreviation) => _picks.Contains(teamAbbreviation);
     private bool IsDisabled() => _picks.Count == 4;
     private bool IsGameStarted(Competition competition) => competition.Status.Type.Name != TypeName.StatusScheduled;

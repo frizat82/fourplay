@@ -1,27 +1,40 @@
 ﻿@implements IDisposable
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.AspNetCore.Mvc
+@using fourplay.Data;
+@using Microsoft.AspNetCore.WebUtilities
+@using fourplay.Components.Account;
+@using Microsoft.AspNetCore.Authentication
 
 <MudNavMenu>
     <AuthorizeView>
-    <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-    <MudNavLink Href="/picks" Match="NavLinkMatch.Prefix">Picks</MudNavLink>
-    <MudNavLink Href="/leagues" Match="NavLinkMatch.Prefix">Leagues</MudNavLink>
-    <MudNavGroup Title="Settings" Expanded="true">
-       <MudNavLink Href="Account/Manage" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">@context.User.Identity?.Name</MudNavLink>
-    </MudNavGroup>
-    <MudNavLink Href="/scores" Match="NavLinkMatch.Prefix">Scores</MudNavLink>
+        <Authorized>
+            <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
+            <MudNavLink Href="/leagues" Match="NavLinkMatch.Prefix">Leagues</MudNavLink>
+            <MudNavLink Href="/picks" Match="NavLinkMatch.Prefix">Picks</MudNavLink>
+            <MudNavLink Href="/scores" Match="NavLinkMatch.Prefix">Scores</MudNavLink>
+            <MudNavGroup Title="Settings" Expanded="true">
+                <MudNavLink Href="Account/Manage" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">
+                    @context.User.Identity?.Name</MudNavLink>
+                <MudNavLink Href="/logout" Match="NavLinkMatch.Prefix"
+                    Icon="@Icons.Material.Filled.Logout">
+                    Logout</MudNavLink>
+            </MudNavGroup>
+        </Authorized>
+        <NotAuthorized>
+            <MudNavLink Href="Account/Login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Password">Login
+            </MudNavLink>
+        </NotAuthorized>
     </AuthorizeView>
-    <NotAuthorized>
-    <MudNavLink Href="Account/Login" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Password">Login</MudNavLink>
-    </NotAuthorized>
 </MudNavMenu>
 
 @code {
     private string? currentUrl;
-    [Inject] NavigationManager NavigationManager {get;set;}
+    [Inject] NavigationManager NavigationManager { get; set; } = default!;
 
     protected override void OnInitialized()
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        currentUrl = NavigationManager?.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
     }
 

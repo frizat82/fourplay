@@ -1,9 +1,10 @@
 using fourplay.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
 namespace fourplay.Components.Pages;
-
+[Authorize]
 public partial class LeaguePicker : ComponentBase {
     [Inject]
     private ApplicationDbContext? _db { get; set; } = default!;

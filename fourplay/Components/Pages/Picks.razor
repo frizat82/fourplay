@@ -54,7 +54,10 @@
                             </MudPaper>
                             <MudDivider></MudDivider>
                             <MudSpacer />
-                            <MudIcon Icon="@Icons.Material.Filled.AlternateEmail" />
+                            <MudItem Class="d-flex justify-end flex-grow-1 gap-4 pr-4">
+                            <!--<MudIcon Icon="@Icons.Material.Filled.AlternateEmail"/>-->
+                            <MudText>@DisplayDetails(@scoreEvent)</MudText>
+                            </MudItem>
                             <MudDivider></MudDivider>
                             <MudPaper class="pa-2 ma-2" Elevation="5">
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Row="true">

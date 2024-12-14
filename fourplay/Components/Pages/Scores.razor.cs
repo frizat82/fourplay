@@ -1,11 +1,11 @@
-using fourplay.Components.Pages;
+using Microsoft.AspNetCore.Authorization;
 using fourplay.Data;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using NodaTime;
 
 namespace fourplay.Components.Pages;
-
+[Authorize]
 public partial class Scores : ComponentBase {
     [Inject]
     private IESPNApiService? _espn { get; set; } = default!;

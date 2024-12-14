@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using Microsoft.AspNetCore.Authorization;
 
 namespace fourplay.Components.Pages;
+[Authorize]
 public partial class PickDialog {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
