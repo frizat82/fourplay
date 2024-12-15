@@ -1,4 +1,5 @@
 ﻿using AppAny.Quartz.EntityFrameworkCore.Migrations;
+using AppAny.Quartz.EntityFrameworkCore.Migrations.PostgreSQL;
 using AppAny.Quartz.EntityFrameworkCore.Migrations.SQLite;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -18,17 +19,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);
         // Adds Quartz.NET SQLite schema to EntityFrameworkCore
-        modelBuilder.AddQuartz(builder => builder.UseSqlite());
+        //modelBuilder.AddQuartz(builder => builder.UseSqlite());
+        modelBuilder.AddQuartz(builder => builder.UsePostgreSql());
 
         modelBuilder.Entity<LeagueInfo>(entity => {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.DateCreated).HasColumnType("datetime")
+            entity.Property(e => e.DateCreated).HasColumnType("timestamp")
         .HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.HasIndex(x => new { x.LeagueName }).IsUnique(true);
         });
         modelBuilder.Entity<LeagueUserMapping>(entity => {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.DateCreated).HasColumnType("datetime")
+            entity.Property(e => e.DateCreated).HasColumnType("timestamp")
         .HasDefaultValueSql("CURRENT_TIMESTAMP");
              entity.HasOne(e => e.League)
                         .WithMany()
@@ -38,7 +40,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         });
         modelBuilder.Entity<LeagueJuiceMapping>(entity => {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.DateCreated).HasColumnType("datetime")
+            entity.Property(e => e.DateCreated).HasColumnType("timestamp")
         .HasDefaultValueSql("CURRENT_TIMESTAMP");
           entity.HasOne(e => e.League)
                         .WithMany()
@@ -48,7 +50,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         });
         modelBuilder.Entity<NFLSpreads>(entity => {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.DateCreated).HasColumnType("datetime")
+            entity.Property(e => e.DateCreated).HasColumnType("timestamp")
         .HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.HasIndex(x => new { x.Season, x.NFLWeek, x.HomeTeam }).IsUnique(true);
 
@@ -56,7 +58,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<NFLScores>(entity => {
             entity.HasKey(e => e.Id);
             entity.HasIndex(x => new { x.Season, x.NFLWeek, x.HomeTeam }).IsUnique(true);
-            entity.Property(e => e.DateCreated).HasColumnType("datetime")
+            entity.Property(e => e.DateCreated).HasColumnType("timestamp")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
         modelBuilder.Entity<NFLPicks>(entity => {
@@ -70,7 +72,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                         .IsRequired();
             entity.HasKey(e => e.Id);
             entity.HasIndex(x => new { x.UserId, x.LeagueId, x.NFLWeek, x.Season, x.Team }).IsUnique(true);
-            entity.Property(e => e.DateCreated).HasColumnType("datetime")
+            entity.Property(e => e.DateCreated).HasColumnType("timestamp")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
     }

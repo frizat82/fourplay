@@ -1,7 +1,7 @@
 using fourplay.Data;
 using Quartz;
 using Serilog;
-
+namespace fourplay.Jobs;
 [DisallowConcurrentExecution]
 public class NFLSpreadJob : IJob {
     private readonly ISportslineOddsService _sportsOdds;

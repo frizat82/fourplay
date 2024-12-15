@@ -2,9 +2,13 @@ using fourplay.Data;
 using Microsoft.AspNetCore.Components;
 namespace fourplay.Components.Pages;
 using Microsoft.AspNetCore.Authorization;
+using MudBlazor;
+using Serilog;
+
 [Authorize]
 public partial class Picks : ComponentBase
 {
+    [Inject] ISnackbar Snackbar { get; set; }
     [Inject]
     private IESPNApiService? _espn { get; set; } = default!;
     [Inject]
@@ -46,6 +50,7 @@ public partial class Picks : ComponentBase
     }
     private async Task SubmitPicks()
     {
+        Log.Information("Submitting Picks");
         var usrId = await _loginHelper.GetUserDetails();
         if (usrId is not null)
         {
@@ -58,6 +63,7 @@ public partial class Picks : ComponentBase
                 UserId = usrId.Id
             }));
             await _db.SaveChangesAsync();
+            Snackbar.Add("Picks Added", Severity.Success);
             _locked = true;
             await InvokeAsync(StateHasChanged);
         }

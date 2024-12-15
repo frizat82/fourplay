@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using Microsoft.AspNetCore.Authorization;
+using fourplay.Models;
 
 namespace fourplay.Components.Pages;
 [Authorize]
@@ -15,6 +16,6 @@ public partial class ManageUserDialog {
 
     private void AddMapping()
     {
-        MudDialog.Close(DialogResult.Ok(new {_user, _league}));
+        MudDialog.Close(DialogResult.Ok(new MapUserModel() {Email =_user, LeagueName = _league}));
     }
 }

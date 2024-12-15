@@ -11,9 +11,7 @@ using Quartz;
 using Quartz.Impl.AdoJobStore;
 using Microsoft.AspNetCore.Authentication;
 using Serilog;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using fourplay.Jobs;
 Environment.SetEnvironmentVariable("DOTNET_hostBuilder:reloadConfigOnChange", "false");
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,13 +45,15 @@ builder.Services.AddAuthentication(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+Log.Information("DB {ConnectionString}", connectionString);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    Log.Debug("DB {ConnectionString}", connectionString);
-    options.UseSqlite(connectionString);
+    //Log.Information("DB {ConnectionString}", connectionString);
+    //options.UseSqlite(connectionString);
+    options.UseNpgsql(connectionString);
     options.EnableSensitiveDataLogging(true);
     options.EnableDetailedErrors(true);
-});
+}, ServiceLifetime.Scoped);
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -102,7 +102,7 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
     // Only if we use GOOGLE FALLBACK
     googleOptions.Events.OnTicketReceived = async context =>
     {
-        var validEmails = new[] { "markmjohnson@gmail.com","jpmulcahy@gmail.com" };
+        var validEmails = new[] { "markmjohnson@gmail.com", "jpmulcahy@gmail.com" };
         async Task AccessDenied(string email)
         {
             Log.Warning("Logging in {User} Denied", email);
@@ -115,7 +115,8 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
         var result = await roleManager.RoleExistsAsync("Administrator");
         var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
         var email = claimsIdentity.Claims.FirstOrDefault(x => x.Type.Contains("email"));
-        if (email is null) {
+        if (email is null)
+        {
             await AccessDenied(email.Value);
             return;
         }
@@ -127,11 +128,14 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
                 Log.Information("Logging in {User} Successfully as Admin", email.Value);
             }
         }
-        if (!validEmails.Contains(email.Value)) {
+        if (!validEmails.Contains(email.Value))
+        {
             await AccessDenied(email.Value);
-        } else {
-        Log.Information("Logging in {User} Successfully", email.Value);
-        context.Success();
+        }
+        else
+        {
+            Log.Information("Logging in {User} Successfully", email.Value);
+            context.Success();
         }
     };
     /*
@@ -144,7 +148,7 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
 
 builder.Services.AddAuthorization(options =>
       options.AddPolicy("User",
-      policy => policy.RequireClaim(ClaimTypes.Email, new[] { "markmjohnson@gmail.com","jpmulcahy@gmail.com" })));
+      policy => policy.RequireClaim(ClaimTypes.Email, new[] { "markmjohnson@gmail.com", "jpmulcahy@gmail.com" })));
 
 /*
 // If this is done we need to add ROLE support above
@@ -190,6 +194,20 @@ builder.Services.AddQuartz(q =>
         options.DefaultMaxRunTime = TimeSpan.FromMinutes(5);
     });
     */
+    q.UsePersistentStore(s =>
+    {
+        // Use for Postgres database
+        s.UsePostgres(postGresOptions =>
+        {
+            postGresOptions.UseDriverDelegate<PostgreSQLDelegate>();
+            postGresOptions.ConnectionString = connectionString;
+            postGresOptions.TablePrefix = "quartz.qrtz_";
+        });
+        s.PerformSchemaValidation = true; // default
+        s.UseProperties = true; // preferred, but not default
+        s.RetryInterval = TimeSpan.FromSeconds(15);
+        s.UseNewtonsoftJsonSerializer();
+    });
     // example of persistent job store using JSON serializer as an example
     /*
     q.UsePersistentStore(s => {
@@ -216,6 +234,20 @@ builder.Services.AddQuartzHostedService(options =>
 
 
 var app = builder.Build();
+
+try
+{
+    Log.Information("Migrating any needed DBs");
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+    }
+}
+catch (Exception ex)
+{
+    Log.Error(ex, "Error Upgrading DB");
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

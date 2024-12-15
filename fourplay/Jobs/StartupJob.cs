@@ -1,6 +1,6 @@
 using fourplay.Data;
 using Quartz;
-
+namespace fourplay.Jobs;
 public class StartupJob : IJob {
     private readonly ISchedulerFactory _factory;
     private readonly ApplicationDbContext _context;

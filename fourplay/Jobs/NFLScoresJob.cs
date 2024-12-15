@@ -1,6 +1,8 @@
 using fourplay.Data;
 using Quartz;
 using Serilog;
+
+namespace fourplay.Jobs;
 [DisallowConcurrentExecution]
 public class NFLScoresJob : IJob {
     private readonly IESPNApiService _espn;

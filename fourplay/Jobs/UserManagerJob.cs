@@ -1,7 +1,8 @@
 using fourplay.Data;
 using Microsoft.AspNetCore.Identity;
 using Quartz;
-
+using Serilog;
+namespace fourplay.Jobs;
 [DisallowConcurrentExecution]
 public class UserManagerJob : IJob {
     private readonly RoleManager<IdentityRole> _roleManager;
@@ -14,6 +15,7 @@ public class UserManagerJob : IJob {
         await CreateRolesAndAdminUser();
     }
     internal async Task CreateRolesAndAdminUser() {
+        Log.Information("Adding roles and assigning Admins");
         const string adminRoleName = "Administrator";
         string[] roleNames = { adminRoleName, "User", "LeagueManager" };
 
@@ -54,14 +56,7 @@ public class UserManagerJob : IJob {
         var checkAppUser = await _userManager.FindByEmailAsync(userEmail);
 
         if (checkAppUser is null || checkAppUser.Id is null) {
-            var newAppUser = new ApplicationUser() {
-                Email = userEmail,
-                UserName = userEmail
-            };
-
-            var appUser = await _userManager.CreateAsync(newAppUser);
-
-            var newUserRole = await _userManager.AddToRoleAsync(newAppUser, roleName);
+            return;
         }
         else {
             var newUserRole = await _userManager.AddToRoleAsync(checkAppUser, roleName);

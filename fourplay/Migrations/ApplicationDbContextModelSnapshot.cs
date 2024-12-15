@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using fourplay.Data;
 
 #nullable disable
@@ -15,465 +16,471 @@ namespace fourplay.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("SCHED_NAME");
+                        .HasColumnName("sched_name");
 
                     b.Property<string>("TriggerName")
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_NAME");
+                        .HasColumnName("trigger_name");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_GROUP");
+                        .HasColumnName("trigger_group");
 
                     b.Property<byte[]>("BlobData")
                         .HasColumnType("bytea")
-                        .HasColumnName("BLOB_DATA");
+                        .HasColumnName("blob_data");
 
                     b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
 
-                    b.ToTable("QRTZ_BLOB_TRIGGERS", (string)null);
+                    b.ToTable("qrtz_blob_triggers", "quartz");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCalendar", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("SCHED_NAME");
+                        .HasColumnName("sched_name");
 
                     b.Property<string>("CalendarName")
                         .HasColumnType("text")
-                        .HasColumnName("CALENDAR_NAME");
+                        .HasColumnName("calendar_name");
 
                     b.Property<byte[]>("Calendar")
                         .IsRequired()
                         .HasColumnType("bytea")
-                        .HasColumnName("CALENDAR");
+                        .HasColumnName("calendar");
 
                     b.HasKey("SchedulerName", "CalendarName");
 
-                    b.ToTable("QRTZ_CALENDARS", (string)null);
+                    b.ToTable("qrtz_calendars", "quartz");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCronTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("SCHED_NAME");
+                        .HasColumnName("sched_name");
 
                     b.Property<string>("TriggerName")
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_NAME");
+                        .HasColumnName("trigger_name");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_GROUP");
+                        .HasColumnName("trigger_group");
 
                     b.Property<string>("CronExpression")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("CRON_EXPRESSION");
+                        .HasColumnName("cron_expression");
 
                     b.Property<string>("TimeZoneId")
                         .HasColumnType("text")
-                        .HasColumnName("TIME_ZONE_ID");
+                        .HasColumnName("time_zone_id");
 
                     b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
 
-                    b.ToTable("QRTZ_CRON_TRIGGERS", (string)null);
+                    b.ToTable("qrtz_cron_triggers", "quartz");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzFiredTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("SCHED_NAME");
+                        .HasColumnName("sched_name");
 
                     b.Property<string>("EntryId")
                         .HasColumnType("text")
-                        .HasColumnName("ENTRY_ID");
+                        .HasColumnName("entry_id");
 
                     b.Property<long>("FiredTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("FIRED_TIME");
+                        .HasColumnName("fired_time");
 
                     b.Property<string>("InstanceName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("INSTANCE_NAME");
+                        .HasColumnName("instance_name");
 
                     b.Property<bool>("IsNonConcurrent")
                         .HasColumnType("bool")
-                        .HasColumnName("IS_NONCONCURRENT");
+                        .HasColumnName("is_nonconcurrent");
 
                     b.Property<string>("JobGroup")
                         .HasColumnType("text")
-                        .HasColumnName("JOB_GROUP");
+                        .HasColumnName("job_group");
 
                     b.Property<string>("JobName")
                         .HasColumnType("text")
-                        .HasColumnName("JOB_NAME");
+                        .HasColumnName("job_name");
 
                     b.Property<int>("Priority")
                         .HasColumnType("integer")
-                        .HasColumnName("PRIORITY");
+                        .HasColumnName("priority");
 
                     b.Property<bool?>("RequestsRecovery")
                         .HasColumnType("bool")
-                        .HasColumnName("REQUESTS_RECOVERY");
+                        .HasColumnName("requests_recovery");
 
                     b.Property<long>("ScheduledTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("SCHED_TIME");
+                        .HasColumnName("sched_time");
 
                     b.Property<string>("State")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("STATE");
+                        .HasColumnName("state");
 
                     b.Property<string>("TriggerGroup")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_GROUP");
+                        .HasColumnName("trigger_group");
 
                     b.Property<string>("TriggerName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_NAME");
+                        .HasColumnName("trigger_name");
 
                     b.HasKey("SchedulerName", "EntryId");
 
                     b.HasIndex("InstanceName")
-                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_INST_NAME");
+                        .HasDatabaseName("idx_qrtz_ft_trig_inst_name");
 
                     b.HasIndex("JobGroup")
-                        .HasDatabaseName("IDX_QRTZ_FT_JOB_GROUP");
+                        .HasDatabaseName("idx_qrtz_ft_job_group");
 
                     b.HasIndex("JobName")
-                        .HasDatabaseName("IDX_QRTZ_FT_JOB_NAME");
+                        .HasDatabaseName("idx_qrtz_ft_job_name");
 
                     b.HasIndex("RequestsRecovery")
-                        .HasDatabaseName("IDX_QRTZ_FT_JOB_REQ_RECOVERY");
+                        .HasDatabaseName("idx_qrtz_ft_job_req_recovery");
 
                     b.HasIndex("TriggerGroup")
-                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_GROUP");
+                        .HasDatabaseName("idx_qrtz_ft_trig_group");
 
                     b.HasIndex("TriggerName")
-                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_NAME");
+                        .HasDatabaseName("idx_qrtz_ft_trig_name");
 
                     b.HasIndex("SchedulerName", "TriggerName", "TriggerGroup")
-                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_NM_GP");
+                        .HasDatabaseName("idx_qrtz_ft_trig_nm_gp");
 
-                    b.ToTable("QRTZ_FIRED_TRIGGERS", (string)null);
+                    b.ToTable("qrtz_fired_triggers", "quartz");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("SCHED_NAME");
+                        .HasColumnName("sched_name");
 
                     b.Property<string>("JobName")
                         .HasColumnType("text")
-                        .HasColumnName("JOB_NAME");
+                        .HasColumnName("job_name");
 
                     b.Property<string>("JobGroup")
                         .HasColumnType("text")
-                        .HasColumnName("JOB_GROUP");
+                        .HasColumnName("job_group");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")
-                        .HasColumnName("DESCRIPTION");
+                        .HasColumnName("description");
 
                     b.Property<bool>("IsDurable")
                         .HasColumnType("bool")
-                        .HasColumnName("IS_DURABLE");
+                        .HasColumnName("is_durable");
 
                     b.Property<bool>("IsNonConcurrent")
                         .HasColumnType("bool")
-                        .HasColumnName("IS_NONCONCURRENT");
+                        .HasColumnName("is_nonconcurrent");
 
                     b.Property<bool>("IsUpdateData")
                         .HasColumnType("bool")
-                        .HasColumnName("IS_UPDATE_DATA");
+                        .HasColumnName("is_update_data");
 
                     b.Property<string>("JobClassName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("JOB_CLASS_NAME");
+                        .HasColumnName("job_class_name");
 
                     b.Property<byte[]>("JobData")
                         .HasColumnType("bytea")
-                        .HasColumnName("JOB_DATA");
+                        .HasColumnName("job_data");
 
                     b.Property<bool>("RequestsRecovery")
                         .HasColumnType("bool")
-                        .HasColumnName("REQUESTS_RECOVERY");
+                        .HasColumnName("requests_recovery");
 
                     b.HasKey("SchedulerName", "JobName", "JobGroup");
 
                     b.HasIndex("RequestsRecovery")
-                        .HasDatabaseName("IDX_QRTZ_J_REQ_RECOVERY");
+                        .HasDatabaseName("idx_qrtz_j_req_recovery");
 
-                    b.ToTable("QRTZ_JOB_DETAILS", (string)null);
+                    b.ToTable("qrtz_job_details", "quartz");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzLock", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("SCHED_NAME");
+                        .HasColumnName("sched_name");
 
                     b.Property<string>("LockName")
                         .HasColumnType("text")
-                        .HasColumnName("LOCK_NAME");
+                        .HasColumnName("lock_name");
 
                     b.HasKey("SchedulerName", "LockName");
 
-                    b.ToTable("QRTZ_LOCKS", (string)null);
+                    b.ToTable("qrtz_locks", "quartz");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzPausedTriggerGroup", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("SCHED_NAME");
+                        .HasColumnName("sched_name");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_GROUP");
+                        .HasColumnName("trigger_group");
 
                     b.HasKey("SchedulerName", "TriggerGroup");
 
-                    b.ToTable("QRTZ_PAUSED_TRIGGER_GRPS", (string)null);
+                    b.ToTable("qrtz_paused_trigger_grps", "quartz");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSchedulerState", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("SCHED_NAME");
+                        .HasColumnName("sched_name");
 
                     b.Property<string>("InstanceName")
                         .HasColumnType("text")
-                        .HasColumnName("INSTANCE_NAME");
+                        .HasColumnName("instance_name");
 
                     b.Property<long>("CheckInInterval")
                         .HasColumnType("bigint")
-                        .HasColumnName("CHECKIN_INTERVAL");
+                        .HasColumnName("checkin_interval");
 
                     b.Property<long>("LastCheckInTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("LAST_CHECKIN_TIME");
+                        .HasColumnName("last_checkin_time");
 
                     b.HasKey("SchedulerName", "InstanceName");
 
-                    b.ToTable("QRTZ_SCHEDULER_STATE", (string)null);
+                    b.ToTable("qrtz_scheduler_state", "quartz");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimplePropertyTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("SCHED_NAME");
+                        .HasColumnName("sched_name");
 
                     b.Property<string>("TriggerName")
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_NAME");
+                        .HasColumnName("trigger_name");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_GROUP");
+                        .HasColumnName("trigger_group");
 
                     b.Property<bool?>("BooleanProperty1")
                         .HasColumnType("bool")
-                        .HasColumnName("BOOL_PROP_1");
+                        .HasColumnName("bool_prop_1");
 
                     b.Property<bool?>("BooleanProperty2")
                         .HasColumnType("bool")
-                        .HasColumnName("BOOL_PROP_2");
+                        .HasColumnName("bool_prop_2");
 
                     b.Property<decimal?>("DecimalProperty1")
                         .HasColumnType("numeric")
-                        .HasColumnName("DEC_PROP_1");
+                        .HasColumnName("dec_prop_1");
 
                     b.Property<decimal?>("DecimalProperty2")
                         .HasColumnType("numeric")
-                        .HasColumnName("DEC_PROP_2");
+                        .HasColumnName("dec_prop_2");
 
                     b.Property<int?>("IntegerProperty1")
                         .HasColumnType("integer")
-                        .HasColumnName("INT_PROP_1");
+                        .HasColumnName("int_prop_1");
 
                     b.Property<int?>("IntegerProperty2")
                         .HasColumnType("integer")
-                        .HasColumnName("INT_PROP_2");
+                        .HasColumnName("int_prop_2");
 
                     b.Property<long?>("LongProperty1")
                         .HasColumnType("bigint")
-                        .HasColumnName("LONG_PROP_1");
+                        .HasColumnName("long_prop_1");
 
                     b.Property<long?>("LongProperty2")
                         .HasColumnType("bigint")
-                        .HasColumnName("LONG_PROP_2");
+                        .HasColumnName("long_prop_2");
 
                     b.Property<string>("StringProperty1")
                         .HasColumnType("text")
-                        .HasColumnName("STR_PROP_1");
+                        .HasColumnName("str_prop_1");
 
                     b.Property<string>("StringProperty2")
                         .HasColumnType("text")
-                        .HasColumnName("STR_PROP_2");
+                        .HasColumnName("str_prop_2");
 
                     b.Property<string>("StringProperty3")
                         .HasColumnType("text")
-                        .HasColumnName("STR_PROP_3");
+                        .HasColumnName("str_prop_3");
 
                     b.Property<string>("TimeZoneId")
                         .HasColumnType("text")
-                        .HasColumnName("TIME_ZONE_ID");
+                        .HasColumnName("time_zone_id");
 
                     b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
 
-                    b.ToTable("QRTZ_SIMPROP_TRIGGERS", (string)null);
+                    b.ToTable("qrtz_simprop_triggers", "quartz");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimpleTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("SCHED_NAME");
+                        .HasColumnName("sched_name");
 
                     b.Property<string>("TriggerName")
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_NAME");
+                        .HasColumnName("trigger_name");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_GROUP");
+                        .HasColumnName("trigger_group");
 
                     b.Property<long>("RepeatCount")
                         .HasColumnType("bigint")
-                        .HasColumnName("REPEAT_COUNT");
+                        .HasColumnName("repeat_count");
 
                     b.Property<long>("RepeatInterval")
                         .HasColumnType("bigint")
-                        .HasColumnName("REPEAT_INTERVAL");
+                        .HasColumnName("repeat_interval");
 
                     b.Property<long>("TimesTriggered")
                         .HasColumnType("bigint")
-                        .HasColumnName("TIMES_TRIGGERED");
+                        .HasColumnName("times_triggered");
 
                     b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
 
-                    b.ToTable("QRTZ_SIMPLE_TRIGGERS", (string)null);
+                    b.ToTable("qrtz_simple_triggers", "quartz");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
                 {
                     b.Property<string>("SchedulerName")
                         .HasColumnType("text")
-                        .HasColumnName("SCHED_NAME");
+                        .HasColumnName("sched_name");
 
                     b.Property<string>("TriggerName")
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_NAME");
+                        .HasColumnName("trigger_name");
 
                     b.Property<string>("TriggerGroup")
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_GROUP");
+                        .HasColumnName("trigger_group");
 
                     b.Property<string>("CalendarName")
                         .HasColumnType("text")
-                        .HasColumnName("CALENDAR_NAME");
+                        .HasColumnName("calendar_name");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")
-                        .HasColumnName("DESCRIPTION");
+                        .HasColumnName("description");
 
                     b.Property<long?>("EndTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("END_TIME");
+                        .HasColumnName("end_time");
 
                     b.Property<byte[]>("JobData")
                         .HasColumnType("bytea")
-                        .HasColumnName("JOB_DATA");
+                        .HasColumnName("job_data");
 
                     b.Property<string>("JobGroup")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("JOB_GROUP");
+                        .HasColumnName("job_group");
 
                     b.Property<string>("JobName")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("JOB_NAME");
+                        .HasColumnName("job_name");
 
                     b.Property<short?>("MisfireInstruction")
                         .HasColumnType("smallint")
-                        .HasColumnName("MISFIRE_INSTR");
+                        .HasColumnName("misfire_instr");
 
                     b.Property<long?>("NextFireTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("NEXT_FIRE_TIME");
+                        .HasColumnName("next_fire_time");
 
                     b.Property<long?>("PreviousFireTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("PREV_FIRE_TIME");
+                        .HasColumnName("prev_fire_time");
 
                     b.Property<int?>("Priority")
                         .HasColumnType("integer")
-                        .HasColumnName("PRIORITY");
+                        .HasColumnName("priority");
 
                     b.Property<long>("StartTime")
                         .HasColumnType("bigint")
-                        .HasColumnName("START_TIME");
+                        .HasColumnName("start_time");
 
                     b.Property<string>("TriggerState")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_STATE");
+                        .HasColumnName("trigger_state");
 
                     b.Property<string>("TriggerType")
                         .IsRequired()
                         .HasColumnType("text")
-                        .HasColumnName("TRIGGER_TYPE");
+                        .HasColumnName("trigger_type");
 
                     b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
 
                     b.HasIndex("NextFireTime")
-                        .HasDatabaseName("IDX_QRTZ_T_NEXT_FIRE_TIME");
+                        .HasDatabaseName("idx_qrtz_t_next_fire_time");
 
                     b.HasIndex("TriggerState")
-                        .HasDatabaseName("IDX_QRTZ_T_STATE");
+                        .HasDatabaseName("idx_qrtz_t_state");
 
                     b.HasIndex("NextFireTime", "TriggerState")
-                        .HasDatabaseName("IDX_QRTZ_T_NFT_ST");
+                        .HasDatabaseName("idx_qrtz_t_nft_st");
 
                     b.HasIndex("SchedulerName", "JobName", "JobGroup");
 
-                    b.ToTable("QRTZ_TRIGGERS", (string)null);
+                    b.ToTable("qrtz_triggers", "quartz");
                 });
 
             modelBuilder.Entity("LeagueInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DateCreated")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("LeagueName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -487,21 +494,23 @@ namespace fourplay.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DateCreated")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<int>("Juice")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("LeagueId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Season")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -515,19 +524,21 @@ namespace fourplay.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DateCreated")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<int>("LeagueId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -542,19 +553,19 @@ namespace fourplay.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -569,17 +580,19 @@ namespace fourplay.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -592,17 +605,19 @@ namespace fourplay.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ClaimValue")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -614,17 +629,17 @@ namespace fourplay.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -636,10 +651,10 @@ namespace fourplay.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("RoleId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -651,16 +666,16 @@ namespace fourplay.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Value")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
@@ -671,29 +686,31 @@ namespace fourplay.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DateCreated")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<int>("LeagueId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("NFLWeek")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Season")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Team")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -709,35 +726,37 @@ namespace fourplay.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AwayTeam")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<double>("AwayTeamScore")
-                        .HasColumnType("REAL");
+                        .HasColumnType("double precision");
 
                     b.Property<DateTime>("DateCreated")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<DateTime>("GameTime")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("HomeTeam")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<double>("HomeTeamScore")
-                        .HasColumnType("REAL");
+                        .HasColumnType("double precision");
 
                     b.Property<int>("NFLWeek")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Season")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -751,35 +770,37 @@ namespace fourplay.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AwayTeam")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<double>("AwayTeamSpread")
-                        .HasColumnType("REAL");
+                        .HasColumnType("double precision");
 
                     b.Property<DateTime>("DateCreated")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<DateTime>("GameTime")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("HomeTeam")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<double>("HomeTeamSpread")
-                        .HasColumnType("REAL");
+                        .HasColumnType("double precision");
 
                     b.Property<int>("NFLWeek")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Season")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -792,54 +813,54 @@ namespace fourplay.Migrations
             modelBuilder.Entity("fourplay.Data.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<int>("AccessFailedCount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
