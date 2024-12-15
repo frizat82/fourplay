@@ -4,6 +4,7 @@ using fourplay.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using Quartz;
 using Serilog;
 
 namespace fourplay.Components.Pages;
@@ -18,6 +19,7 @@ public partial class UserManager : ComponentBase
     private List<LeagueUserMapping> _userMapping { get; set; } = new();
     private List<LeagueInfo> _leagueInfo { get; set; } = new();
     private List<LeagueJuiceMapping> _leagueJuiceMapping { get; set; } = new();
+    [Inject] private ISchedulerFactory _schedulerFactory { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -80,5 +82,13 @@ public partial class UserManager : ComponentBase
             }
             await InvokeAsync(StateHasChanged);
         }
+    }
+    public async Task RunSpreads()
+    {
+        // Create a scheduler
+        var scheduler = await _schedulerFactory.GetScheduler();
+        await scheduler.TriggerJob(new JobKey("NFL Spreads"));
+        Log.Information("Started Spread Job");
+        Snackbar.Add("Started Spread Job", Severity.Success);
     }
 }
