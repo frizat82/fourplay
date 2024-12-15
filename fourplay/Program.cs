@@ -49,6 +49,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
+    Log.Debug("DB {ConnectionString}", connectionString);
     options.UseSqlite(connectionString);
     options.EnableSensitiveDataLogging(true);
     options.EnableDetailedErrors(true);
@@ -101,10 +102,12 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
     // Only if we use GOOGLE FALLBACK
     googleOptions.Events.OnTicketReceived = async context =>
     {
-        var validEmails = new[] { "markmjohnson@gmail.com" };
-        void AccessDenied()
+        var validEmails = new[] { "markmjohnson@gmail.com","jpmulcahy@gmail.com" };
+        async Task AccessDenied(string email)
         {
-            context.Response.Redirect("/Auth/Unauthorized");
+            Log.Warning("Logging in {User} Denied", email);
+            await context.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            context.Response.Redirect("/auth");
             context.Fail("You are not allowed");
             context.HandleResponse();
         }
@@ -113,18 +116,7 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
         var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
         var email = claimsIdentity.Claims.FirstOrDefault(x => x.Type.Contains("email"));
         if (email is null) {
-            context.Fail("Invalid User");
-            //await SignInManager.SignOutAsync();
-            //await context.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-            //IdentityManager.RedirectTo("/");
-            // Clear the authentication cookies
-            await context.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
-            // Redirect to the homepage
-            context.Response.Redirect("/");
-
-            // Prevent further processing of the authentication ticket
-            context.HandleResponse();
+            await AccessDenied(email.Value);
             return;
         }
         if (result)
@@ -132,22 +124,13 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
             if (email.Value == "markmjohnson@gmail.com")
             {
                 claimsIdentity?.AddClaim(new Claim(ClaimTypes.Role, "Administrator"));
+                Log.Information("Logging in {User} Successfully as Admin", email.Value);
             }
         }
         if (!validEmails.Contains(email.Value)) {
-            context.Fail("Invalid User");
-            //await SignInManager.SignOutAsync();
-            //await context.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-            //IdentityManager.RedirectTo("/");
-            // Clear the authentication cookies
-            await context.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-
-            // Redirect to the homepage
-            context.Response.Redirect("/");
-
-            // Prevent further processing of the authentication ticket
-            context.HandleResponse();
+            await AccessDenied(email.Value);
         } else {
+        Log.Information("Logging in {User} Successfully", email.Value);
         context.Success();
         }
     };
@@ -158,21 +141,22 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
         return Task.CompletedTask;
     };*/
 });
-/*
+
 builder.Services.AddAuthorization(options =>
       options.AddPolicy("User",
-      policy => policy.RequireClaim(ClaimTypes.Email, new[] { "markmjohnson@gmail.com" })));
-*/
+      policy => policy.RequireClaim(ClaimTypes.Email, new[] { "markmjohnson@gmail.com","jpmulcahy@gmail.com" })));
 
+/*
 // If this is done we need to add ROLE support above
 builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = new AuthorizationPolicyBuilder(
             GoogleDefaults.AuthenticationScheme
         )
         .RequireAuthenticatedUser()
-        .RequireClaim(ClaimTypes.Email, new[] { "markmjohnson@gmail.com" })
+        .RequireClaim(ClaimTypes.Email, new[] { "markmjohnson@gmail.com","jpmulcahy@gmail.com" })
         .Build()
 );
+*/
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<ILoginHelper, LoginHelper>();
 // Quartz
@@ -182,11 +166,10 @@ builder.Services.AddScoped<IJob, StartupJob>();
 builder.Services.AddScoped<IJob, UserManagerJob>();
 builder.Services.AddQuartz(q =>
 {
-    q.UseMicrosoftDependencyInjectionJobFactory();
+    //q.UseMicrosoftDependencyInjectionJobFactory();
     // quickest way to create a job with single trigger is to use ScheduleJob
-    // (requires version 3.2)
     q.ScheduleJob<UserManagerJob>(trigger => trigger.WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
-    q.ScheduleJob<StartupJob>(trigger => trigger.WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
+    //q.ScheduleJob<StartupJob>(trigger => trigger.WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
     q.ScheduleJob<NFLSpreadJob>(trigger => trigger
         .WithIdentity("NFL Spreads")
         .WithCronSchedule("0 0 14 ? * THU", x => x.WithMisfireHandlingInstructionFireAndProceed()) // Fire at 10:00 AM every Thursday
@@ -209,20 +192,19 @@ builder.Services.AddQuartz(q =>
     */
     // example of persistent job store using JSON serializer as an example
     /*
-        q.UsePersistentStore(s => {
-            // Use for SQLite database
-            s.UseSQLite(sqlLiteOptions => {
-                sqlLiteOptions.UseDriverDelegate<SQLiteDelegate>();
-                sqlLiteOptions.ConnectionString = connectionString;
-                sqlLiteOptions.TablePrefix = "QRTZ_";
-            });
-            s.PerformSchemaValidation = true; // default
-            s.UseProperties = true; // preferred, but not default
-            s.RetryInterval = TimeSpan.FromSeconds(15);
-            s.UseNewtonsoftJsonSerializer();
+    q.UsePersistentStore(s => {
+        // Use for SQLite database
+        s.UseSQLite(sqlLiteOptions => {
+            sqlLiteOptions.UseDriverDelegate<SQLiteDelegate>();
+            sqlLiteOptions.ConnectionString = connectionString;
+            sqlLiteOptions.TablePrefix = "QRTZ_";
         });
-
-    */
+        s.PerformSchemaValidation = true; // default
+        s.UseProperties = true; // preferred, but not default
+        s.RetryInterval = TimeSpan.FromSeconds(15);
+        s.UseNewtonsoftJsonSerializer();
+    });
+*/
 });
 
 // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle

@@ -12,16 +12,18 @@ namespace fourplay.Components.Pages;
 [IgnoreAntiforgeryToken]
 public partial class UserLogout : ComponentBase
 {
-    [Inject] private SignInManager<ApplicationUser> SignInManager {get;set;} = default!;
+    [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
     [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
-    [Inject] private IdentityRedirectManager IdentityManager {get;set;} = default!;
+    [Inject] private IdentityRedirectManager IdentityManager { get; set; } = default!;
 
-    protected override async Task OnInitializedAsync() {
-    
-        await SignInManager.SignOutAsync();
-        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+    protected override async Task OnInitializedAsync()
+    {
+        if (SignInManager is not null)
+        {
+            await SignInManager.SignOutAsync();
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-        IdentityManager.RedirectTo("/");
+            IdentityManager.RedirectTo("/");
+        }
     }
 }
-    

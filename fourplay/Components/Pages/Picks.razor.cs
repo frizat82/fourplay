@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Components;
 namespace fourplay.Components.Pages;
 using Microsoft.AspNetCore.Authorization;
 [Authorize]
-public partial class Picks : ComponentBase {
+public partial class Picks : ComponentBase
+{
     [Inject]
     private IESPNApiService? _espn { get; set; } = default!;
     [Inject]
@@ -17,32 +18,44 @@ public partial class Picks : ComponentBase {
     private int? _leagueId { get; set; }
     private bool _locked = false;
 
-    protected override async Task OnInitializedAsync() {
+    protected override async Task OnInitializedAsync()
+    {
         _scores = await _espn.GetScores();
         _odds = _db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
         var usrId = await _loginHelper.GetUserDetails();
-        var picks = _db.NFLPicks.Where(x => x.UserId == usrId.Id && x.Season == _scores!.Season.Year
-        && x.NFLWeek == _scores.Week.Number);
-        if (picks.Any()) {
-            _picks = picks.Select(x => x.Team).ToList();
-            _locked = true;
+        if (usrId is not null)
+        {
+            var picks = _db.NFLPicks.Where(x => x.UserId == usrId.Id && x.Season == _scores!.Season.Year
+            && x.NFLWeek == _scores.Week.Number);
+            if (picks.Any())
+            {
+                _picks = picks.Select(x => x.Team).ToList();
+                _locked = true;
+            }
         }
     }
-    protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if (firstRender) {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
             var leagueId = await _localStorage.GetItemAsync<int>("leagueId");
             if (leagueId > 0)
                 _leagueId = leagueId;
             await InvokeAsync(StateHasChanged);
         }
     }
-    private async Task SubmitPicks() {
+    private async Task SubmitPicks()
+    {
         var usrId = await _loginHelper.GetUserDetails();
-        if (usrId is not null) {
-            await _db.NFLPicks.AddRangeAsync(_picks.Select(x => new NFLPicks() {
-                LeagueId = _leagueId.Value, NFLWeek = (int)_scores.Week.Number,
+        if (usrId is not null)
+        {
+            await _db.NFLPicks.AddRangeAsync(_picks.Select(x => new NFLPicks()
+            {
+                LeagueId = _leagueId.Value,
+                NFLWeek = (int)_scores.Week.Number,
                 Season = (int)_scores!.Season.Year,
-                Team = x, UserId = usrId.Id
+                Team = x,
+                UserId = usrId.Id
             }));
             await _db.SaveChangesAsync();
             _locked = true;
@@ -50,11 +63,14 @@ public partial class Picks : ComponentBase {
         }
     }
 
-    private double? GetSpread(string teamAbbr) {
-        if (_leagueId != 0) {
+    private double? GetSpread(string teamAbbr)
+    {
+        if (_leagueId != 0)
+        {
             var spread = _odds.FirstOrDefault(x => x.HomeTeam == teamAbbr);
             var leagueSpread = _db.LeagueJuiceMapping.FirstOrDefault(x => x.Id == _leagueId && x.Season == _scores!.Season.Year);
-            if (leagueSpread is not null) {
+            if (leagueSpread is not null)
+            {
                 if (spread is not null)
                     return spread.HomeTeamSpread + leagueSpread.Juice;
                 spread = _odds.FirstOrDefault(x => x.AwayTeam == teamAbbr);
@@ -65,19 +81,25 @@ public partial class Picks : ComponentBase {
         return null;
 
     }
-    private void UnSelectPick(string teamAbbreviation) {
-        if (!IsPicksLocked()) {
+    private void UnSelectPick(string teamAbbreviation)
+    {
+        if (!IsPicksLocked())
+        {
             _picks.Remove(teamAbbreviation);
         }
     }
 
-    private void SelectPick(string teamAbbreviation) {
-        if (!IsPicksLocked()) {
+    private void SelectPick(string teamAbbreviation)
+    {
+        if (!IsPicksLocked())
+        {
             _picks.Add(teamAbbreviation);
         }
     }
-  private string? DisplayDetails(Competition? competition) {
-        if (competition.Status.Type.Name == TypeName.StatusScheduled) {
+    private string? DisplayDetails(Competition? competition)
+    {
+        if (competition.Status.Type.Name == TypeName.StatusScheduled)
+        {
             return competition.Date.ToLocalTime().ToString("ddd, MMMM dd HH:mm");
         }
         return "          ";
