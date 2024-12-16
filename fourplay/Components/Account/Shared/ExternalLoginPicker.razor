@@ -25,10 +25,15 @@ else
         <p>
             @foreach (var provider in externalLogins)
                 {
-                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name"
-                        title="Log in using your @provider.DisplayName account">
-                        @provider.DisplayName <MudIcon Icon="@GetIcon(@provider.Name)" Title="@provider.DisplayName" />
-                    </button>
+                    <MudItem lg="6" xs="12">
+                        <MudPaper class="pa-3" Elevation="15">
+                            <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name"
+                                title="Log in using your @provider.DisplayName account">
+                                <MudIcon Icon="@GetIcon(@provider.Name)" Title="@provider.DisplayName" />
+                                <div>&nbsp;&nbsp;@provider.DisplayName</div>
+                            </button>
+                        </MudPaper>
+                    </MudItem>
 
                 }
             </p>
@@ -45,14 +50,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         externalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToArray();
-    }
-    private void SetProviderAndSubmit(string providerName)
-    {
-        // Set the hidden input field's value to the selected provider name
-        JS.InvokeVoidAsync("document.getElementById('provider').value", providerName);
-
-        // Optionally, submit the form via JavaScript
-        JS.InvokeVoidAsync("document.forms[0].submit");
     }
     private string GetIcon(string providerName)
     {
