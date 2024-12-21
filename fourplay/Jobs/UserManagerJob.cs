@@ -4,28 +4,44 @@ using Quartz;
 using Serilog;
 namespace fourplay.Jobs;
 [DisallowConcurrentExecution]
-public class UserManagerJob : IJob {
+public class UserManagerJob : IJob
+{
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly UserManager<ApplicationUser> _userManager;
-    public UserManagerJob(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager) {
+    private readonly ApplicationDbContext _db;
+    public UserManagerJob(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, ApplicationDbContext db)
+    {
         _roleManager = roleManager;
         _userManager = userManager;
+        _db = db;
     }
-    public async Task Execute(IJobExecutionContext context) {
+    public async Task Execute(IJobExecutionContext context)
+    {
         await CreateRolesAndAdminUser();
     }
-    internal async Task CreateRolesAndAdminUser() {
+    internal async Task CreateRolesAndAdminUser()
+    {
         Log.Information("Adding roles and assigning Admins");
         const string adminRoleName = "Administrator";
         string[] roleNames = { adminRoleName, "User", "LeagueManager" };
 
-        foreach (var roleName in roleNames) {
+        foreach (var roleName in roleNames)
+        {
             await CreateRole(roleName);
         }
 
         // Get these value from "appsettings.json" file.
         var adminUserEmail = "markmjohnson@gmail.com";
+        await CreateBaseUser(adminUserEmail);
         await AddUserToRole(adminUserEmail, adminRoleName);
+    }
+    /// <summary>
+    /// Create base user
+    /// </summary>
+    internal async Task CreateBaseUser(string userEmail)
+    {
+        var user = new LeagueUsers() { GoogleEmail = userEmail };
+        await _db.LeagueUsers.AddAsync(user);
     }
 
     /// <summary>
@@ -33,11 +49,13 @@ public class UserManagerJob : IJob {
     /// </summary>
     /// <param name="serviceProvider">Service Provider</param>
     /// <param name="roleName">Role Name</param>
-    internal async Task CreateRole(string roleName) {
+    internal async Task CreateRole(string roleName)
+    {
 
         var roleExists = await _roleManager.RoleExistsAsync(roleName);
 
-        if (!roleExists) {
+        if (!roleExists)
+        {
             var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
         }
     }
@@ -51,15 +69,19 @@ public class UserManagerJob : IJob {
     /// <param name="userPwd">User Password. Used to create the user if not exists.</param>
     /// <param name="roleName">Role Name</param>
     internal async Task AddUserToRole(string userEmail,
-        string roleName) {
+        string roleName)
+    {
 
         var checkAppUser = await _userManager.FindByEmailAsync(userEmail);
 
-        if (checkAppUser is null || checkAppUser.Id is null) {
+        if (checkAppUser is null || checkAppUser.Id is null)
+        {
             return;
         }
-        else {
+        else
+        {
             var newUserRole = await _userManager.AddToRoleAsync(checkAppUser, roleName);
+            Log.Information("User Added To Role {@Identity}", newUserRole);
         }
     }
 

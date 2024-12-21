@@ -37,6 +37,19 @@
         <MudItem xs="12">
             <MudButton Variant="Variant.Filled" @onclick="AddLeague">Add League</MudButton>
         </MudItem>
+        <MudSpacer />
+        <MudPaper class="pa-3" Elevation="0">
+            <MudDataGrid T="LeagueUsers" ReadOnly="true" Items="@_leagueUsers" EditMode="DataGridEditMode.Form"
+                Bordered="true" Dense="true" EditTrigger="DataGridEditTrigger.Manual">
+                <Columns>
+                    <PropertyColumn Property="x => x.GoogleEmail" />
+                </Columns>
+            </MudDataGrid>
+        </MudPaper>
+        <MudSpacer />
+        <MudItem xs="12">
+            <MudButton Variant="Variant.Filled" @onclick="AddUser">Add User</MudButton>
+        </MudItem>
         <MudItem xs="12">
             <MudButton Variant="Variant.Filled" @onclick="RunSpreads">Run Spreads Job</MudButton>
         </MudItem>

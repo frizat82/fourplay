@@ -1,21 +1,22 @@
 using fourplay.Data;
 using Microsoft.AspNetCore.Components;
-namespace fourplay.Components.Pages;
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using Serilog;
 
+namespace fourplay.Components.Pages;
 [Authorize]
 public partial class Picks : ComponentBase
 {
-    [Inject] ISnackbar Snackbar { get; set; }
-    [Inject]
-    private IESPNApiService? _espn { get; set; } = default!;
-    [Inject]
-    private ApplicationDbContext? _db { get; set; } = default!;
+    [Inject] ISnackbar Snackbar { get; set; } = default!;
+    [Inject] private IESPNApiService? _espn { get; set; } = default!;
+    [Inject] private IDbContextFactory<ApplicationDbContext> _dbContextFactory { get; set; } = default!;
+    private ApplicationDbContext? _db { get; set; }
     [Inject]
     private ILoginHelper _loginHelper { get; set; } = default!;
-    [Inject] Blazored.LocalStorage.ILocalStorageService _localStorage { get; set; }
+    [Inject] ILocalStorageService _localStorage { get; set; } = default!;
     private ESPNScores? _scores = null;
     private List<NFLSpreads>? _odds = null;
     private List<string> _picks = new();
@@ -24,6 +25,7 @@ public partial class Picks : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        _db = _dbContextFactory.CreateDbContext();
         _scores = await _espn.GetScores();
         _odds = _db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
         var usrId = await _loginHelper.GetUserDetails();
@@ -33,7 +35,7 @@ public partial class Picks : ComponentBase
             && x.NFLWeek == _scores.Week.Number);
             if (picks.Any())
             {
-                _picks = picks.Select(x => x.Team).ToList();
+                _picks = await picks.Select(x => x.Team).ToListAsync();
                 _locked = true;
             }
         }

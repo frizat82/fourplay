@@ -5,18 +5,15 @@ using fourplay.Models;
 
 namespace fourplay.Components.Pages;
 [Authorize]
-public partial class ManageUserDialog
+public partial class AddUserDialog
 {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-    [Parameter] public List<string> Users { get; set; }
-    [Parameter] public List<string> Leagues { get; set; }
     private string _user;
-    private string _league;
     private void Cancel() => MudDialog.Cancel();
-    public bool IsEnabled() => !(_league is not null && _user is not null);
+    public bool IsEnabled() => !(_user is not null);
 
     private void AddMapping()
     {
-        MudDialog.Close(DialogResult.Ok(new MapUserModel() { Email = _user, LeagueName = _league }));
+        MudDialog.Close(DialogResult.Ok(new MapUserModel() { Email = _user }));
     }
 }

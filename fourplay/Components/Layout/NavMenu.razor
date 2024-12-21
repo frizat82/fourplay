@@ -9,15 +9,19 @@
 <MudNavMenu>
     <AuthorizeView>
         <Authorized>
-            <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-            <MudNavLink Href="/leagues" Match="NavLinkMatch.Prefix">Leagues</MudNavLink>
-            <MudNavLink Href="/picks" Match="NavLinkMatch.Prefix">Picks</MudNavLink>
-            <MudNavLink Href="/scores" Match="NavLinkMatch.Prefix">Scores</MudNavLink>
+            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
+            <MudNavLink Href="/leagues" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Groups">Leagues
+            </MudNavLink>
+            <MudNavLink Href="/picks" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AddToPhotos">Picks
+            </MudNavLink>
+            <MudNavLink Href="/scores" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Scoreboard">Scores
+            </MudNavLink>
+            <MudNavLink Href="/leaderboard" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Leaderboard">
+                Leaderboard</MudNavLink>
             <MudNavGroup Title="Settings" Expanded="true">
                 <MudNavLink Href="Account/Manage" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">
                     @context.User.Identity?.Name</MudNavLink>
-                <MudNavLink Href="/logout" Match="NavLinkMatch.Prefix"
-                    Icon="@Icons.Material.Filled.Logout">
+                <MudNavLink Href="/logout" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Logout">
                     Logout</MudNavLink>
             </MudNavGroup>
         </Authorized>
@@ -27,8 +31,9 @@
         </NotAuthorized>
     </AuthorizeView>
     <AuthorizeView Roles="Administrator">
-        <MudNavLink Href="/userManagement" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SupervisedUserCircle">User Management
-            </MudNavLink>
+        <MudNavLink Href="/userManagement" Match="NavLinkMatch.Prefix"
+            Icon="@Icons.Material.Filled.SupervisedUserCircle">User Management
+        </MudNavLink>
     </AuthorizeView>
 </MudNavMenu>
 

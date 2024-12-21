@@ -1,0 +1,9 @@
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="_user" Label="User" Variant="Variant.Outlined"></MudTextField>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="@IsEnabled()" Color="Color.Error" OnClick="AddMapping">Add Mapping</MudButton>
+    </DialogActions>
+</MudDialog>

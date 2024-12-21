@@ -3,25 +3,26 @@ using fourplay.Data;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using NodaTime;
+using Microsoft.EntityFrameworkCore;
+using Blazored.LocalStorage;
 
 namespace fourplay.Components.Pages;
 [Authorize]
 public partial class Scores : ComponentBase
 {
-    [Inject]
-    private IESPNApiService? _espn { get; set; } = default!;
+    [Inject] private IESPNApiService? _espn { get; set; } = default!;
     [Inject]
     private ApplicationDbContext? _db { get; set; } = default!;
     private ESPNScores? _scores = null;
     private System.Timers.Timer _timer = new();
     private List<NFLSpreads>? _odds = null;
-    [Inject] Blazored.LocalStorage.ILocalStorageService _localStorage { get; set; }
+    [Inject] ILocalStorageService _localStorage { get; set; } = default!;
     private int _leagueId = 0;
-    [Inject] IDialogService _dialogService { get; set; }
+    [Inject] IDialogService _dialogService { get; set; } = default!;
     protected override async Task OnInitializedAsync()
     {
         _scores = await _espn.GetScores();
-        _odds = _db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
+        _odds = await _db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToListAsync();
         await RunTimer();
         _timer.Elapsed += TimeElapsed;
         _timer.Interval = TimeSpan.FromMinutes(5).TotalMilliseconds;
@@ -63,25 +64,23 @@ public partial class Scores : ComponentBase
         return picks.Count();
     }
     private void TimeElapsed(object? sender, System.Timers.ElapsedEventArgs e) => RunTimer();
-    private Task ShowDialog(string teamAbbr, string logo)
+    private async Task ShowDialog(string teamAbbr, string logo)
     {
-        var usrNames = _db?.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
-        && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr).Select(y => y.User.NormalizedUserName).ToList();
+        var usrNames = await _db?.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
+        && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr).Select(y => y.User.NormalizedUserName).ToListAsync();
         if (usrNames.Count > 0)
         {
             var parameters = new DialogParameters<PickDialog> {
             { x => x.UserNames, usrNames },
             { x => x.TeamAbbr, teamAbbr},
-            {x => x.Logo, logo}
-        }; return _dialogService.ShowAsync<PickDialog>("User Picks", parameters, new DialogOptions
-        {
-            CloseOnEscapeKey = true,
-            NoHeader = true,
-            CloseButton = false
-        });
+            {x => x.Logo, logo}};
+            await _dialogService.ShowAsync<PickDialog>("User Picks", parameters, new DialogOptions
+            {
+                CloseOnEscapeKey = true,
+                NoHeader = true,
+                CloseButton = false
+            });
         }
-
-        return Task.CompletedTask;
     }
     protected async Task RunTimer()
     {

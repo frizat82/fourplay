@@ -46,6 +46,7 @@ builder.Services.AddAuthentication(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 Log.Information("DB {ConnectionString}", connectionString);
+/*
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     //Log.Information("DB {ConnectionString}", connectionString);
@@ -53,7 +54,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString);
     options.EnableSensitiveDataLogging(true);
     options.EnableDetailedErrors(true);
-}, ServiceLifetime.Scoped);
+});
+*/
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+{
+    //Log.Information("DB {ConnectionString}", connectionString);
+    //options.UseSqlite(connectionString);
+    options.UseNpgsql(connectionString);
+    options.EnableSensitiveDataLogging(true);
+    options.EnableDetailedErrors(true);
+});
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -102,7 +112,8 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
     // Only if we use GOOGLE FALLBACK
     googleOptions.Events.OnTicketReceived = async context =>
     {
-        var validEmails = new[] { "markmjohnson@gmail.com", "jpmulcahy@gmail.com" };
+        var validEmails = new[] { "markmjohnson@gmail.com", "jpmulcahy@gmail.com", "patutroska@gmail.com",
+        "brithepartsguy@gmail.com", "bbock72@gmail.com" };
         async Task AccessDenied(string email)
         {
             Log.Warning("Logging in {User} Denied", email);
@@ -145,11 +156,13 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
         return Task.CompletedTask;
     };*/
 });
-
+/*
 builder.Services.AddAuthorization(options =>
       options.AddPolicy("User",
       policy => policy.RequireClaim(ClaimTypes.Email, new[] { "markmjohnson@gmail.com", "jpmulcahy@gmail.com" })));
 
+*/
+builder.Services.AddAuthorization();
 /*
 // If this is done we need to add ROLE support above
 builder.Services.AddAuthorization(options =>
