@@ -4,64 +4,73 @@
 <MudContainer>
     <MudGrid>
         <MudSpacer />
-        <MudPaper Class="border-solid border-2 mud-border-primary pa-4" Elevation="3">
-            <MudItem xs="12">
+        <MudItem xs="12" lg="4">
+            <MudPaper Class="border-solid border-2 mud-border-primary ma-4 pa-4" Elevation="3">
                 <MudText Align="Align.Center" Typo="Typo.h3">Assign a User to a League</MudText>
-            </MudItem>
-            <MudDataGrid Loading="@_loadingMappings" T="LeagueUserMapping" ReadOnly="true" Items="@_userMapping"
-                EditMode="DataGridEditMode.Form" Bordered="true" Dense="true" EditTrigger="DataGridEditTrigger.Manual">
-                <Columns>
-                    <PropertyColumn Property="x => x.League.LeagueName" />
-                    <PropertyColumn Property="x => x.User" />
-                </Columns>
-            </MudDataGrid>
-            <MudItem xs="12">
-                <MudButton Variant="Variant.Filled" @onclick="AddMapping">Add User to a League</MudButton>
-            </MudItem>
-        </MudPaper>
+                <MudDataGrid Loading="@_loadingMappings" T="LeagueUserMapping" ReadOnly="true" Items="@_userMapping"
+                    EditMode="DataGridEditMode.Form" Bordered="true" Dense="true"
+                    EditTrigger="DataGridEditTrigger.Manual">
+                    <Columns>
+                        <PropertyColumn Property="x => x.League.LeagueName" />
+                        <PropertyColumn Property="x => x.User" />
+                    </Columns>
+                </MudDataGrid>
+                <MudSpacer />
+                <MudItem xs="12">
+                    <MudButton Variant="Variant.Filled" @onclick="AddMapping">Add User to a League</MudButton>
+                </MudItem>
+            </MudPaper>
 
+            <MudSpacer />
+            <MudPaper Class="border-solid border-2 mud-border-primary ma-4 pa-4" Elevation="3">
+                <MudItem xs="12">
+                    <MudText Align="Align.Center" Typo="Typo.h3">Setup a New League</MudText>
+                </MudItem>
+                <MudDataGrid Loading="@_loadingJuice" T="LeagueJuiceMapping" ReadOnly="true"
+                    Items="@_leagueJuiceMapping" EditMode="DataGridEditMode.Form" Bordered="true" Dense="true"
+                    EditTrigger="DataGridEditTrigger.Manual">
+                    <Columns>
+                        <PropertyColumn Property="x => x.League.LeagueName" />
+                        <PropertyColumn Property="x => x.Juice" />
+                    </Columns>
+                </MudDataGrid>
+                <MudSpacer />
+                <MudItem xs="12">
+                    <MudButton Variant="Variant.Filled" @onclick="AddLeague">Add League</MudButton>
+                </MudItem>
+            </MudPaper>
+        </MudItem>
 
         <MudSpacer />
-        <MudPaper Class="border-solid border-2 mud-border-primary pa-4" Elevation="3">
-            <MudItem xs="12">
-                <MudText Align="Align.Center" Typo="Typo.h3">Setup a New League</MudText>
-            </MudItem>
-            <MudDataGrid Loading="@_loadingJuice" T="LeagueJuiceMapping" ReadOnly="true" Items="@_leagueJuiceMapping"
-                EditMode="DataGridEditMode.Form" Bordered="true" Dense="true" EditTrigger="DataGridEditTrigger.Manual">
-                <Columns>
-                    <PropertyColumn Property="x => x.League.LeagueName" />
-                    <PropertyColumn Property="x => x.Juice" />
-                </Columns>
-            </MudDataGrid>
-            <MudItem xs="12">
-                <MudButton Variant="Variant.Filled" @onclick="AddLeague">Add League</MudButton>
-            </MudItem>
-        </MudPaper>
-
-        <MudSpacer />
-        <MudPaper Class="border-solid border-2 mud-border-primary pa-4" Elevation="3">
-            <MudItem xs="12">
+        <MudItem xs="12" lg="4">
+            <MudPaper Class="border-solid border-2 mud-border-primary ma-4 pa-4" Elevation="3">
                 <MudText Align="Align.Center" Typo="Typo.h3">Add User</MudText>
-            </MudItem>
-            <MudDataGrid Loading="@_loadingUsers" T="LeagueUsers" ReadOnly="true" Items="@_leagueUsers"
-                EditMode="DataGridEditMode.Form" Bordered="true" Dense="true" EditTrigger="DataGridEditTrigger.Manual">
-                <Columns>
-                    <PropertyColumn Property="x => x.GoogleEmail" />
-                </Columns>
-            </MudDataGrid>
-            <MudItem xs="12">
-                <MudButton Variant="Variant.Filled" @onclick="AddUser">Add User</MudButton>
-            </MudItem>
-        </MudPaper>
-        <MudSpacer />
-        <MudPaper Class="border-solid border-2 mud-border-primary pa-4" Elevation="3">
-            <MudItem xs="12">
-                <MudText Align="Align.Center" Typo="Typo.h3">Admin Tasks</MudText>
-            </MudItem>
-            <MudItem xs="12">
-                <MudButton Variant="Variant.Filled" @onclick="RunSpreads">Run Spreads Job</MudButton>
-                <MudButton Variant="Variant.Filled" @onclick="RunUserJob">Run User Manager Job</MudButton>
-            </MudItem>
-        </MudPaper>
+
+                <MudDataGrid Loading="@_loadingUsers" T="LeagueUsers" ReadOnly="true" Items="@_leagueUsers"
+                    EditMode="DataGridEditMode.Form" Bordered="true" Dense="true"
+                    EditTrigger="DataGridEditTrigger.Manual">
+                    <Columns>
+                        <PropertyColumn Property="x => x.GoogleEmail" />
+                    </Columns>
+                </MudDataGrid>
+                <MudSpacer />
+                <MudItem xs="12">
+                    <MudButton Variant="Variant.Filled" @onclick="AddUser">Add User</MudButton>
+                </MudItem>
+            </MudPaper>
+
+            <MudSpacer />
+            <MudPaper Class="border-solid border-2 mud-border-primary ma-4 pa-4" Elevation="3">
+                <MudItem xs="12">
+                    <MudText Align="Align.Center" Typo="Typo.h3">Admin Tasks</MudText>
+                </MudItem>
+                <MudSpacer />
+                <MudItem xs="12">
+                    <MudButton Variant="Variant.Filled" @onclick="RunSpreads">Run Spreads Job</MudButton>
+                    <MudButton Variant="Variant.Filled" @onclick="RunUserJob">Run User Manager Job</MudButton>
+                </MudItem>
+            </MudPaper>
+        </MudItem>
     </MudGrid>
+
 </MudContainer>
