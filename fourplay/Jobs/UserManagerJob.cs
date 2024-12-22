@@ -20,6 +20,7 @@ public class UserManagerJob : IJob
     }
     public async Task Execute(IJobExecutionContext context)
     {
+        Log.Information("Executing UserManagerJob");
         await CreateRolesAndAdminUser();
     }
     internal async Task CreateRolesAndAdminUser()
@@ -66,6 +67,7 @@ public class UserManagerJob : IJob
         if (!roleExists)
         {
             var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
+            Log.Information("New Role {@Identity}", result);
         }
     }
 

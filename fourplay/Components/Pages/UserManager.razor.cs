@@ -30,6 +30,7 @@ public partial class UserManager : ComponentBase
     {
         _db = _dbContextFactory.CreateDbContext();
         _users = await _db!.Users.ToListAsync();
+        //Log.Information("{@Users}", _users);
         _leagueUsers = await _db!.LeagueUsers.ToListAsync();
         _loadingUsers = false;
         _userMapping = await _db.LeagueUserMapping.ToListAsync();
@@ -122,5 +123,13 @@ public partial class UserManager : ComponentBase
         await scheduler.TriggerJob(new JobKey("NFL Spreads"));
         Log.Information("Started Spread Job");
         Snackbar.Add("Started Spread Job", Severity.Success);
+    }
+    public async Task RunUserJob()
+    {
+        // Create a scheduler
+        var scheduler = await _schedulerFactory.GetScheduler();
+        await scheduler.TriggerJob(new JobKey("User Manager"));
+        Log.Information("Started User Manager Job");
+        Snackbar.Add("Started User Manager Job", Severity.Success);
     }
 }
