@@ -185,7 +185,9 @@ builder.Services.AddQuartz(q =>
 {
     //q.UseMicrosoftDependencyInjectionJobFactory();
     // quickest way to create a job with single trigger is to use ScheduleJob
-    q.ScheduleJob<UserManagerJob>(trigger => trigger.WithIdentity("User Manager").WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
+    q.ScheduleJob<UserManagerJob>(trigger => trigger
+        .WithIdentity("User Manager")
+        .WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
     //q.ScheduleJob<StartupJob>(trigger => trigger.WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
     q.ScheduleJob<NFLSpreadJob>(trigger => trigger
         .WithIdentity("NFL Spreads")

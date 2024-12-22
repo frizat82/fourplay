@@ -52,6 +52,8 @@ public class UserManagerJob : IJob
     {
         var user = new LeagueUsers() { GoogleEmail = userEmail };
         await _db.LeagueUsers.AddAsync(user);
+        await _db.SaveChangesAsync();
+        Log.Information("Base user created {@Identity}", user);
     }
 
     /// <summary>

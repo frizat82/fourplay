@@ -12,7 +12,7 @@ public class StartupJob : IJob
     public async Task Execute(IJobExecutionContext context)
     {
         var scheduler = await _factory.GetScheduler();
-        await scheduler.TriggerJob(new JobKey("User MAnager"));
+        await scheduler.TriggerJob(new JobKey("User Manager"));
         await Task.Delay(TimeSpan.FromMinutes(1));
         await scheduler.TriggerJob(new JobKey("NFL Scores"));
         await Task.Delay(TimeSpan.FromMinutes(1));
