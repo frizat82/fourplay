@@ -13,7 +13,6 @@ public partial class Picks : ComponentBase
     [Inject] ISnackbar Snackbar { get; set; } = default!;
     [Inject] private IESPNApiService? _espn { get; set; } = default!;
     [Inject] private IDbContextFactory<ApplicationDbContext> _dbContextFactory { get; set; } = default!;
-    private ApplicationDbContext? _db { get; set; }
     [Inject]
     private ILoginHelper _loginHelper { get; set; } = default!;
     [Inject] ILocalStorageService _localStorage { get; set; } = default!;
@@ -25,13 +24,13 @@ public partial class Picks : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        _db = _dbContextFactory.CreateDbContext();
+        using var db = _dbContextFactory.CreateDbContext();
         _scores = await _espn.GetScores();
-        _odds = _db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
+        _odds = db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
         var usrId = await _loginHelper.GetUserDetails();
         if (usrId is not null)
         {
-            var picks = _db.NFLPicks.Where(x => x.UserId == usrId.Id && x.Season == _scores!.Season.Year
+            var picks = db.NFLPicks.Where(x => x.UserId == usrId.Id && x.Season == _scores!.Season.Year
             && x.NFLWeek == _scores.Week.Number);
             if (picks.Any())
             {
@@ -53,10 +52,11 @@ public partial class Picks : ComponentBase
     private async Task SubmitPicks()
     {
         Log.Information("Submitting Picks");
+        using var db = _dbContextFactory.CreateDbContext();
         var usrId = await _loginHelper.GetUserDetails();
         if (usrId is not null)
         {
-            await _db.NFLPicks.AddRangeAsync(_picks.Select(x => new NFLPicks()
+            await db.NFLPicks.AddRangeAsync(_picks.Select(x => new NFLPicks()
             {
                 LeagueId = _leagueId.Value,
                 NFLWeek = (int)_scores.Week.Number,
@@ -64,7 +64,7 @@ public partial class Picks : ComponentBase
                 Team = x,
                 UserId = usrId.Id
             }));
-            await _db.SaveChangesAsync();
+            await db.SaveChangesAsync();
             Snackbar.Add("Picks Added", Severity.Success);
             _locked = true;
             await InvokeAsync(StateHasChanged);
@@ -73,10 +73,12 @@ public partial class Picks : ComponentBase
 
     private double? GetSpread(string teamAbbr)
     {
+        //TODO: Add Caching
+        using var db = _dbContextFactory.CreateDbContext();
         if (_leagueId != 0)
         {
             var spread = _odds.FirstOrDefault(x => x.HomeTeam == teamAbbr);
-            var leagueSpread = _db.LeagueJuiceMapping.FirstOrDefault(x => x.Id == _leagueId && x.Season == _scores!.Season.Year);
+            var leagueSpread = db.LeagueJuiceMapping.FirstOrDefault(x => x.Id == _leagueId && x.Season == _scores!.Season.Year);
             if (leagueSpread is not null)
             {
                 if (spread is not null)

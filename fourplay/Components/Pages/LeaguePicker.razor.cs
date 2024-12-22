@@ -8,15 +8,13 @@ using MudBlazor;
 
 namespace fourplay.Components.Pages;
 [Authorize]
-public partial class LeaguePicker : ComponentBase, IDisposable
+public partial class LeaguePicker : ComponentBase
 {
     [Inject] private IDbContextFactory<ApplicationDbContext> _dbContextFactory { get; set; } = default!;
-    private ApplicationDbContext? _db { get; set; }
-    [Inject] ILoginHelper _loginHelper { get; set; }
+    [Inject] ILoginHelper _loginHelper { get; set; } = default!;
     private List<LeagueInfo> _leagues { get; set; } = new();
     private int _selectedValue;
     [Inject] ILocalStorageService _localStorage { get; set; } = default!;
-    public void Dispose() => _db?.Dispose();
     private void OnSelectedValuesChanged(int value)
     {
         if (value == _selectedValue)
@@ -33,15 +31,16 @@ public partial class LeaguePicker : ComponentBase, IDisposable
                 _selectedValue = leagueId;
             await InvokeAsync(StateHasChanged);
         }
+
     }
     protected override async Task OnInitializedAsync()
     {
-        _db = _dbContextFactory.CreateDbContext();
+        using var db = _dbContextFactory.CreateDbContext();
         var usrId = await _loginHelper.GetUserDetails();
         if (usrId is not null)
         {
-            var leagueMapping = _db.LeagueUserMapping.Where(x => x.UserId == usrId.Id);
-            _leagues = await _db.LeagueInfo.Where(x => leagueMapping.Select(x => x.LeagueId).Contains(x.Id)).ToListAsync();
+            var leagueMapping = await db.LeagueUserMapping.Where(x => x.UserId == usrId.Id).ToListAsync();
+            _leagues = await db.LeagueInfo.Where(x => leagueMapping.Select(x => x.LeagueId).Contains(x.Id)).ToListAsync();
         }
     }
 

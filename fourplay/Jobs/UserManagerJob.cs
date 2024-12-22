@@ -1,7 +1,10 @@
+using System.Diagnostics;
 using fourplay.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Serilog;
+using Bogus;
 namespace fourplay.Jobs;
 [DisallowConcurrentExecution]
 public class UserManagerJob : IJob
@@ -34,6 +37,12 @@ public class UserManagerJob : IJob
         var adminUserEmail = "markmjohnson@gmail.com";
         await CreateBaseUser(adminUserEmail);
         await AddUserToRole(adminUserEmail, adminRoleName);
+        /*
+        if (Debugger.IsAttached)
+        {
+            await PopulateDatabaseWithRandomData();
+        }
+        */
     }
     /// <summary>
     /// Create base user
@@ -84,5 +93,45 @@ public class UserManagerJob : IJob
             Log.Information("User Added To Role {@Identity}", newUserRole);
         }
     }
+    /*
+    internal async Task PopulateDatabaseWithRandomData()
+    {
+        var faker = new Faker();
 
+        // Add random users
+        var currentUsers = await _db.LeagueUsers.ToListAsync();
+        if (currentUsers.Count < 10)
+        {
+            for (int i = 0; i < 10 - urrentUsers.Count; i++)
+            {
+                var user = new LeagueUsers
+                {
+                    GoogleEmail = faker.Internet.Email()
+                };
+                await _db.LeagueUsers.AddAsync(user);
+            }
+
+        }
+        await _db.SaveChangesAsync();
+
+        // Add random scores
+        var users = await _db.LeagueUsers.ToListAsync();
+
+
+        await _db.SaveChangesAsync();
+
+        // Add random spreads
+        foreach (var gameId in games)
+        {
+            var spread = new NFLSpreads
+            {
+                GameId = gameId,
+                Spread = faker.Random.Double(-10, 10)
+            };
+            await _db.NFLSpreads.AddAsync(spread);
+        }
+
+        await _db.SaveChangesAsync();
+    }
+*/
 }

@@ -22,15 +22,21 @@ public partial class UserManager : ComponentBase
     private List<LeagueJuiceMapping> _leagueJuiceMapping { get; set; } = new();
     private List<LeagueUsers> _leagueUsers { get; set; } = new();
     [Inject] private ISchedulerFactory _schedulerFactory { get; set; } = default!;
+    private bool _loadingUsers = true;
+    private bool _loadingMappings = true;
+    private bool _loadingJuice = true;
 
     protected override async Task OnInitializedAsync()
     {
         _db = _dbContextFactory.CreateDbContext();
         _users = await _db!.Users.ToListAsync();
         _leagueUsers = await _db!.LeagueUsers.ToListAsync();
+        _loadingUsers = false;
         _userMapping = await _db.LeagueUserMapping.ToListAsync();
+        _loadingMappings = false;
         _leagueInfo = await _db.LeagueInfo.ToListAsync();
         _leagueJuiceMapping = await _db.LeagueJuiceMapping.ToListAsync();
+        _loadingJuice = false;
     }
     public async Task AddUser()
     {
