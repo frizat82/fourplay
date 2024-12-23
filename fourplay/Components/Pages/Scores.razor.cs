@@ -5,14 +5,15 @@ using MudBlazor;
 using NodaTime;
 using Microsoft.EntityFrameworkCore;
 using Blazored.LocalStorage;
+using System;
 
 namespace fourplay.Components.Pages;
 [Authorize]
-public partial class Scores : ComponentBase
+public partial class Scores : ComponentBase, IDisposable
 {
     [Inject] private IESPNApiService? _espn { get; set; } = default!;
-    [Inject]
-    private ApplicationDbContext? _db { get; set; } = default!;
+    [Inject] private ApplicationDbContext? _db { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
     private ESPNScores? _scores = null;
     private System.Timers.Timer _timer = new();
     private List<NFLSpreads>? _odds = null;
@@ -34,8 +35,10 @@ public partial class Scores : ComponentBase
         if (firstRender)
         {
             var leagueId = await _localStorage.GetItemAsync<int>("leagueId");
-            if (leagueId > 0)
-                _leagueId = leagueId;
+            if (leagueId == 0)
+                Navigation.NavigateTo("/leagues");
+            _leagueId = leagueId;
+            await OnInitializedAsync();
             await InvokeAsync(StateHasChanged);
         }
     }
@@ -98,7 +101,7 @@ public partial class Scores : ComponentBase
     {
         if (disposing)
         {
-            _timer.Dispose();
+            _timer?.Dispose();
         }
     }
 

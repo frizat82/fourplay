@@ -24,6 +24,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         //modelBuilder.AddQuartz(builder => builder.UseSqlite());
         modelBuilder.AddQuartz(builder => builder.UsePostgreSql());
 
+        modelBuilder.Entity<LeagueUsers>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(x => new { x.GoogleEmail }).IsUnique(true);
+
+            });
         modelBuilder.Entity<LeagueInfo>(entity =>
         {
             entity.HasKey(e => e.Id);

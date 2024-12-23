@@ -4,9 +4,14 @@
             <MudList T="string">
         @foreach (var user in @UserNames)
         {
-            <MudListItem>
-                @user
-            </MudListItem>
+                <MudListItem Value="@user" Icon="@Icons.Material.Filled.Inbox">
+                                <AvatarContent>
+                                    <MudAvatar Color="Color.Tertiary">@user.First()</MudAvatar>
+                                </AvatarContent>
+                                <ChildContent>
+                                    @user
+                                </ChildContent>
+                            </MudListItem>
         }
             </MudList>
     </DialogContent>

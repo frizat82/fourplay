@@ -12,9 +12,10 @@ public partial class Picks : ComponentBase
 {
     [Inject] ISnackbar Snackbar { get; set; } = default!;
     [Inject] private IESPNApiService? _espn { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
     [Inject] private IDbContextFactory<ApplicationDbContext> _dbContextFactory { get; set; } = default!;
-    [Inject]
-    private ILoginHelper _loginHelper { get; set; } = default!;
+    [Inject] private ILoginHelper _loginHelper { get; set; } = default!;
     [Inject] ILocalStorageService _localStorage { get; set; } = default!;
     private ESPNScores? _scores = null;
     private List<NFLSpreads>? _odds = null;
@@ -44,8 +45,10 @@ public partial class Picks : ComponentBase
         if (firstRender)
         {
             var leagueId = await _localStorage.GetItemAsync<int>("leagueId");
-            if (leagueId > 0)
-                _leagueId = leagueId;
+            if (leagueId == 0)
+                Navigation.NavigateTo("/leagues");
+            _leagueId = leagueId;
+            await OnInitializedAsync();
             await InvokeAsync(StateHasChanged);
         }
     }

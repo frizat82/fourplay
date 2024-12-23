@@ -14,33 +14,42 @@ public partial class Leaderboard : ComponentBase
     [Inject] private ApplicationDbContext? _db { get; set; } = default!;
     [Inject] ILocalStorageService _localStorage { get; set; } = default!;
     [Inject] private IESPNApiService? _espn { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
     private int _leagueId;
     private DataTable _dataTable = new();
     private bool _loading = true;
     protected override async Task OnInitializedAsync()
     {
+        _loading = true;
+        Log.Information("Loading Scoreboard {LeagueId}", _leagueId);
         try
         {
-            _loading = true;
             var scores = await _espn!.GetScores();
             if (scores is null)
                 return;
+
+            var allUsers = await _db!.LeagueUserMapping.ToListAsync();
+            Log.Information("{@AllUsers}", allUsers);
 
             var leagueUsers = await _db!.LeagueUserMapping
                 .Where(lum => lum.LeagueId == _leagueId)
                 .Select(lum => lum.UserId)
                 .ToListAsync();
 
+            Log.Information("{@LeagueUsers}", leagueUsers);
             var userScores = await _db.NFLScores
                 .Where(score => score.Season == scores.Season.Year)
                 .ToListAsync();
 
             var spreads = await _db.NFLSpreads.Where(spread => spread.Season == scores.Season.Year).ToListAsync();
 
+            //Log.Information("{@Spreads}", spreads);
             var leagueInfo = await _db.LeagueJuiceMapping
                 .Where(li => li.LeagueId == _leagueId)
                 .FirstOrDefaultAsync();
 
+            Log.Information("{@LeagueInfo}", leagueInfo);
             _dataTable = new DataTable();
             _dataTable.Columns.Add("User");
 
@@ -80,6 +89,7 @@ public partial class Leaderboard : ComponentBase
 
                     row[$"Week {week}"] = allPicksBeatSpread ? "Yes" : "No";
                 }
+                Log.Information("{@Row}", row);
                 _dataTable.Rows.Add(row);
             }
         }
@@ -96,8 +106,10 @@ public partial class Leaderboard : ComponentBase
         if (firstRender)
         {
             var leagueId = await _localStorage.GetItemAsync<int>("leagueId");
-            if (leagueId > 0)
-                _leagueId = leagueId;
+            if (leagueId == 0)
+                Navigation.NavigateTo("/leagues");
+            _leagueId = leagueId;
+            await OnInitializedAsync();
             await InvokeAsync(StateHasChanged);
         }
     }

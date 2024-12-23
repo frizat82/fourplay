@@ -43,23 +43,13 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-                       throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration.GetConnectionString("AZURE_POSTGRESQL_CONNECTIONSTRING") ??
+                       throw new InvalidOperationException("Connection string 'AZURE_POSTGRESQL_CONNECTIONSTRING' not found.");
 Log.Information("DB {ConnectionString}", connectionString);
-/*
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    //Log.Information("DB {ConnectionString}", connectionString);
-    //options.UseSqlite(connectionString);
-    options.UseNpgsql(connectionString);
-    options.EnableSensitiveDataLogging(true);
-    options.EnableDetailedErrors(true);
-});
-*/
+
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
     //Log.Information("DB {ConnectionString}", connectionString);
-    //options.UseSqlite(connectionString);
     options.UseNpgsql(connectionString);
     options.EnableSensitiveDataLogging(true);
     options.EnableDetailedErrors(true);
@@ -103,10 +93,13 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions =>
     googleOptions.ClientId = builder.Configuration["Google:ClientId"];
     googleOptions.ClientSecret = builder.Configuration["Google:ClientSecret"];
     // Add Picture Support
+    googleOptions.Scope.Add("profile");
+    googleOptions.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
     googleOptions.Events.OnCreatingTicket = (context) =>
     {
         var picture = context.User.GetProperty("picture").GetString();
-        context.Identity?.AddClaim(new Claim("picture", picture));
+        if (picture is not null)
+            context.Identity?.AddClaim(new Claim("urn:google:picture", picture));
         return Task.CompletedTask;
     };
     // Only if we use GOOGLE FALLBACK
@@ -184,11 +177,10 @@ builder.Services.AddScoped<IJob, UserManagerJob>();
 builder.Services.AddQuartz(q =>
 {
     //q.UseMicrosoftDependencyInjectionJobFactory();
-    // quickest way to create a job with single trigger is to use ScheduleJob
     q.ScheduleJob<UserManagerJob>(trigger => trigger
         .WithIdentity("User Manager")
-        .WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
-    //q.ScheduleJob<StartupJob>(trigger => trigger.WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(1).WithRepeatCount(0)).StartNow());
+            .StartAt(DateBuilder.FutureDate(5, IntervalUnit.Minute))
+            ); // use DateBuilder to create a date in the future
     q.ScheduleJob<NFLSpreadJob>(trigger => trigger
         .WithIdentity("NFL Spreads")
         .WithCronSchedule("0 0 14 ? * THU", x => x.WithMisfireHandlingInstructionFireAndProceed()) // Fire at 10:00 AM every Thursday
@@ -198,17 +190,6 @@ builder.Services.AddQuartz(q =>
     .WithIdentity("NFL Scores")
     .WithCronSchedule("0 0 10 ? * THU", x => x.WithMisfireHandlingInstructionFireAndProceed()) // Fire at 10:00 AM every Thursday
 );
-    /*
-    // convert time zones using converter that can handle Windows/Linux differences
-    q.UseTimeZoneConverter();
-
-    // auto-interrupt long-running job
-    q.UseJobAutoInterrupt(options =>
-    {
-        // this is the default
-        options.DefaultMaxRunTime = TimeSpan.FromMinutes(5);
-    });
-    */
     q.UsePersistentStore(s =>
     {
         // Use for Postgres database
@@ -223,21 +204,6 @@ builder.Services.AddQuartz(q =>
         s.RetryInterval = TimeSpan.FromSeconds(15);
         s.UseNewtonsoftJsonSerializer();
     });
-    // example of persistent job store using JSON serializer as an example
-    /*
-    q.UsePersistentStore(s => {
-        // Use for SQLite database
-        s.UseSQLite(sqlLiteOptions => {
-            sqlLiteOptions.UseDriverDelegate<SQLiteDelegate>();
-            sqlLiteOptions.ConnectionString = connectionString;
-            sqlLiteOptions.TablePrefix = "QRTZ_";
-        });
-        s.PerformSchemaValidation = true; // default
-        s.UseProperties = true; // preferred, but not default
-        s.RetryInterval = TimeSpan.FromSeconds(15);
-        s.UseNewtonsoftJsonSerializer();
-    });
-*/
 });
 
 // Quartz.Extensions.Hosting allows you to fire background service that handles scheduler lifecycle
