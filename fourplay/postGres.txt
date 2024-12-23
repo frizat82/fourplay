@@ -1,0 +1,16 @@
+Server name
+fourplay-server
+Engine
+PostgreSQL - Flexible Server
+Compute tier and size
+Burstable Standard_B1ms
+Database name
+fourplay-database
+Region
+Canada Central
+Username
+bndfafamga
+Password
+ypkIsKqi0$ND3iTw
+User ID=root;Password=password;Host=10.0.1.5;Port=5432;Database=fourplay;Pooling=true;Min Pool Size=0;Max Pool Size=100;Connection Lifetime=0;
+User ID=root;Password=myPassword;Host=localhost;Port=5432;Database=myDataBase;Pooling=true;Min Pool Size=0;Max Pool Size=100;Connection Lifetime=0;
