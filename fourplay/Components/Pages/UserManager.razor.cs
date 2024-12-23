@@ -45,6 +45,8 @@ public partial class UserManager : ComponentBase
 
         var dialog = await DialogService.ShowAsync<AddUserDialog>("Add User", parameters);
         var result = await dialog.Result;
+        if (result is null)
+            return;
 
         if (!result.Canceled)
         {

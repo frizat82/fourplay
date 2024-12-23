@@ -7,7 +7,7 @@ namespace fourplay.Components.Pages;
 [Authorize]
 public partial class ManageLeagueDialog
 {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
     private string? _leagueName;
     private int? _juice;
     private int? _season;
@@ -16,6 +16,6 @@ public partial class ManageLeagueDialog
 
     private void AddMapping()
     {
-        MudDialog.Close(DialogResult.Ok(new CreateLeagueModel(){ LeagueName = _leagueName, Juice = _juice.Value, Season = _season.Value }));
+        MudDialog.Close(DialogResult.Ok(new CreateLeagueModel() { LeagueName = _leagueName!, Juice = _juice!.Value, Season = _season!.Value }));
     }
 }
