@@ -7,5 +7,6 @@ public class LeagueJuiceMapping {
     public int LeagueId { get; set; }
     public int Season { get; set; }
     public int Juice { get; set; }
+    public int WeeklyCost { get; set; }
     public DateTime DateCreated { get; set; }
 }

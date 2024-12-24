@@ -1,6 +1,19 @@
 ﻿@page "/leaderboard"
 @using System.Data
 
+
+<style>
+    .green-background {
+        background-color: green;
+        color: white;
+    }
+
+    .red-background {
+        background-color: red;
+        color: white;
+    }
+</style>
+
 <PageTitle>Leaderboard</PageTitle>
 <MudContainer>
     <MudGrid>
@@ -23,11 +36,19 @@
                 <RowTemplate>
                     @foreach (var column in _dataTable.Columns.Cast<DataColumn>())
                     {
-                        <MudTd>@context[column.ColumnName]</MudTd>
+                        var cellValue = context[column.ColumnName]?.ToString();
+                        if (cellValue == "True" || cellValue == "False")
+                        {
+                            var cellClass = cellValue == "True" ? "green-background" : "red-background";
+                            <MudTd Class="@cellClass">@cellValue</MudTd>
+                        }
+                        else
+                        {
+                            <MudTd>@cellValue</MudTd>
+                        }
                     }
                 </RowTemplate>
             </MudTable>
         </MudPaper>
-
     </MudGrid>
 </MudContainer>

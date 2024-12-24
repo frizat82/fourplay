@@ -14,7 +14,7 @@ public class LeaderboardService : ILeaderboardService {
         _dbContextFactory = dbFactory;
         _espn = espnService;
     }
-    public async Task<DataTable> InteralLeaderboard(int leagueId) {
+    public async Task<DataTable> InteralLeaderboard(int leagueId, long seasonYear) {
         var dataTable = new DataTable();
         using var db = _dbContextFactory.CreateDbContext();
         if (db == null) {
@@ -28,22 +28,19 @@ public class LeaderboardService : ILeaderboardService {
                 return dataTable;
             }
 
-            var scores = await _espn!.GetScores();
-            if (scores is null)
-                return dataTable;
             var allUsers = await db.LeagueUserMapping
                     .Include(lum => lum.User) // Ensure the User entity is included
                     .ToListAsync();
-            Log.Information("{@AllUsers}", allUsers);
+            //Log.Information("{@AllUsers}", allUsers);
 
             var leagueUsers = await db.LeagueUserMapping
                 .Where(lum => lum.LeagueId == leagueId)
                     .Include(lum => lum.User) // Ensure the User entity is included
                 .ToListAsync();
 
-            Log.Information("{@LeagueUsers}", leagueUsers);
+            //Log.Information("{@LeagueUsers}", leagueUsers);
             var userScores = await db.NFLScores
-                .Where(score => score.Season == scores.Season.Year)
+                .Where(score => score.Season == seasonYear)
                 .ToListAsync();
 
             if (userScores == null) {
@@ -51,7 +48,7 @@ public class LeaderboardService : ILeaderboardService {
                 return dataTable;
             }
 
-            var spreads = await db.NFLSpreads.Where(spread => spread.Season == scores.Season.Year).ToListAsync();
+            var spreads = await db.NFLSpreads.Where(spread => spread.Season == seasonYear).ToListAsync();
 
             //Log.Information("{@Spreads}", spreads);
             var leagueInfo = await db.LeagueJuiceMapping
@@ -64,10 +61,10 @@ public class LeaderboardService : ILeaderboardService {
                 return dataTable;
             }
 
-            Log.Information("{@LeagueInfo}", leagueInfo);
+            //Log.Information("{@LeagueInfo}", leagueInfo);
             dataTable = new DataTable();
             dataTable.Columns.Add("User");
-
+            dataTable.Columns.Add("Total");
             for (int week = 1; week <= 16; week++) {
                 dataTable.Columns.Add($"Week {week}");
             }
@@ -78,7 +75,7 @@ public class LeaderboardService : ILeaderboardService {
 
                 for (int week = 1; week <= 16; week++) {
                     var userPicks = await db.NFLPicks
-                        .Where(pick => pick.UserId == user.UserId && pick.Season == scores.Season.Year && pick.NFLWeek == week)
+                        .Where(pick => pick.UserId == user.UserId && pick.Season == seasonYear && pick.NFLWeek == week)
                         .ToListAsync();
 
                     bool allPicksBeatSpread = userPicks.All(pick => {
@@ -95,11 +92,13 @@ public class LeaderboardService : ILeaderboardService {
                             return (score.AwayTeamScore - score.HomeTeamScore) > adjustedSpread;
                         }
                     });
-                    row[$"Week {week}"] = allPicksBeatSpread ? "Yes" : "No";
+                    row[$"Week {week}"] = allPicksBeatSpread ? true : false;
                 }
                 //Log.Information("{@Row}", row);
                 dataTable.Rows.Add(row);
             }
+            // Calc Totals
+            dataTable = await CalculateUserTotals(dataTable, leagueId, seasonYear);
         }
         catch (Exception ex) {
             Log.Error(ex, "Error loading leaderboard");
@@ -108,14 +107,64 @@ public class LeaderboardService : ILeaderboardService {
         return dataTable;
     }
 
-    public async Task<DataTable> BuildLeaderboard(int leagueId) {
+    public async Task<DataTable> BuildLeaderboard(int leagueId, long seasonYear) {
         if (leagueId == 0) {
             Log.Error("League ID is not set.");
             return new DataTable();
         }
         return await _memory.GetOrCreateAsync($"leaderboard:{leagueId}", async (option) => {
             option.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
-            return await InteralLeaderboard(leagueId);
+            return await InteralLeaderboard(leagueId, seasonYear);
         });
+    }
+    public async Task<DataTable> CalculateUserTotals(DataTable dataTable, int leagueId, long seasonYear) {
+        using var db = _dbContextFactory.CreateDbContext();
+        var baseWeeklyCost = await db.LeagueJuiceMapping
+            .Where(ljm => ljm.LeagueId == leagueId && ljm.Season == seasonYear)
+            .Select(ljm => ljm.WeeklyCost)
+            .FirstOrDefaultAsync();
+
+        if (baseWeeklyCost == 0) {
+            Log.Error("Base weekly cost not found.");
+            return dataTable;
+        }
+        var userTotals = new Dictionary<string, decimal>();
+        decimal currentWeeklyCost = baseWeeklyCost;
+
+        for (int week = 1; week <= 16; week++) {
+            var weekColumn = $"Week {week}";
+            var winners = new List<string>();
+            bool allUsersWon = true;
+
+            foreach (DataRow row in dataTable.Rows) {
+                var userEmail = row["User"].ToString();
+                if (userEmail != null && row[weekColumn].ToString() == "True") {
+                    winners.Add(userEmail);
+                }
+                else {
+                    allUsersWon = false;
+                }
+            }
+
+            foreach (DataRow row in dataTable.Rows) {
+                var userEmail = row["User"].ToString();
+                if (userEmail != null && row[weekColumn].ToString() == "False") {
+                    if (!userTotals.ContainsKey(userEmail)) {
+                        userTotals[userEmail] = 0;
+                    }
+                    userTotals[userEmail] += winners.Count * currentWeeklyCost;
+                }
+            }
+
+            // Double the cost for the next week if all users won this week
+            if (allUsersWon) {
+                currentWeeklyCost *= 2;
+            }
+            else {
+                currentWeeklyCost = baseWeeklyCost;
+            }
+        }
+
+        return dataTable;
     }
 }

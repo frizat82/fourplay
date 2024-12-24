@@ -20,11 +20,11 @@ public partial class Leaderboard : ComponentBase {
     private async Task BuildScoreboard() {
         Log.Information("Loading Scoreboard {LeagueId}", _leagueId);
         _loading = true;
-        _dataTable = await _leaderboard.BuildLeaderboard(_leagueId);
+        var scores = await _espn!.GetScores();
+        _dataTable = await _leaderboard.BuildLeaderboard(_leagueId, scores!.Season.Year);
         _loading = false;
         await InvokeAsync(StateHasChanged);
     }
-
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender) {
             try {
