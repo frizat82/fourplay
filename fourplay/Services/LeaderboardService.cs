@@ -118,6 +118,7 @@ public class LeaderboardService : ILeaderboardService {
         });
     }
     public async Task<DataTable> CalculateUserTotals(DataTable dataTable, int leagueId, long seasonYear) {
+        Log.Information("Loading User Totals");
         using var db = _dbContextFactory.CreateDbContext();
         var baseWeeklyCost = await db.LeagueJuiceMapping
             .Where(ljm => ljm.LeagueId == leagueId && ljm.Season == seasonYear)

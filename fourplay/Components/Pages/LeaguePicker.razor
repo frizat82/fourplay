@@ -10,7 +10,7 @@
         <MudSpacer />
         <MudItem lg="6" xs="12">
             <MudPaper Class="border-solid border-2 mud-border-primary ma-4 pa-4" Elevation="3">
-                @if (_leagues.Count() == 0)
+                @if (!_loading && _leagues.Count() == 0)
                 {
 
                     <MudText Align="Align.Center" Typo="Typo.h3">Not Assigned to Any Leagues, Contact Admin</MudText>
