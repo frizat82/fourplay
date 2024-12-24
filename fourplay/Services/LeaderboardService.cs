@@ -130,7 +130,7 @@ public class LeaderboardService : ILeaderboardService {
             return dataTable;
         }
         var userTotals = new Dictionary<string, decimal>();
-        decimal currentWeeklyCost = baseWeeklyCost;
+        var currentWeeklyCost = baseWeeklyCost;
 
         for (int week = 1; week <= 16; week++) {
             var weekColumn = $"Week {week}";
@@ -144,28 +144,33 @@ public class LeaderboardService : ILeaderboardService {
                 }
                 else {
                     allUsersWon = false;
+                    Log.Information("User {User} did not win week {Week}", userEmail, week);
                 }
             }
-
-            foreach (DataRow row in dataTable.Rows) {
-                var userEmail = row["User"].ToString();
-                if (userEmail != null && row[weekColumn].ToString() == "False") {
-                    if (!userTotals.ContainsKey(userEmail)) {
-                        userTotals[userEmail] = 0;
+            if (!allUsersWon) {
+                foreach (DataRow row in dataTable.Rows) {
+                    var userEmail = row["User"].ToString();
+                    if (userEmail != null && row[weekColumn].ToString() == "False") {
+                        if (!userTotals.ContainsKey(userEmail)) {
+                            userTotals[userEmail] = 0;
+                        }
+                        Log.Information("User {User} lost week {Week} {Count} {Cost}", userEmail, week, winners.Count, currentWeeklyCost);
+                        userTotals[userEmail] += winners.Count * currentWeeklyCost;
                     }
-                    userTotals[userEmail] += winners.Count * currentWeeklyCost;
                 }
-            }
-
-            // Double the cost for the next week if all users won this week
-            if (allUsersWon) {
-                currentWeeklyCost *= 2;
-            }
-            else {
                 currentWeeklyCost = baseWeeklyCost;
             }
+            // Double the cost for the next week if all users won this week
+            else {
+                currentWeeklyCost += baseWeeklyCost;
+                Log.Information("All users won week {Week} Doubling {Juice}", week, currentWeeklyCost);
+            }
         }
-
+        foreach (DataRow row in dataTable.Rows) {
+            var userEmail = row["User"].ToString();
+            if (userTotals.ContainsKey(userEmail!))
+                row["Total"] = userTotals[userEmail!];
+        }
         return dataTable;
     }
 }

@@ -6,6 +6,7 @@ using NodaTime;
 using Microsoft.EntityFrameworkCore;
 using Blazored.LocalStorage;
 using System;
+using Serilog;
 
 namespace fourplay.Components.Pages;
 [Authorize]
@@ -29,22 +30,27 @@ public partial class Scores : ComponentBase, IDisposable {
         _timer.Enabled = true;
     }
     protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if (firstRender) {
+        if (firstRender || _leagueId == 0) {
             try {
                 var leagueId = await _localStorage.GetItemAsync<int>("leagueId");
+                Log.Information("LeagueId: {LeagueId}", leagueId);
                 if (leagueId == 0) {
+                    Log.Information("LeagueId is 0");
                     await _localStorage.RemoveItemAsync("leagueId");
                     Navigation.NavigateTo("/leagues");
                 }
                 _leagueId = leagueId;
                 await InvokeAsync(StateHasChanged);
             }
-            catch (Exception) {
+            catch (Exception ex) {
+                Log.Error(ex, "Error getting leagueId");
                 Navigation.NavigateTo("/leagues");
             }
         }
-        else if (_leagueId == 0)
+        else if (_leagueId == 0) {
+            Log.Information("_leagueId is 0");
             Navigation.NavigateTo("/leagues");
+        }
     }
     public string GetIcon(Competition competition, Competitor baseTeam, Competitor compareTeam) {
         var spread = GetSpread(baseTeam.Team.Abbreviation) ?? 0;

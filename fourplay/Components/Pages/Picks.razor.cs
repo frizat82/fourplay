@@ -37,22 +37,27 @@ public partial class Picks : ComponentBase {
         }
     }
     protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if (firstRender) {
+        if (firstRender || _leagueId == 0) {
             try {
                 var leagueId = await _localStorage.GetItemAsync<int>("leagueId");
+                Log.Information("LeagueId: {LeagueId}", leagueId);
                 if (leagueId == 0) {
+                    Log.Information("LeagueId is 0");
                     await _localStorage.RemoveItemAsync("leagueId");
                     Navigation.NavigateTo("/leagues");
                 }
                 _leagueId = leagueId;
                 await InvokeAsync(StateHasChanged);
             }
-            catch (Exception) {
+            catch (Exception ex) {
+                Log.Error(ex, "Error getting leagueId");
                 Navigation.NavigateTo("/leagues");
             }
         }
-        else if (_leagueId == 0)
+        else if (_leagueId == 0) {
+            Log.Information("_leagueId is 0");
             Navigation.NavigateTo("/leagues");
+        }
     }
     private async Task SubmitPicks() {
         Log.Information("Submitting Picks");

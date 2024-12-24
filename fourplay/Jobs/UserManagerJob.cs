@@ -7,30 +7,25 @@ using Serilog;
 using Bogus;
 namespace fourplay.Jobs;
 [DisallowConcurrentExecution]
-public class UserManagerJob : IJob
-{
+public class UserManagerJob : IJob {
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ApplicationDbContext _db;
-    public UserManagerJob(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, ApplicationDbContext db)
-    {
+    public UserManagerJob(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, ApplicationDbContext db) {
         _roleManager = roleManager;
         _userManager = userManager;
         _db = db;
     }
-    public async Task Execute(IJobExecutionContext context)
-    {
+    public async Task Execute(IJobExecutionContext context) {
         Log.Information("Executing UserManagerJob");
         await CreateRolesAndAdminUser();
     }
-    internal async Task CreateRolesAndAdminUser()
-    {
+    internal async Task CreateRolesAndAdminUser() {
         Log.Information("Adding roles and assigning Admins");
         const string adminRoleName = "Administrator";
         string[] roleNames = { adminRoleName, "User", "LeagueManager" };
 
-        foreach (var roleName in roleNames)
-        {
+        foreach (var roleName in roleNames) {
             await CreateRole(roleName);
         }
 
@@ -44,16 +39,26 @@ public class UserManagerJob : IJob
             await PopulateDatabaseWithRandomData();
         }
         */
+        Log.Information("Updatting Base 0 WeeklyCost");
+        await _db.LeagueJuiceMapping.Where(b => b.WeeklyCost == 0).ExecuteUpdateAsync(setters => setters.SetProperty(b => b.WeeklyCost, 5));
     }
     /// <summary>
     /// Create base user
     /// </summary>
-    internal async Task CreateBaseUser(string userEmail)
-    {
-        var user = new LeagueUsers() { GoogleEmail = userEmail };
-        await _db.LeagueUsers.AddAsync(user);
-        await _db.SaveChangesAsync();
-        Log.Information("Base user created {@Identity}", user);
+    internal async Task CreateBaseUser(string userEmail) {
+        try {
+            var user = new LeagueUsers() { GoogleEmail = userEmail };
+            await _db.LeagueUsers.AddAsync(user);
+            await _db.SaveChangesAsync();
+            Log.Information("Base user created {@Identity}", user);
+        }
+        catch (DbUpdateException dbe) {
+            // Ignore
+            // TODO we should check if user exists
+        }
+        catch (Exception ex) {
+            Log.Error(ex, "Uable to create base user {UserName}", userEmail);
+        }
     }
 
     /// <summary>
@@ -61,13 +66,11 @@ public class UserManagerJob : IJob
     /// </summary>
     /// <param name="serviceProvider">Service Provider</param>
     /// <param name="roleName">Role Name</param>
-    internal async Task CreateRole(string roleName)
-    {
+    internal async Task CreateRole(string roleName) {
 
         var roleExists = await _roleManager.RoleExistsAsync(roleName);
 
-        if (!roleExists)
-        {
+        if (!roleExists) {
             var result = await _roleManager.CreateAsync(new IdentityRole(roleName));
             Log.Information("New Role {@Identity}", result);
         }
@@ -82,17 +85,14 @@ public class UserManagerJob : IJob
     /// <param name="userPwd">User Password. Used to create the user if not exists.</param>
     /// <param name="roleName">Role Name</param>
     internal async Task AddUserToRole(string userEmail,
-        string roleName)
-    {
+        string roleName) {
 
         var checkAppUser = await _userManager.FindByEmailAsync(userEmail);
 
-        if (checkAppUser is null || checkAppUser.Id is null)
-        {
+        if (checkAppUser is null || checkAppUser.Id is null) {
             return;
         }
-        else
-        {
+        else {
             var newUserRole = await _userManager.AddToRoleAsync(checkAppUser, roleName);
             Log.Information("User Added To Role {@Identity}", newUserRole);
         }
