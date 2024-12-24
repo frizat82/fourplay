@@ -1,0 +1,20 @@
+<MudDialog>
+    <DialogContent>
+           <MudSelect Label="User Email" @bind-Value="_user">
+        @foreach (var user in @Users)
+        {
+          <MudSelectItem Value="@user">@user</MudSelectItem>
+        }
+            </MudSelect>
+            <MudSelect Label="League Name" @bind-Value="_league">
+        @foreach (var league in @Leagues)
+        {
+            <MudSelectItem Value="@league">@league</MudSelectItem>
+        }
+            </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="@IsEnabled()" Color="Color.Error" OnClick="AddMapping">Add Mapping</MudButton>
+    </DialogActions>
+</MudDialog>

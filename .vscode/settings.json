@@ -1,0 +1,5 @@
+{
+    "appService.preDeployTask": "publish-release",
+    "appService.deploySubpath": "fourplay/bin/Release/net8.0/publish",
+    "appService.defaultWebAppToDeploy": "/subscriptions/bf6cf41d-cba8-44b8-9e43-033cf77e3203/resourceGroups/resourceGroup/providers/Microsoft.Web/sites/fourplay"
+}
