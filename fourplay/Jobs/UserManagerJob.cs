@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Serilog;
 using Bogus;
+using Npgsql;
 namespace fourplay.Jobs;
 [DisallowConcurrentExecution]
 public class UserManagerJob : IJob {
@@ -56,6 +57,7 @@ public class UserManagerJob : IJob {
             // Ignore
             // TODO we should check if user exists
         }
+        catch (PostgresException pge) { }
         catch (Exception ex) {
             Log.Error(ex, "Uable to create base user {UserName}", userEmail);
         }

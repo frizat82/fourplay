@@ -4,8 +4,7 @@
 <MudContainer>
     <MudGrid>
         <MudItem xs="12">
-            <MudProgressLinear Color="Color.Primary" Indeterminate="true"
-                Class="@((@_scores != null ? "invisible" : ""))" />
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((!@_loading ? "invisible" : ""))" />
         </MudItem>
         @if (_scores is not null && _leagueId > 0)
         {

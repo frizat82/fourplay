@@ -24,31 +24,34 @@
         <MudItem xs="12">
             <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((!@_loading ? "invisible" : ""))" />
         </MudItem>
-        <MudPaper class="pa-3" Elevation="3">
-            <MudTable T="DataRow" Items="_dataTable.Rows.Cast<DataRow>()" Hover="true" Bordered="true" Striped="true"
-                ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info">
-                <HeaderContent>
-                    @foreach (DataColumn column in _dataTable.Columns)
-                    {
-                        <MudTh>@column.ColumnName</MudTh>
-                    }
-                </HeaderContent>
-                <RowTemplate>
-                    @foreach (var column in _dataTable.Columns.Cast<DataColumn>())
-                    {
-                        var cellValue = context[column.ColumnName]?.ToString();
-                        if (cellValue == "True" || cellValue == "False")
+        @if (_dataTable.Rows.Count > 0)
+        {
+            <MudPaper class="pa-3" Elevation="3">
+                <MudTable T="DataRow" Items="_dataTable.Rows.Cast<DataRow>()" Hover="true" Bordered="true" Striped="true"
+                    ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info">
+                    <HeaderContent>
+                        @foreach (DataColumn column in _dataTable.Columns)
                         {
-                            var cellClass = cellValue == "True" ? "green-background" : "red-background";
-                            <MudTd Class="@cellClass"></MudTd>
+                            <MudTh>@column.ColumnName</MudTh>
                         }
-                        else
+                    </HeaderContent>
+                    <RowTemplate>
+                        @foreach (var column in _dataTable.Columns.Cast<DataColumn>())
                         {
-                            <MudTd>@cellValue</MudTd>
+                            var cellValue = context[column.ColumnName]?.ToString();
+                            if (cellValue == "True" || cellValue == "False")
+                            {
+                                var cellClass = cellValue == "True" ? "green-background" : "red-background";
+                                <MudTd Class="@cellClass"></MudTd>
+                            }
+                            else
+                            {
+                                <MudTd>@cellValue</MudTd>
+                            }
                         }
-                    }
-                </RowTemplate>
-            </MudTable>
-        </MudPaper>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        }
     </MudGrid>
 </MudContainer>

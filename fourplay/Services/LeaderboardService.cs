@@ -78,21 +78,26 @@ public class LeaderboardService : ILeaderboardService {
                         .Where(pick => pick.UserId == user.UserId && pick.Season == seasonYear && pick.NFLWeek == week)
                         .ToListAsync();
 
-                    bool allPicksBeatSpread = userPicks.All(pick => {
-                        var score = userScores.FirstOrDefault(s => s.NFLWeek == week);
-                        var homeTeamSpread = spreads.FirstOrDefault(s => s.NFLWeek == week && s.HomeTeam == pick.Team);
-                        var awayTeamSpread = spreads.FirstOrDefault(s => s.NFLWeek == week && s.AwayTeam == pick.Team);
-                        if (score == null || homeTeamSpread == null || awayTeamSpread == null) return false;
-                        if (homeTeamSpread is not null) {
-                            var adjustedSpread = homeTeamSpread.HomeTeamSpread + leagueInfo!.Juice;
-                            return (score.HomeTeamScore - score.AwayTeamScore) > adjustedSpread;
-                        }
-                        else {
-                            var adjustedSpread = awayTeamSpread.AwayTeamSpread + leagueInfo!.Juice;
-                            return (score.AwayTeamScore - score.HomeTeamScore) > adjustedSpread;
-                        }
-                    });
-                    row[$"Week {week}"] = allPicksBeatSpread ? true : false;
+                    if (userPicks.Count < 4) {
+                        row[$"Week {week}"] = false;
+                    }
+                    else {
+                        bool allPicksBeatSpread = userPicks.All(pick => {
+                            var score = userScores.FirstOrDefault(s => s.NFLWeek == week);
+                            var homeTeamSpread = spreads.FirstOrDefault(s => s.NFLWeek == week && s.HomeTeam == pick.Team);
+                            var awayTeamSpread = spreads.FirstOrDefault(s => s.NFLWeek == week && s.AwayTeam == pick.Team);
+                            if (score == null || homeTeamSpread == null || awayTeamSpread == null) return false;
+                            if (homeTeamSpread is not null) {
+                                var adjustedSpread = homeTeamSpread.HomeTeamSpread + leagueInfo!.Juice;
+                                return (score.HomeTeamScore - score.AwayTeamScore) > adjustedSpread;
+                            }
+                            else {
+                                var adjustedSpread = awayTeamSpread.AwayTeamSpread + leagueInfo!.Juice;
+                                return (score.AwayTeamScore - score.HomeTeamScore) > adjustedSpread;
+                            }
+                        });
+                        row[$"Week {week}"] = allPicksBeatSpread ? true : false;
+                    }
                 }
                 //Log.Information("{@Row}", row);
                 dataTable.Rows.Add(row);
@@ -144,9 +149,14 @@ public class LeaderboardService : ILeaderboardService {
                 }
                 else {
                     allUsersWon = false;
-                    Log.Information("User {User} did not win week {Week}", userEmail, week);
+                    Log.Information("User {User} did not win {Week}", userEmail, week);
                 }
             }
+            // Nobody winning is the same thing as everyone losing
+            if (winners.Count == 0) {
+                allUsersWon = false;
+            }
+            // Fill in
             if (!allUsersWon) {
                 foreach (DataRow row in dataTable.Rows) {
                     var userEmail = row["User"].ToString();

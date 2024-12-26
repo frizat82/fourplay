@@ -20,7 +20,9 @@ public partial class Scores : ComponentBase, IDisposable {
     [Inject] ILocalStorageService _localStorage { get; set; } = default!;
     private int _leagueId = 0;
     [Inject] IDialogService _dialogService { get; set; } = default!;
+    private bool _loading = true;
     protected override async Task OnInitializedAsync() {
+        _loading = true;
         _scores = await _espn.GetScores();
         _odds = await _db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToListAsync();
         await RunTimer();
@@ -28,6 +30,7 @@ public partial class Scores : ComponentBase, IDisposable {
         _timer.Interval = TimeSpan.FromMinutes(5).TotalMilliseconds;
         _timer.AutoReset = true;
         _timer.Enabled = true;
+        _loading = false;
     }
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender || _leagueId == 0) {

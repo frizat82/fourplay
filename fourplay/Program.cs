@@ -12,12 +12,13 @@ using Quartz.Impl.AdoJobStore;
 using Microsoft.AspNetCore.Authentication;
 using Serilog;
 using fourplay.Jobs;
+using Serilog.Formatting.Compact;
 Environment.SetEnvironmentVariable("DOTNET_hostBuilder:reloadConfigOnChange", "false");
 var builder = WebApplication.CreateBuilder(args);
 
 // Serilog
 builder.Host.UseSerilog((context, services, configuration) => configuration
-    .WriteTo.Console()
+    .WriteTo.Console(new CompactJsonFormatter()).Enrich.FromLogContext()
     .MinimumLevel.Override("Quartz", Serilog.Events.LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
@@ -170,7 +171,8 @@ builder.Services.AddQuartz(q => {
             ); // use DateBuilder to create a date in the future
     q.ScheduleJob<NFLSpreadJob>(trigger => trigger
         .WithIdentity("NFL Spreads")
-        .WithCronSchedule("0 0 14 ? * THU", x => x.WithMisfireHandlingInstructionFireAndProceed()) // Fire at 10:00 AM every Thursday
+        .WithCronSchedule("0 0 10 24 12 ?", x => x.WithMisfireHandlingInstructionFireAndProceed()) // Fire at 10:00 AM every xmas eve
+        .WithCronSchedule("0 0 14 ? * THU", x => x.WithMisfireHandlingInstructionFireAndProceed()) // Fire at 2:00 PM every Thursday
 
     );
     q.ScheduleJob<NFLScoresJob>(trigger => trigger

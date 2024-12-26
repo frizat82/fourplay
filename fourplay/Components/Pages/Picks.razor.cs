@@ -20,9 +20,11 @@ public partial class Picks : ComponentBase {
     private List<NFLSpreads>? _odds = null;
     private List<string> _picks = new();
     private int _leagueId = 0;
+    private bool _loading = true;
     private bool _locked = false;
 
     protected override async Task OnInitializedAsync() {
+        _loading = true;
         using var db = _dbContextFactory.CreateDbContext();
         _scores = await _espn.GetScores();
         _odds = db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
@@ -35,6 +37,7 @@ public partial class Picks : ComponentBase {
                 _locked = true;
             }
         }
+        _loading = false;
     }
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender || _leagueId == 0) {
