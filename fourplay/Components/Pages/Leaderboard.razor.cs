@@ -16,7 +16,6 @@ public partial class Leaderboard : ComponentBase {
     private int _leagueId = 0;
     private DataTable _dataTable = new();
     private bool _loading = true;
-
     private async Task BuildScoreboard() {
         Log.Information("Loading Scoreboard {LeagueId}", _leagueId);
         _loading = true;
@@ -25,6 +24,12 @@ public partial class Leaderboard : ComponentBase {
         _loading = false;
         await InvokeAsync(StateHasChanged);
     }
+    public Func<DataRow, object> Sort => (DataRow row) => {
+        var value = row["Total"].ToString();
+        if (value is null || value == "")
+            return 0;
+        return Double.Parse(value);
+    };
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender || _leagueId == 0) {
             try {

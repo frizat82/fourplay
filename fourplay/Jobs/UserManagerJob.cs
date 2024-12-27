@@ -48,16 +48,14 @@ public class UserManagerJob : IJob {
     /// </summary>
     internal async Task CreateBaseUser(string userEmail) {
         try {
+            if (await _db.LeagueUsers.AnyAsync(x => x.GoogleEmail == userEmail)) {
+                return;
+            }
             var user = new LeagueUsers() { GoogleEmail = userEmail };
             await _db.LeagueUsers.AddAsync(user);
             await _db.SaveChangesAsync();
             Log.Information("Base user created {@Identity}", user);
         }
-        catch (DbUpdateException dbe) {
-            // Ignore
-            // TODO we should check if user exists
-        }
-        catch (PostgresException pge) { }
         catch (Exception ex) {
             Log.Error(ex, "Uable to create base user {UserName}", userEmail);
         }

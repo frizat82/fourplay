@@ -63,9 +63,9 @@ public class LeaderboardService : ILeaderboardService {
 
             //Log.Information("{@LeagueInfo}", leagueInfo);
             dataTable = new DataTable();
-            dataTable.Columns.Add("User");
-            dataTable.Columns.Add("Total");
-            for (int week = 1; week <= 16; week++) {
+            dataTable.Columns.Add("User", typeof(string));
+            dataTable.Columns.Add("Total", typeof(double));
+            for (int week = 16; week >= 1; week--) {
                 dataTable.Columns.Add($"Week {week}");
             }
 
@@ -79,7 +79,7 @@ public class LeaderboardService : ILeaderboardService {
                         .ToListAsync();
 
                     if (userPicks.Count < 4) {
-                        row[$"Week {week}"] = false;
+                        row[$"Week {week}"] = "Invalid";
                     }
                     else {
                         bool allPicksBeatSpread = userPicks.All(pick => {
@@ -160,7 +160,7 @@ public class LeaderboardService : ILeaderboardService {
             if (!allUsersWon) {
                 foreach (DataRow row in dataTable.Rows) {
                     var userEmail = row["User"].ToString();
-                    if (userEmail != null && row[weekColumn].ToString() == "False") {
+                    if (userEmail != null && row[weekColumn].ToString() != "True") {
                         if (!userTotals.ContainsKey(userEmail)) {
                             userTotals[userEmail] = 0;
                         }
@@ -180,6 +180,8 @@ public class LeaderboardService : ILeaderboardService {
             var userEmail = row["User"].ToString();
             if (userTotals.ContainsKey(userEmail!))
                 row["Total"] = userTotals[userEmail!];
+            else
+                row["Total"] = 0;
         }
         return dataTable;
     }

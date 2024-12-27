@@ -1,7 +1,6 @@
 ﻿@page "/leaderboard"
 @using System.Data
 
-
 <style>
     .green-background {
         background-color: green;
@@ -12,10 +11,31 @@
         background-color: red;
         color: white;
     }
+
+    .table-cell {
+        padding: 8px;
+        border: 1px solid #ddd; /* Add border around each cell */
+    }
+
+    .table-header {
+        font-weight: bold;
+        text-align: center;
+        border: 1px solid #ddd; /* Add border around each header cell */
+    }
+
+    .center-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .full-width {
+        width: 100%;
+    }
 </style>
 
 <PageTitle>Leaderboard</PageTitle>
-<MudContainer>
+<MudContainer Class="full-width">
     <MudGrid>
         <MudItem xs="12">
             <MudText Align="Align.Center" Typo="Typo.h3">Standings</MudText>
@@ -24,34 +44,53 @@
         <MudItem xs="12">
             <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((!@_loading ? "invisible" : ""))" />
         </MudItem>
-        @if (_dataTable.Rows.Count > 0)
-        {
-            <MudPaper class="pa-3" Elevation="3">
-                <MudTable T="DataRow" Items="_dataTable.Rows.Cast<DataRow>()" Hover="true" Bordered="true" Striped="true"
-                    ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info">
-                    <HeaderContent>
-                        @foreach (DataColumn column in _dataTable.Columns)
-                        {
-                            <MudTh>@column.ColumnName</MudTh>
-                        }
-                    </HeaderContent>
-                    <RowTemplate>
-                        @foreach (var column in _dataTable.Columns.Cast<DataColumn>())
-                        {
-                            var cellValue = context[column.ColumnName]?.ToString();
-                            if (cellValue == "True" || cellValue == "False")
+        <MudItem xs="12">
+            @if (_dataTable.Rows.Count > 0)
+            {
+                <MudPaper class="pa-3 full-width" Elevation="3">
+                    <MudTable T="DataRow" Items="_dataTable.Rows.Cast<DataRow>()" Bordered="true" Striped="true" Dense="true"
+                        ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info">
+                        <HeaderContent>
+                            @foreach (DataColumn column in _dataTable.Columns)
                             {
-                                var cellClass = cellValue == "True" ? "green-background" : "red-background";
-                                <MudTd Class="@cellClass"></MudTd>
+                                @if (@column.ColumnName == "Total") {
+                                    <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="Sort">@column.ColumnName</MudTableSortLabel></MudTh>
+                                }
+                                else {
+                                <MudTh>@column.ColumnName</MudTh>
+                                }
                             }
-                            else
+                        </HeaderContent>
+                        <RowTemplate>
+                            @foreach (var column in _dataTable.Columns.Cast<DataColumn>())
                             {
-                                <MudTd>@cellValue</MudTd>
+                                var cellValue = context[column.ColumnName]?.ToString();
+                                if (cellValue == "True" || cellValue == "False" || cellValue == "Invalid")
+                                {
+                                    <MudTd>
+                                        @if (cellValue == "True")
+                                        {
+                                            <MudIcon Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle" />
+                                        }
+                                        else if (cellValue == "Invalid")
+                                        {
+                                            <MudIcon Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Warning" />
+                                        }
+                                        else
+                                        {
+                                            <MudIcon Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Cancel" />
+                                        }
+                                    </MudTd>
+                                }
+                                else
+                                {
+                                    <MudTd>@cellValue</MudTd>
+                                }
                             }
-                        }
-                    </RowTemplate>
-                </MudTable>
-            </MudPaper>
-        }
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
+            }
+        </MudItem>
     </MudGrid>
 </MudContainer>
