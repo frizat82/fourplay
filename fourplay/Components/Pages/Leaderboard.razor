@@ -1,42 +1,9 @@
 ﻿@page "/leaderboard"
 @using System.Data
 
-<style>
-    .green-background {
-        background-color: green;
-        color: white;
-    }
-
-    .red-background {
-        background-color: red;
-        color: white;
-    }
-
-    .table-cell {
-        padding: 8px;
-        border: 1px solid #ddd; /* Add border around each cell */
-    }
-
-    .table-header {
-        font-weight: bold;
-        text-align: center;
-        border: 1px solid #ddd; /* Add border around each header cell */
-    }
-
-    .center-content {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .full-width {
-        width: 100%;
-    }
-</style>
-
 <PageTitle>Leaderboard</PageTitle>
-<MudContainer Class="full-width">
-    <MudGrid>
+<MudContainer>
+    <MudGrid Justify="Justify.FlexStart">
         <MudItem xs="12">
             <MudText Align="Align.Center" Typo="Typo.h3">Standings</MudText>
         </MudItem>
