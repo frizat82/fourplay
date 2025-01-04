@@ -16,7 +16,7 @@
             {
                 <MudPaper class="pa-3 full-width" Elevation="3">
                     <MudTable T="DataRow" Items="_dataTable.Rows.Cast<DataRow>()" Bordered="true" Striped="true" Dense="true"
-                        ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info">
+                        ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info" Breakpoint="Breakpoint.None">
                         <HeaderContent>
                             @foreach (DataColumn column in _dataTable.Columns)
                             {

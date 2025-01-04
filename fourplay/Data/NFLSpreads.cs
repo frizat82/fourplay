@@ -9,6 +9,7 @@ public class NFLSpreads {
     public string AwayTeam { get; set; }
     public double HomeTeamSpread { get; set; }
     public double AwayTeamSpread { get; set; }
+    public double OverUnder { get; set; }
     public DateTime GameTime { get; set; }
     public DateTime DateCreated { get; set; }
 }

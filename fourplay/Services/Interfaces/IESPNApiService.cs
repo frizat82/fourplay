@@ -1,6 +1,5 @@
-public interface IESPNApiService
-{
-    public Task<ESPNScores?> GetWeekScores(int week, int year);
+public interface IESPNApiService {
+    public Task<ESPNScores?> GetWeekScores(int week, int year, bool postSeason = false);
     /*
     public Task<ESPNApiNFLSeasonDetail?> GetSeasonDetail(int year);
     */

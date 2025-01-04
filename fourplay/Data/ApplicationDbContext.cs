@@ -15,6 +15,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<NFLPicks> NFLPicks { get; set; }
     public DbSet<NFLSpreads> NFLSpreads { get; set; }
     public DbSet<NFLScores> NFLScores { get; set; }
+    public DbSet<NFLScores> NFLPostSeasonScores { get; set; }
     public DbSet<LeagueInfo> LeagueInfo { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);

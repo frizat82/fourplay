@@ -2,38 +2,30 @@ using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
-public class ESPNApiService : IESPNApiService
-{
+public class ESPNApiService : IESPNApiService {
     private readonly HttpClient _httpClient;
     private readonly IMemoryCache _memory;
 
-    public ESPNApiService(HttpClient httpClient, IMemoryCache memoryCache)
-    {
+    public ESPNApiService(HttpClient httpClient, IMemoryCache memoryCache) {
         _httpClient = httpClient;
         _memory = memoryCache;
         // Add any additional configuration for the HttpClient here
     }
-    public async Task<ESPNScores?> GetWeekScores(int week, int year)
-    {
-        return await _memory.GetOrCreateAsync<ESPNScores?>($"scores:{week}:{year}", async (option) =>
-        {
+    public async Task<ESPNScores?> GetWeekScores(int week, int year, bool postSeason = false) {
+        return await _memory.GetOrCreateAsync<ESPNScores?>($"scores:{week}:{year}", async (option) => {
             option.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-            try
-            {
+            try {
                 // Replace the endpoint with the actual ESPN API endpoint for NFL spreads
-                var response = await _httpClient.GetAsync($"/apis/site/v2/sports/football/nfl/scoreboard?dates={year}&seasontype=2&week={week}");
+                var response = await _httpClient.GetAsync($"/apis/site/v2/sports/football/nfl/scoreboard?dates={year}&seasontype={(postSeason ? 3 : 2)}&week={week}");
                 response.EnsureSuccessStatusCode();
-                if (response.IsSuccessStatusCode)
-                {
+                if (response.IsSuccessStatusCode) {
                     var responseString = await response.Content.ReadAsStringAsync();
-                    var options = new JsonSerializerOptions
-                    {
+                    var options = new JsonSerializerOptions {
                         PropertyNameCaseInsensitive = true
                     };
                     ESPNApiServiceJsonConverter.Settings.Converters.ToList().ForEach(x => options.Converters.Add(x));
                     // Deserialize the JSON response into a .NET object
-                    foreach (var map in Helpers.NFLTeamAbbrMapping)
-                    {
+                    foreach (var map in Helpers.NFLTeamAbbrMapping) {
                         if (responseString.Contains($"\"{map.Key}\""))
                             responseString = responseString.Replace($"\"{map.Key}\"", $"\"{map.Value}\"");
                     }
@@ -42,14 +34,12 @@ public class ESPNApiService : IESPNApiService
                     // Use the deserialized object as needed
                     return deserializedObject;
                 }
-                else
-                {
+                else {
                     Log.Error($"Error: {response.ReasonPhrase}");
                     return null;
                 }
             }
-            catch (HttpRequestException e)
-            {
+            catch (HttpRequestException e) {
                 Log.Error($"HTTP Request error: {e.Message}");
                 return null;
             }
@@ -133,28 +123,22 @@ public class ESPNApiService : IESPNApiService
             });
         }
     */
-    public async Task<ESPNScores?> GetScores()
-    {
-        return await _memory.GetOrCreateAsync<ESPNScores?>("scores", async (option) =>
-        {
+    public async Task<ESPNScores?> GetScores() {
+        return await _memory.GetOrCreateAsync<ESPNScores?>("scores", async (option) => {
             option.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-            try
-            {
+            try {
                 // Replace the endpoint with the actual ESPN API endpoint for NFL spreads
                 var response = await _httpClient.GetAsync("/apis/site/v2/sports/football/nfl/scoreboard");
                 response.EnsureSuccessStatusCode();
-                if (response.IsSuccessStatusCode)
-                {
+                if (response.IsSuccessStatusCode) {
                     var responseString = await response.Content.ReadAsStringAsync();
                     if (String.IsNullOrEmpty(responseString))
                         return new ESPNScores();
-                    var options = new JsonSerializerOptions
-                    {
+                    var options = new JsonSerializerOptions {
                         PropertyNameCaseInsensitive = true
                     };
                     ESPNApiServiceJsonConverter.Settings.Converters.ToList().ForEach(x => options.Converters.Add(x));
-                    foreach (var map in Helpers.NFLTeamAbbrMapping)
-                    {
+                    foreach (var map in Helpers.NFLTeamAbbrMapping) {
                         if (responseString.Contains($"\"{map.Key}\""))
                             responseString = responseString.Replace($"\"{map.Key}\"", $"\"{map.Value}\"");
                     }
@@ -165,14 +149,12 @@ public class ESPNApiService : IESPNApiService
                     Log.Error($"Deserialized object: {deserializedObject}");
                     return deserializedObject;
                 }
-                else
-                {
+                else {
                     Log.Error($"Error: {response.ReasonPhrase}");
                     return null;
                 }
             }
-            catch (HttpRequestException e)
-            {
+            catch (HttpRequestException e) {
                 Log.Error($"HTTP Request error: {e.Message}");
                 return null;
             }

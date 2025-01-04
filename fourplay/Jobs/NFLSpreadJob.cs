@@ -36,6 +36,7 @@ public class NFLSpreadJob : IJob {
                 spread.GameTime = result.ScheduledTime.UtcDateTime;
                 var cleanHomeSpread = result.SportsBookOdds.Consensus.Spread.Home.Value.Replace("+", "");
                 var cleanAwaySpread = result.SportsBookOdds.Consensus.Spread.Away.Value.Replace("+", "");
+                var cleanOU = result.SportsBookOdds.Consensus.Total.Over.Value.Replace("+", "");
                 if (cleanHomeSpread == "FK") {
                     Log.Error("Error");
                 }

@@ -2,8 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Globalization;
 
-public partial class ESPNScores
-{
+public partial class ESPNScores {
     [JsonPropertyName("leagues")]
     public League[] Leagues { get; set; }
 
@@ -17,8 +16,11 @@ public partial class ESPNScores
     public Event[] Events { get; set; }
 }
 
-public partial class Event
-{
+public partial class Event {
+    [JsonPropertyName("season")]
+    public Season Season { get; set; }
+    [JsonPropertyName("week")]
+    public Week Week { get; set; }
 
     [JsonPropertyName("date")]
     public DateTimeOffset Date { get; set; }
@@ -28,8 +30,7 @@ public partial class Event
 
 }
 
-public partial class Competition
-{
+public partial class Competition {
 
     [JsonPropertyName("date")]
     //[JsonConverter(typeof(IsoDateTimeOffsetConverter))]
@@ -43,8 +44,7 @@ public partial class Competition
 
 }
 
-public partial class Broadcast
-{
+public partial class Broadcast {
     [JsonPropertyName("market")]
     public MarketEnum Market { get; set; }
 
@@ -52,8 +52,7 @@ public partial class Broadcast
     public string[] Names { get; set; }
 }
 
-public partial class Competitor
-{
+public partial class Competitor {
 
     [JsonPropertyName("homeAway")]
     public HomeAway HomeAway { get; set; }
@@ -66,8 +65,7 @@ public partial class Competitor
     public long Score { get; set; }
 }
 
-public partial class CompetitorLeader
-{
+public partial class CompetitorLeader {
     [JsonPropertyName("name")]
     public LeaderName Name { get; set; }
 
@@ -84,8 +82,7 @@ public partial class CompetitorLeader
     public LeaderLeader[] Leaders { get; set; }
 }
 
-public partial class LeaderLeader
-{
+public partial class LeaderLeader {
     [JsonPropertyName("displayValue")]
     public string DisplayValue { get; set; }
 
@@ -99,8 +96,7 @@ public partial class LeaderLeader
     public TeamClass Team { get; set; }
 }
 
-public partial class Athlete
-{
+public partial class Athlete {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
@@ -134,8 +130,7 @@ public partial class Athlete
     public bool Active { get; set; }
 }
 
-public partial class AthleteLink
-{
+public partial class AthleteLink {
     [JsonPropertyName("rel")]
     public RelEnum[] Rel { get; set; }
 
@@ -143,27 +138,23 @@ public partial class AthleteLink
     public Uri Href { get; set; }
 }
 
-public partial class Position
-{
+public partial class Position {
     [JsonPropertyName("abbreviation")]
     public string Abbreviation { get; set; }
 }
 
-public partial class TeamClass
-{
+public partial class TeamClass {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
 }
 
-public partial class Linescore
-{
+public partial class Linescore {
     [JsonPropertyName("value")]
     public double Value { get; set; }
 }
 
-public partial class Record
-{
+public partial class Record {
     [JsonPropertyName("name")]
     public RecordName Name { get; set; }
 
@@ -178,8 +169,7 @@ public partial class Record
     public string Summary { get; set; }
 }
 
-public partial class Team
-{
+public partial class Team {
 
     [JsonPropertyName("abbreviation")]
     public string Abbreviation { get; set; }
@@ -191,8 +181,7 @@ public partial class Team
     public Uri Logo { get; set; }
 }
 
-public partial class TeamsOnByeLink
-{
+public partial class TeamsOnByeLink {
     [JsonPropertyName("rel")]
     public RecordTypeDetail[] Rel { get; set; }
 
@@ -209,20 +198,17 @@ public partial class TeamsOnByeLink
     public bool IsPremium { get; set; }
 }
 
-public partial class Format
-{
+public partial class Format {
     [JsonPropertyName("regulation")]
     public Regulation Regulation { get; set; }
 }
 
-public partial class Regulation
-{
+public partial class Regulation {
     [JsonPropertyName("periods")]
     public long Periods { get; set; }
 }
 
-public partial class GeoBroadcast
-{
+public partial class GeoBroadcast {
     [JsonPropertyName("type")]
     public GeoBroadcastType Type { get; set; }
 
@@ -239,8 +225,7 @@ public partial class GeoBroadcast
     public Region Region { get; set; }
 }
 
-public partial class MarketClass
-{
+public partial class MarketClass {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
@@ -249,14 +234,12 @@ public partial class MarketClass
     public MarketType Type { get; set; }
 }
 
-public partial class Media
-{
+public partial class Media {
     [JsonPropertyName("shortName")]
     public string ShortName { get; set; }
 }
 
-public partial class GeoBroadcastType
-{
+public partial class GeoBroadcastType {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
@@ -265,8 +248,7 @@ public partial class GeoBroadcastType
     public string ShortName { get; set; }
 }
 
-public partial class Headline
-{
+public partial class Headline {
     [JsonPropertyName("description")]
     public string Description { get; set; }
 
@@ -281,8 +263,7 @@ public partial class Headline
     public Video[] Video { get; set; }
 }
 
-public partial class Video
-{
+public partial class Video {
     [JsonPropertyName("id")]
     public long Id { get; set; }
 
@@ -308,8 +289,7 @@ public partial class Video
     public Links Links { get; set; }
 }
 
-public partial class DeviceRestrictions
-{
+public partial class DeviceRestrictions {
     [JsonPropertyName("type")]
     public string Type { get; set; }
 
@@ -317,8 +297,7 @@ public partial class DeviceRestrictions
     public Device[] Devices { get; set; }
 }
 
-public partial class Links
-{
+public partial class Links {
     [JsonPropertyName("api")]
     public Api Api { get; set; }
 
@@ -332,8 +311,7 @@ public partial class Links
     public Mobile Mobile { get; set; }
 }
 
-public partial class Api
-{
+public partial class Api {
     [JsonPropertyName("self")]
     public ArtworkElement Self { get; set; }
 
@@ -341,14 +319,12 @@ public partial class Api
     public ArtworkElement Artwork { get; set; }
 }
 
-public partial class ArtworkElement
-{
+public partial class ArtworkElement {
     [JsonPropertyName("href")]
     public Uri Href { get; set; }
 }
 
-public partial class Mobile
-{
+public partial class Mobile {
     [JsonPropertyName("alert")]
     public ArtworkElement Alert { get; set; }
 
@@ -365,8 +341,7 @@ public partial class Mobile
     public ArtworkElement ProgressiveDownload { get; set; }
 }
 
-public partial class Source
-{
+public partial class Source {
     [JsonPropertyName("mezzanine")]
     public ArtworkElement Mezzanine { get; set; }
 
@@ -389,8 +364,7 @@ public partial class Source
     public Uri Href { get; set; }
 }
 
-public partial class Hls
-{
+public partial class Hls {
     [JsonPropertyName("href")]
     public Uri Href { get; set; }
 
@@ -398,8 +372,7 @@ public partial class Hls
     public ArtworkElement Hd { get; set; }
 }
 
-public partial class Web
-{
+public partial class Web {
     [JsonPropertyName("href")]
     public Uri Href { get; set; }
 
@@ -410,8 +383,7 @@ public partial class Web
     public ArtworkElement Self { get; set; }
 }
 
-public partial class Tracking
-{
+public partial class Tracking {
     [JsonPropertyName("sportName")]
     public string SportName { get; set; }
 
@@ -428,8 +400,7 @@ public partial class Tracking
     public string TrackingId { get; set; }
 }
 
-public partial class Note
-{
+public partial class Note {
     [JsonPropertyName("type")]
     public NoteType Type { get; set; }
 
@@ -437,8 +408,7 @@ public partial class Note
     public string Headline { get; set; }
 }
 
-public partial class Odd
-{
+public partial class Odd {
     [JsonPropertyName("provider")]
     public Provider Provider { get; set; }
 
@@ -449,8 +419,7 @@ public partial class Odd
     public double OverUnder { get; set; }
 }
 
-public partial class Provider
-{
+public partial class Provider {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
@@ -462,8 +431,7 @@ public partial class Provider
     public long Priority { get; set; }
 }
 
-public partial class Situation
-{
+public partial class Situation {
     [JsonPropertyName("$ref")]
     public Uri Ref { get; set; }
 
@@ -506,8 +474,7 @@ public partial class Situation
     public long? Possession { get; set; }
 }
 
-public partial class LastPlay
-{
+public partial class LastPlay {
     [JsonPropertyName("id")]
     public string Id { get; set; }
 
@@ -543,8 +510,7 @@ public partial class LastPlay
     public AthletesInvolved[] AthletesInvolved { get; set; }
 }
 
-public partial class AthletesInvolved
-{
+public partial class AthletesInvolved {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
@@ -575,8 +541,7 @@ public partial class AthletesInvolved
     public TeamClass Team { get; set; }
 }
 
-public partial class Drive
-{
+public partial class Drive {
     [JsonPropertyName("description")]
     public string Description { get; set; }
 
@@ -595,8 +560,7 @@ public partial class Drive
     public string Result { get; set; }
 }
 
-public partial class DriveEnd
-{
+public partial class DriveEnd {
     [JsonPropertyName("yardLine")]
     public long YardLine { get; set; }
 
@@ -604,14 +568,12 @@ public partial class DriveEnd
     public string Text { get; set; }
 }
 
-public partial class TimeElapsed
-{
+public partial class TimeElapsed {
     [JsonPropertyName("displayValue")]
     public string DisplayValue { get; set; }
 }
 
-public partial class LastPlayEnd
-{
+public partial class LastPlayEnd {
     [JsonPropertyName("yardLine")]
     public long YardLine { get; set; }
 
@@ -620,8 +582,7 @@ public partial class LastPlayEnd
     public TeamClass Team { get; set; }
 }
 
-public partial class Probability
-{
+public partial class Probability {
     [JsonPropertyName("tiePercentage")]
     public double TiePercentage { get; set; }
 
@@ -635,8 +596,7 @@ public partial class Probability
     public double SecondsLeft { get; set; }
 }
 
-public partial class LastPlayType
-{
+public partial class LastPlayType {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
@@ -648,8 +608,7 @@ public partial class LastPlayType
     public string Abbreviation { get; set; }
 }
 
-public partial class Status
-{
+public partial class Status {
     [JsonPropertyName("clock")]
     public double Clock { get; set; }
 
@@ -663,8 +622,7 @@ public partial class Status
     public StatusType Type { get; set; }
 }
 
-public partial class StatusType
-{
+public partial class StatusType {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
@@ -688,8 +646,7 @@ public partial class StatusType
     public string ShortDetail { get; set; }
 }
 
-public partial class Ticket
-{
+public partial class Ticket {
     [JsonPropertyName("summary")]
     public string Summary { get; set; }
 
@@ -700,8 +657,7 @@ public partial class Ticket
     public ArtworkElement[] Links { get; set; }
 }
 
-public partial class CompetitionType
-{
+public partial class CompetitionType {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
@@ -710,8 +666,7 @@ public partial class CompetitionType
     public TypeAbbreviation Abbreviation { get; set; }
 }
 
-public partial class CompetitionVenue
-{
+public partial class CompetitionVenue {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
@@ -729,8 +684,7 @@ public partial class CompetitionVenue
     public bool Indoor { get; set; }
 }
 
-public partial class Address
-{
+public partial class Address {
     [JsonPropertyName("city")]
     public string City { get; set; }
 
@@ -739,8 +693,7 @@ public partial class Address
     public string State { get; set; }
 }
 
-public partial class EventLink
-{
+public partial class EventLink {
     [JsonPropertyName("language")]
     public Language Language { get; set; }
 
@@ -763,8 +716,7 @@ public partial class EventLink
     public bool IsPremium { get; set; }
 }
 
-public partial class EventSeason
-{
+public partial class EventSeason {
     [JsonPropertyName("year")]
     public long Year { get; set; }
 
@@ -775,8 +727,7 @@ public partial class EventSeason
     public Slug Slug { get; set; }
 }
 
-public partial class Weather
-{
+public partial class Weather {
     [JsonPropertyName("displayValue")]
     public string DisplayValue { get; set; }
 
@@ -794,14 +745,12 @@ public partial class Weather
     public EventLink Link { get; set; }
 }
 
-public partial class EventWeek
-{
+public partial class EventWeek {
     [JsonPropertyName("number")]
     public long Number { get; set; }
 }
 
-public partial class League
-{
+public partial class League {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
@@ -840,8 +789,7 @@ public partial class League
     public Calendar[] Calendar { get; set; }
 }
 
-public partial class Calendar
-{
+public partial class Calendar {
     [JsonPropertyName("label")]
     public string Label { get; set; }
 
@@ -859,8 +807,7 @@ public partial class Calendar
     //public Entry[] Entries { get; set; }
 }
 
-public partial class Entry
-{
+public partial class Entry {
     [JsonPropertyName("label")]
     public string Label { get; set; }
 
@@ -881,8 +828,7 @@ public partial class Entry
     public string EndDate { get; set; }
 }
 
-public partial class Logo
-{
+public partial class Logo {
     [JsonPropertyName("href")]
     public Uri Href { get; set; }
 
@@ -902,8 +848,7 @@ public partial class Logo
     public string LastUpdated { get; set; }
 }
 
-public partial class LeagueSeason
-{
+public partial class LeagueSeason {
     [JsonPropertyName("year")]
     public long Year { get; set; }
 
@@ -921,8 +866,7 @@ public partial class LeagueSeason
     public SeasonType Type { get; set; }
 }
 
-public partial class SeasonType
-{
+public partial class SeasonType {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }
@@ -937,8 +881,7 @@ public partial class SeasonType
     public string Abbreviation { get; set; }
 }
 
-public partial class Season
-{
+public partial class Season {
     [JsonPropertyName("type")]
     public long Type { get; set; }
 
@@ -946,8 +889,7 @@ public partial class Season
     public long Year { get; set; }
 }
 
-public partial class Week
-{
+public partial class Week {
     [JsonPropertyName("number")]
     public long Number { get; set; }
 
@@ -1009,8 +951,7 @@ public enum Language { EnUs };
 
 public enum Slug { RegularSeason = 2, PreSeason = 1 };
 
-public partial struct RelUnion
-{
+public partial struct RelUnion {
     public NoteType? Enum;
     public long? Integer;
 
@@ -1018,10 +959,8 @@ public partial struct RelUnion
     public static implicit operator RelUnion(long Integer) => new() { Integer = Integer };
 }
 
-internal static class ESPNApiServiceJsonConverter
-{
-    public static readonly JsonSerializerOptions Settings = new(JsonSerializerDefaults.General)
-    {
+internal static class ESPNApiServiceJsonConverter {
+    public static readonly JsonSerializerOptions Settings = new(JsonSerializerDefaults.General) {
         Converters =
             {
                 MarketEnumConverter.Singleton,
@@ -1060,28 +999,22 @@ internal static class ESPNApiServiceJsonConverter
     };
 }
 
-internal class MarketEnumConverter : JsonConverter<MarketEnum>
-{
+internal class MarketEnumConverter : JsonConverter<MarketEnum> {
     public override bool CanConvert(Type t) => t == typeof(MarketEnum);
 
-    public override MarketEnum Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override MarketEnum Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        if (value == "national")
-        {
+        if (value == "national") {
             return MarketEnum.National;
         }
-        if (value == "away")
-        {
+        if (value == "away") {
             return MarketEnum.Away;
         }
         else return MarketEnum.Home;
     }
 
-    public override void Write(Utf8JsonWriter writer, MarketEnum value, JsonSerializerOptions options)
-    {
-        if (value == MarketEnum.National)
-        {
+    public override void Write(Utf8JsonWriter writer, MarketEnum value, JsonSerializerOptions options) {
+        if (value == MarketEnum.National) {
             JsonSerializer.Serialize(writer, "national", options);
             return;
         }
@@ -1091,15 +1024,12 @@ internal class MarketEnumConverter : JsonConverter<MarketEnum>
     public static readonly MarketEnumConverter Singleton = new();
 }
 
-internal class HomeAwayConverter : JsonConverter<HomeAway>
-{
+internal class HomeAwayConverter : JsonConverter<HomeAway> {
     public override bool CanConvert(Type t) => t == typeof(HomeAway);
 
-    public override HomeAway Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override HomeAway Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "away":
                 return HomeAway.Away;
             case "home":
@@ -1108,10 +1038,8 @@ internal class HomeAwayConverter : JsonConverter<HomeAway>
         throw new Exception("Cannot unmarshal type HomeAway");
     }
 
-    public override void Write(Utf8JsonWriter writer, HomeAway value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, HomeAway value, JsonSerializerOptions options) {
+        switch (value) {
             case HomeAway.Away:
                 JsonSerializer.Serialize(writer, "away", options);
                 return;
@@ -1125,23 +1053,19 @@ internal class HomeAwayConverter : JsonConverter<HomeAway>
     public static readonly HomeAwayConverter Singleton = new();
 }
 
-internal class ParseStringConverter : JsonConverter<long>
-{
+internal class ParseStringConverter : JsonConverter<long> {
     public override bool CanConvert(Type t) => t == typeof(long);
 
-    public override long Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override long Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
         long l;
-        if (Int64.TryParse(value, out l))
-        {
+        if (Int64.TryParse(value, out l)) {
             return l;
         }
         throw new Exception("Cannot unmarshal type long");
     }
 
-    public override void Write(Utf8JsonWriter writer, long value, JsonSerializerOptions options)
-    {
+    public override void Write(Utf8JsonWriter writer, long value, JsonSerializerOptions options) {
         JsonSerializer.Serialize(writer, value.ToString(), options);
         return;
     }
@@ -1149,15 +1073,12 @@ internal class ParseStringConverter : JsonConverter<long>
     public static readonly ParseStringConverter Singleton = new();
 }
 
-internal class LeaderAbbreviationConverter : JsonConverter<LeaderAbbreviation>
-{
+internal class LeaderAbbreviationConverter : JsonConverter<LeaderAbbreviation> {
     public override bool CanConvert(Type t) => t == typeof(LeaderAbbreviation);
 
-    public override LeaderAbbreviation Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override LeaderAbbreviation Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "PYDS":
                 return LeaderAbbreviation.Pyds;
             case "RECYDS":
@@ -1168,10 +1089,8 @@ internal class LeaderAbbreviationConverter : JsonConverter<LeaderAbbreviation>
         return LeaderAbbreviation.Pyds;
     }
 
-    public override void Write(Utf8JsonWriter writer, LeaderAbbreviation value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, LeaderAbbreviation value, JsonSerializerOptions options) {
+        switch (value) {
             case LeaderAbbreviation.Pyds:
                 JsonSerializer.Serialize(writer, "PYDS", options);
                 return;
@@ -1188,15 +1107,12 @@ internal class LeaderAbbreviationConverter : JsonConverter<LeaderAbbreviation>
     public static readonly LeaderAbbreviationConverter Singleton = new();
 }
 
-internal class DisplayNameConverter : JsonConverter<DisplayName>
-{
+internal class DisplayNameConverter : JsonConverter<DisplayName> {
     public override bool CanConvert(Type t) => t == typeof(DisplayName);
 
-    public override DisplayName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override DisplayName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "Passing Leader":
                 return DisplayName.PassingLeader;
             case "Receiving Leader":
@@ -1207,10 +1123,8 @@ internal class DisplayNameConverter : JsonConverter<DisplayName>
         throw new Exception("Cannot unmarshal type DisplayName");
     }
 
-    public override void Write(Utf8JsonWriter writer, DisplayName value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, DisplayName value, JsonSerializerOptions options) {
+        switch (value) {
             case DisplayName.PassingLeader:
                 JsonSerializer.Serialize(writer, "Passing Leader", options);
                 return;
@@ -1227,15 +1141,12 @@ internal class DisplayNameConverter : JsonConverter<DisplayName>
     public static readonly DisplayNameConverter Singleton = new();
 }
 
-internal class RelEnumConverter : JsonConverter<RelEnum>
-{
+internal class RelEnumConverter : JsonConverter<RelEnum> {
     public override bool CanConvert(Type t) => t == typeof(RelEnum);
 
-    public override RelEnum Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override RelEnum Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "athlete":
                 return RelEnum.Athlete;
             case "desktop":
@@ -1246,10 +1157,8 @@ internal class RelEnumConverter : JsonConverter<RelEnum>
         throw new Exception("Cannot unmarshal type RelEnum");
     }
 
-    public override void Write(Utf8JsonWriter writer, RelEnum value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, RelEnum value, JsonSerializerOptions options) {
+        switch (value) {
             case RelEnum.Athlete:
                 JsonSerializer.Serialize(writer, "athlete", options);
                 return;
@@ -1310,15 +1219,12 @@ internal class TionConverter : JsonConverter<Tion>
     public static readonly TionConverter Singleton = new TionConverter();
 }
 */
-internal class LeaderNameConverter : JsonConverter<LeaderName>
-{
+internal class LeaderNameConverter : JsonConverter<LeaderName> {
     public override bool CanConvert(Type t) => t == typeof(LeaderName);
 
-    public override LeaderName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override LeaderName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "passingLeader":
                 return LeaderName.PassingLeader;
             case "passingYards":
@@ -1335,10 +1241,8 @@ internal class LeaderNameConverter : JsonConverter<LeaderName>
         throw new Exception("Cannot unmarshal type LeaderName");
     }
 
-    public override void Write(Utf8JsonWriter writer, LeaderName value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, LeaderName value, JsonSerializerOptions options) {
+        switch (value) {
             case LeaderName.PassingLeader:
                 JsonSerializer.Serialize(writer, "passingLeader", options);
                 return;
@@ -1364,15 +1268,12 @@ internal class LeaderNameConverter : JsonConverter<LeaderName>
     public static readonly LeaderNameConverter Singleton = new();
 }
 
-internal class ShortDisplayNameConverter : JsonConverter<ShortDisplayName>
-{
+internal class ShortDisplayNameConverter : JsonConverter<ShortDisplayName> {
     public override bool CanConvert(Type t) => t == typeof(ShortDisplayName);
 
-    public override ShortDisplayName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override ShortDisplayName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "PASS":
                 return ShortDisplayName.Pass;
             case "REC":
@@ -1383,10 +1284,8 @@ internal class ShortDisplayNameConverter : JsonConverter<ShortDisplayName>
         throw new Exception("Cannot unmarshal type ShortDisplayName");
     }
 
-    public override void Write(Utf8JsonWriter writer, ShortDisplayName value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, ShortDisplayName value, JsonSerializerOptions options) {
+        switch (value) {
             case ShortDisplayName.Pass:
                 JsonSerializer.Serialize(writer, "PASS", options);
                 return;
@@ -1403,15 +1302,12 @@ internal class ShortDisplayNameConverter : JsonConverter<ShortDisplayName>
     public static readonly ShortDisplayNameConverter Singleton = new();
 }
 
-internal class RecordAbbreviationConverter : JsonConverter<RecordAbbreviation>
-{
+internal class RecordAbbreviationConverter : JsonConverter<RecordAbbreviation> {
     public override bool CanConvert(Type t) => t == typeof(RecordAbbreviation);
 
-    public override RecordAbbreviation Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override RecordAbbreviation Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "Any":
                 return RecordAbbreviation.Any;
             case "Game":
@@ -1420,10 +1316,8 @@ internal class RecordAbbreviationConverter : JsonConverter<RecordAbbreviation>
         return RecordAbbreviation.Any;
     }
 
-    public override void Write(Utf8JsonWriter writer, RecordAbbreviation value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, RecordAbbreviation value, JsonSerializerOptions options) {
+        switch (value) {
             case RecordAbbreviation.Any:
                 JsonSerializer.Serialize(writer, "Any", options);
                 return;
@@ -1437,15 +1331,12 @@ internal class RecordAbbreviationConverter : JsonConverter<RecordAbbreviation>
     public static readonly RecordAbbreviationConverter Singleton = new();
 }
 
-internal class RecordNameConverter : JsonConverter<RecordName>
-{
+internal class RecordNameConverter : JsonConverter<RecordName> {
     public override bool CanConvert(Type t) => t == typeof(RecordName);
 
-    public override RecordName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override RecordName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "Home":
                 return RecordName.Home;
             case "Road":
@@ -1456,10 +1347,8 @@ internal class RecordNameConverter : JsonConverter<RecordName>
         return RecordName.Home;
     }
 
-    public override void Write(Utf8JsonWriter writer, RecordName value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, RecordName value, JsonSerializerOptions options) {
+        switch (value) {
             case RecordName.Home:
                 JsonSerializer.Serialize(writer, "Home", options);
                 return;
@@ -1476,15 +1365,12 @@ internal class RecordNameConverter : JsonConverter<RecordName>
     public static readonly RecordNameConverter Singleton = new();
 }
 
-internal class RecordTypeConverter : JsonConverter<RecordType>
-{
+internal class RecordTypeConverter : JsonConverter<RecordType> {
     public override bool CanConvert(Type t) => t == typeof(RecordType);
 
-    public override RecordType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override RecordType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "home":
                 return RecordType.Home;
             case "road":
@@ -1495,10 +1381,8 @@ internal class RecordTypeConverter : JsonConverter<RecordType>
         return RecordType.Home;
     }
 
-    public override void Write(Utf8JsonWriter writer, RecordType value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, RecordType value, JsonSerializerOptions options) {
+        switch (value) {
             case RecordType.Home:
                 JsonSerializer.Serialize(writer, "home", options);
                 return;
@@ -1515,15 +1399,12 @@ internal class RecordTypeConverter : JsonConverter<RecordType>
     public static readonly RecordTypeConverter Singleton = new();
 }
 
-internal class RecordTypeDetailConverter : JsonConverter<RecordTypeDetail>
-{
+internal class RecordTypeDetailConverter : JsonConverter<RecordTypeDetail> {
     public override bool CanConvert(Type t) => t == typeof(RecordTypeDetail);
 
-    public override RecordTypeDetail Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override RecordTypeDetail Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "clubhouse":
                 return RecordTypeDetail.Clubhouse;
             case "desktop":
@@ -1540,10 +1421,8 @@ internal class RecordTypeDetailConverter : JsonConverter<RecordTypeDetail>
         throw new Exception("Cannot unmarshal type TypRecordTypeDetaileElement");
     }
 
-    public override void Write(Utf8JsonWriter writer, RecordTypeDetail value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, RecordTypeDetail value, JsonSerializerOptions options) {
+        switch (value) {
             case RecordTypeDetail.Clubhouse:
                 JsonSerializer.Serialize(writer, "clubhouse", options);
                 return;
@@ -1569,15 +1448,12 @@ internal class RecordTypeDetailConverter : JsonConverter<RecordTypeDetail>
     public static readonly RecordTypeDetailConverter Singleton = new();
 }
 
-internal class TextConverter : JsonConverter<Text>
-{
+internal class TextConverter : JsonConverter<Text> {
     public override bool CanConvert(Type t) => t == typeof(Text);
 
-    public override Text Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override Text Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "Clubhouse":
                 return Text.Clubhouse;
             case "Roster":
@@ -1590,10 +1466,8 @@ internal class TextConverter : JsonConverter<Text>
         return Text.Clubhouse;
     }
 
-    public override void Write(Utf8JsonWriter writer, Text value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, Text value, JsonSerializerOptions options) {
+        switch (value) {
             case Text.Clubhouse:
                 JsonSerializer.Serialize(writer, "Clubhouse", options);
                 return;
@@ -1613,24 +1487,19 @@ internal class TextConverter : JsonConverter<Text>
     public static readonly TextConverter Singleton = new();
 }
 
-internal class LangConverter : JsonConverter<Lang>
-{
+internal class LangConverter : JsonConverter<Lang> {
     public override bool CanConvert(Type t) => t == typeof(Lang);
 
-    public override Lang Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override Lang Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        if (value == "en")
-        {
+        if (value == "en") {
             return Lang.En;
         }
         return Lang.En;
     }
 
-    public override void Write(Utf8JsonWriter writer, Lang value, JsonSerializerOptions options)
-    {
-        if (value == Lang.En)
-        {
+    public override void Write(Utf8JsonWriter writer, Lang value, JsonSerializerOptions options) {
+        if (value == Lang.En) {
             JsonSerializer.Serialize(writer, "en", options);
             return;
         }
@@ -1640,28 +1509,22 @@ internal class LangConverter : JsonConverter<Lang>
     public static readonly LangConverter Singleton = new();
 }
 
-internal class MarketTypeConverter : JsonConverter<MarketType>
-{
+internal class MarketTypeConverter : JsonConverter<MarketType> {
     public override bool CanConvert(Type t) => t == typeof(MarketType);
 
-    public override MarketType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override MarketType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        if (value == "National")
-        {
+        if (value == "National") {
             return MarketType.National;
         }
-        if (value == "Away")
-        {
+        if (value == "Away") {
             return MarketType.Away;
         }
         return MarketType.Home;
     }
 
-    public override void Write(Utf8JsonWriter writer, MarketType value, JsonSerializerOptions options)
-    {
-        if (value == MarketType.National)
-        {
+    public override void Write(Utf8JsonWriter writer, MarketType value, JsonSerializerOptions options) {
+        if (value == MarketType.National) {
             JsonSerializer.Serialize(writer, "National", options);
             return;
         }
@@ -1671,24 +1534,19 @@ internal class MarketTypeConverter : JsonConverter<MarketType>
     public static readonly MarketTypeConverter Singleton = new();
 }
 
-internal class RegionConverter : JsonConverter<Region>
-{
+internal class RegionConverter : JsonConverter<Region> {
     public override bool CanConvert(Type t) => t == typeof(Region);
 
-    public override Region Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override Region Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        if (value == "us")
-        {
+        if (value == "us") {
             return Region.Us;
         }
         return Region.Us;
     }
 
-    public override void Write(Utf8JsonWriter writer, Region value, JsonSerializerOptions options)
-    {
-        if (value == Region.Us)
-        {
+    public override void Write(Utf8JsonWriter writer, Region value, JsonSerializerOptions options) {
+        if (value == Region.Us) {
             JsonSerializer.Serialize(writer, "us", options);
             return;
         }
@@ -1698,15 +1556,12 @@ internal class RegionConverter : JsonConverter<Region>
     public static readonly RegionConverter Singleton = new();
 }
 
-internal class ShortNameConverter : JsonConverter<ShortName>
-{
+internal class ShortNameConverter : JsonConverter<ShortName> {
     public override bool CanConvert(Type t) => t == typeof(ShortName);
 
-    public override ShortName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override ShortName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "TV":
                 return ShortName.Tv;
             case "Web":
@@ -1715,10 +1570,8 @@ internal class ShortNameConverter : JsonConverter<ShortName>
         return ShortName.Tv;
     }
 
-    public override void Write(Utf8JsonWriter writer, ShortName value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, ShortName value, JsonSerializerOptions options) {
+        switch (value) {
             case ShortName.Tv:
                 JsonSerializer.Serialize(writer, "TV", options);
                 return;
@@ -1732,15 +1585,12 @@ internal class ShortNameConverter : JsonConverter<ShortName>
     public static readonly ShortNameConverter Singleton = new();
 }
 
-internal class ShortTextConverter : JsonConverter<ShortText>
-{
+internal class ShortTextConverter : JsonConverter<ShortText> {
     public override bool CanConvert(Type t) => t == typeof(ShortText);
 
-    public override ShortText Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override ShortText Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "Box Score":
                 return ShortText.BoxScore;
             case "Gamecast":
@@ -1757,10 +1607,8 @@ internal class ShortTextConverter : JsonConverter<ShortText>
         throw new Exception("Cannot unmarshal type ShortText");
     }
 
-    public override void Write(Utf8JsonWriter writer, ShortText value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, ShortText value, JsonSerializerOptions options) {
+        switch (value) {
             case ShortText.BoxScore:
                 JsonSerializer.Serialize(writer, "Box Score", options);
                 return;
@@ -1786,15 +1634,12 @@ internal class ShortTextConverter : JsonConverter<ShortText>
     public static readonly ShortTextConverter Singleton = new();
 }
 
-internal class DeviceConverter : JsonConverter<Device>
-{
+internal class DeviceConverter : JsonConverter<Device> {
     public override bool CanConvert(Type t) => t == typeof(Device);
 
-    public override Device Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override Device Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "desktop":
                 return Device.Desktop;
             case "handset":
@@ -1807,10 +1652,8 @@ internal class DeviceConverter : JsonConverter<Device>
         return Device.Desktop;
     }
 
-    public override void Write(Utf8JsonWriter writer, Device value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, Device value, JsonSerializerOptions options) {
+        switch (value) {
             case Device.Desktop:
                 JsonSerializer.Serialize(writer, "desktop", options);
                 return;
@@ -1830,15 +1673,12 @@ internal class DeviceConverter : JsonConverter<Device>
     public static readonly DeviceConverter Singleton = new();
 }
 
-internal class NoteTypeConverter : JsonConverter<NoteType>
-{
+internal class NoteTypeConverter : JsonConverter<NoteType> {
     public override bool CanConvert(Type t) => t == typeof(NoteType);
 
-    public override NoteType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override NoteType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "07073":
                 return NoteType.The07073;
             case "boxscore":
@@ -1861,10 +1701,8 @@ internal class NoteTypeConverter : JsonConverter<NoteType>
         throw new Exception("Cannot unmarshal type NoteType");
     }
 
-    public override void Write(Utf8JsonWriter writer, NoteType value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, NoteType value, JsonSerializerOptions options) {
+        switch (value) {
             case NoteType.Boxscore:
                 JsonSerializer.Serialize(writer, "boxscore", options);
                 return;
@@ -1945,15 +1783,12 @@ internal class DisplayClockConverter : JsonConverter<DisplayClock>
     public static readonly DisplayClockConverter Singleton = new DisplayClockConverter();
 }
 */
-internal class DescriptionConverter : JsonConverter<Description>
-{
+internal class DescriptionConverter : JsonConverter<Description> {
     public override bool CanConvert(Type t) => t == typeof(Description);
 
-    public override Description Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override Description Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "Final":
                 return Description.Final;
             case "Halftime":
@@ -1968,10 +1803,8 @@ internal class DescriptionConverter : JsonConverter<Description>
         throw new Exception("Cannot unmarshal type Description");
     }
 
-    public override void Write(Utf8JsonWriter writer, Description value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, Description value, JsonSerializerOptions options) {
+        switch (value) {
             case Description.Final:
                 JsonSerializer.Serialize(writer, "Final", options);
                 return;
@@ -1991,15 +1824,12 @@ internal class DescriptionConverter : JsonConverter<Description>
     public static readonly DescriptionConverter Singleton = new();
 }
 
-internal class TypeNameConverter : JsonConverter<TypeName>
-{
+internal class TypeNameConverter : JsonConverter<TypeName> {
     public override bool CanConvert(Type t) => t == typeof(TypeName);
 
-    public override TypeName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override TypeName Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "STATUS_FINAL":
                 return TypeName.StatusFinal;
             case "STATUS_HALFTIME":
@@ -2014,10 +1844,8 @@ internal class TypeNameConverter : JsonConverter<TypeName>
         throw new Exception("Cannot unmarshal type TypeName");
     }
 
-    public override void Write(Utf8JsonWriter writer, TypeName value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, TypeName value, JsonSerializerOptions options) {
+        switch (value) {
             case TypeName.StatusFinal:
                 JsonSerializer.Serialize(writer, "STATUS_FINAL", options);
                 return;
@@ -2037,15 +1865,12 @@ internal class TypeNameConverter : JsonConverter<TypeName>
     public static readonly TypeNameConverter Singleton = new();
 }
 
-internal class StateConverter : JsonConverter<State>
-{
+internal class StateConverter : JsonConverter<State> {
     public override bool CanConvert(Type t) => t == typeof(State);
 
-    public override State Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override State Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        switch (value)
-        {
+        switch (value) {
             case "in":
                 return State.In;
             case "post":
@@ -2056,10 +1881,8 @@ internal class StateConverter : JsonConverter<State>
         throw new Exception("Cannot unmarshal type State");
     }
 
-    public override void Write(Utf8JsonWriter writer, State value, JsonSerializerOptions options)
-    {
-        switch (value)
-        {
+    public override void Write(Utf8JsonWriter writer, State value, JsonSerializerOptions options) {
+        switch (value) {
             case State.In:
                 JsonSerializer.Serialize(writer, "in", options);
                 return;
@@ -2076,24 +1899,19 @@ internal class StateConverter : JsonConverter<State>
     public static readonly StateConverter Singleton = new();
 }
 
-internal class TypeAbbreviationConverter : JsonConverter<TypeAbbreviation>
-{
+internal class TypeAbbreviationConverter : JsonConverter<TypeAbbreviation> {
     public override bool CanConvert(Type t) => t == typeof(TypeAbbreviation);
 
-    public override TypeAbbreviation Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override TypeAbbreviation Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        if (value == "STD")
-        {
+        if (value == "STD") {
             return TypeAbbreviation.Std;
         }
         return TypeAbbreviation.Std;
     }
 
-    public override void Write(Utf8JsonWriter writer, TypeAbbreviation value, JsonSerializerOptions options)
-    {
-        if (value == TypeAbbreviation.Std)
-        {
+    public override void Write(Utf8JsonWriter writer, TypeAbbreviation value, JsonSerializerOptions options) {
+        if (value == TypeAbbreviation.Std) {
             JsonSerializer.Serialize(writer, "STD", options);
             return;
         }
@@ -2103,24 +1921,19 @@ internal class TypeAbbreviationConverter : JsonConverter<TypeAbbreviation>
     public static readonly TypeAbbreviationConverter Singleton = new();
 }
 
-internal class LanguageConverter : JsonConverter<Language>
-{
+internal class LanguageConverter : JsonConverter<Language> {
     public override bool CanConvert(Type t) => t == typeof(Language);
 
-    public override Language Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override Language Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        if (value == "en-US")
-        {
+        if (value == "en-US") {
             return Language.EnUs;
         }
         return Language.EnUs;
     }
 
-    public override void Write(Utf8JsonWriter writer, Language value, JsonSerializerOptions options)
-    {
-        if (value == Language.EnUs)
-        {
+    public override void Write(Utf8JsonWriter writer, Language value, JsonSerializerOptions options) {
+        if (value == Language.EnUs) {
             JsonSerializer.Serialize(writer, "en-US", options);
             return;
         }
@@ -2130,18 +1943,14 @@ internal class LanguageConverter : JsonConverter<Language>
     public static readonly LanguageConverter Singleton = new();
 }
 
-internal class RelUnionConverter : JsonConverter<RelUnion>
-{
+internal class RelUnionConverter : JsonConverter<RelUnion> {
     public override bool CanConvert(Type t) => t == typeof(RelUnion);
 
-    public override RelUnion Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        switch (reader.TokenType)
-        {
+    public override RelUnion Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+        switch (reader.TokenType) {
             case JsonTokenType.String:
                 var stringValue = reader.GetString();
-                switch (stringValue)
-                {
+                switch (stringValue) {
                     case "07073":
                         return new RelUnion { Enum = NoteType.The07073 };
                     case "boxscore":
@@ -2162,8 +1971,7 @@ internal class RelUnionConverter : JsonConverter<RelUnion>
                         return new RelUnion { Enum = NoteType.Summary };
                 }
                 long l;
-                if (Int64.TryParse(stringValue, out l))
-                {
+                if (Int64.TryParse(stringValue, out l)) {
                     return new RelUnion { Integer = l };
                 }
                 break;
@@ -2171,12 +1979,9 @@ internal class RelUnionConverter : JsonConverter<RelUnion>
         throw new Exception("Cannot unmarshal type RelUnion");
     }
 
-    public override void Write(Utf8JsonWriter writer, RelUnion value, JsonSerializerOptions options)
-    {
-        if (value.Enum != null)
-        {
-            switch (value.Enum)
-            {
+    public override void Write(Utf8JsonWriter writer, RelUnion value, JsonSerializerOptions options) {
+        if (value.Enum != null) {
+            switch (value.Enum) {
                 case NoteType.The07073:
                     JsonSerializer.Serialize(writer, "07073", options);
                     return;
@@ -2206,8 +2011,7 @@ internal class RelUnionConverter : JsonConverter<RelUnion>
                     return;
             }
         }
-        if (value.Integer != null)
-        {
+        if (value.Integer != null) {
             JsonSerializer.Serialize(writer, value.Integer.Value.ToString(), options);
             return;
         }
@@ -2217,15 +2021,12 @@ internal class RelUnionConverter : JsonConverter<RelUnion>
     public static readonly RelUnionConverter Singleton = new();
 }
 
-internal class SlugConverter : JsonConverter<Slug>
-{
+internal class SlugConverter : JsonConverter<Slug> {
     public override bool CanConvert(Type t) => t == typeof(Slug);
 
-    public override Slug Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override Slug Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
-        if (value == "regular-season")
-        {
+        if (value == "regular-season") {
             return Slug.RegularSeason;
         }
         else if (value == "pre-sesaon")
@@ -2233,10 +2034,8 @@ internal class SlugConverter : JsonConverter<Slug>
         return Slug.PreSeason;
     }
 
-    public override void Write(Utf8JsonWriter writer, Slug value, JsonSerializerOptions options)
-    {
-        if (value == Slug.RegularSeason)
-        {
+    public override void Write(Utf8JsonWriter writer, Slug value, JsonSerializerOptions options) {
+        if (value == Slug.RegularSeason) {
             JsonSerializer.Serialize(writer, "regular-season", options);
             return;
         }
@@ -2246,18 +2045,15 @@ internal class SlugConverter : JsonConverter<Slug>
     public static readonly SlugConverter Singleton = new();
 }
 
-public class DateOnlyConverter : JsonConverter<DateOnly>
-{
+public class DateOnlyConverter : JsonConverter<DateOnly> {
     private readonly string serializationFormat;
     public DateOnlyConverter() : this(null) { }
 
-    public DateOnlyConverter(string? serializationFormat)
-    {
+    public DateOnlyConverter(string? serializationFormat) {
         this.serializationFormat = serializationFormat ?? "yyyy-MM-dd";
     }
 
-    public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
         return DateOnly.Parse(value!);
     }
@@ -2266,19 +2062,16 @@ public class DateOnlyConverter : JsonConverter<DateOnly>
         => writer.WriteStringValue(value.ToString(serializationFormat));
 }
 
-public class TimeOnlyConverter : JsonConverter<TimeOnly>
-{
+public class TimeOnlyConverter : JsonConverter<TimeOnly> {
     private readonly string serializationFormat;
 
     public TimeOnlyConverter() : this(null) { }
 
-    public TimeOnlyConverter(string? serializationFormat)
-    {
+    public TimeOnlyConverter(string? serializationFormat) {
         this.serializationFormat = serializationFormat ?? "HH:mm:ss.fff";
     }
 
-    public override TimeOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override TimeOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
         return TimeOnly.Parse(value!);
     }
@@ -2287,8 +2080,7 @@ public class TimeOnlyConverter : JsonConverter<TimeOnly>
         => writer.WriteStringValue(value.ToString(serializationFormat));
 }
 //2023-10-13T00:15Z
-internal class IsoDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
-{
+internal class IsoDateTimeOffsetConverter : JsonConverter<DateTimeOffset> {
     public override bool CanConvert(Type t) => t == typeof(DateTimeOffset);
 
     private const string DefaultDateTimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK";
@@ -2297,32 +2089,27 @@ internal class IsoDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
     private string? _dateTimeFormat;
     private CultureInfo? _culture;
 
-    public DateTimeStyles DateTimeStyles
-    {
+    public DateTimeStyles DateTimeStyles {
         get => _dateTimeStyles;
         set => _dateTimeStyles = value;
     }
 
-    public string? DateTimeFormat
-    {
+    public string? DateTimeFormat {
         get => _dateTimeFormat ?? string.Empty;
         set => _dateTimeFormat = (string.IsNullOrEmpty(value)) ? null : value;
     }
 
-    public CultureInfo Culture
-    {
+    public CultureInfo Culture {
         get => _culture ?? CultureInfo.CurrentCulture;
         set => _culture = value;
     }
 
-    public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
-    {
+    public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options) {
         string text;
 
 
         if ((_dateTimeStyles & DateTimeStyles.AdjustToUniversal) == DateTimeStyles.AdjustToUniversal
-            || (_dateTimeStyles & DateTimeStyles.AssumeUniversal) == DateTimeStyles.AssumeUniversal)
-        {
+            || (_dateTimeStyles & DateTimeStyles.AssumeUniversal) == DateTimeStyles.AssumeUniversal) {
             value = value.ToUniversalTime();
         }
 
@@ -2331,23 +2118,18 @@ internal class IsoDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
         writer.WriteStringValue(text);
     }
 
-    public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+    public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         string? dateText = reader.GetString();
 
-        if (string.IsNullOrEmpty(dateText) == false)
-        {
-            if (!string.IsNullOrEmpty(_dateTimeFormat))
-            {
+        if (string.IsNullOrEmpty(dateText) == false) {
+            if (!string.IsNullOrEmpty(_dateTimeFormat)) {
                 return DateTimeOffset.ParseExact(dateText, _dateTimeFormat, Culture, _dateTimeStyles);
             }
-            else
-            {
+            else {
                 return DateTimeOffset.Parse(dateText, Culture, _dateTimeStyles);
             }
         }
-        else
-        {
+        else {
             return default(DateTimeOffset);
         }
     }
@@ -2355,18 +2137,15 @@ internal class IsoDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
 
     public static readonly IsoDateTimeOffsetConverter Singleton = new();
 }
-internal class DateTimeConverterUsingDateTimeParse : JsonConverter<DateTime>
-{
-    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
+internal class DateTimeConverterUsingDateTimeParse : JsonConverter<DateTime> {
+    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         //Apr 1 2019 12:00
         //Debug.Assert(typeToConvert == typeof(DateTime));
         //return DateTime.SpecifyKind(DateTime.Parse(reader.GetString() ?? string.Empty), DateTimeKind.Utc);
         return DateTime.Parse(reader.GetString() ?? string.Empty);
     }
 
-    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
-    {
+    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options) {
         writer.WriteStringValue(value.ToString());
     }
 }
