@@ -1,10 +1,11 @@
 using System.Data;
 using System.Threading.Tasks;
 using fourplay.Data;
+using fourplay.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
-
+namespace fourplay.Services;
 public class LeaderboardService : ILeaderboardService {
     private IDbContextFactory<ApplicationDbContext> _dbContextFactory { get; set; }
     private IESPNApiService? _espn { get; set; }

@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Authentication;
 using Serilog;
 using fourplay.Jobs;
 using Serilog.Formatting.Compact;
+using fourplay.Services.Interfaces;
+using fourplay.Services;
 Environment.SetEnvironmentVariable("DOTNET_hostBuilder:reloadConfigOnChange", "false");
 var builder = WebApplication.CreateBuilder(args);
 

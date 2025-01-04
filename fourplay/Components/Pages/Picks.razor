@@ -37,18 +37,18 @@
                                     <MudImage Src="@GameHelpers.GetAwayTeamLogo(@scoreEvent)" Width="50" />
                                     <MudPaper Elevation="0">
                                         <MudText Typo="Typo.h6" Class="d-flex justify-end flex-grow-1 gap-4 pr-4">
-                                            @GetSpread(@GameHelpers.GetHomeTeamAbbr(@scoreEvent))
+                                            @GetSpread(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))
                                         </MudText>
                                     </MudPaper>
                                     @if (IsSelected(@GameHelpers.GetAwayTeamAbbr(@scoreEvent)))
                                     {
-                                        <MudButton OnClick="@((e) => UnSelectPick(@GameHelpers.GetHomeTeamAbbr(@scoreEvent)))"
+                                        <MudButton OnClick="@((e) => UnSelectPick(@GameHelpers.GetAwayTeamAbbr(@scoreEvent)))"
                                             Color="Color.Tertiary" Variant="Variant.Filled">Picked</MudButton>
                                     }
                                     else
                                     {
                                         <MudButton Disabled="@IsGameStartedOrDisabledPicks(@scoreEvent)"
-                                            OnClick="@((e) => SelectPick(@GameHelpers.GetHomeTeamAbbr(@scoreEvent)))"
+                                            OnClick="@((e) => SelectPick(@GameHelpers.GetAwayTeamAbbr(@scoreEvent)))"
                                             Color="Color.Warning" Variant="Variant.Filled">Pick</MudButton>
                                     }
                                 </MudStack>
@@ -65,18 +65,18 @@
                                     <MudImage Src="@GameHelpers.GetHomeTeamLogo(@scoreEvent)" Width="50" />
                                     <MudPaper Elevation="0">
                                         <MudText Typo="Typo.h6" Class="d-flex justify-end flex-grow-1 gap-4 pr-4">
-                                            @GetSpread(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))
+                                            @GetSpread(@GameHelpers.GetHomeTeamAbbr(@scoreEvent))
                                         </MudText>
                                     </MudPaper>
                                     @if (IsSelected(@GameHelpers.GetHomeTeamAbbr(@scoreEvent)))
                                     {
-                                        <MudButton OnClick="@((e) => UnSelectPick(@GameHelpers.GetAwayTeamAbbr(@scoreEvent)))"
+                                        <MudButton OnClick="@((e) => UnSelectPick(@GameHelpers.GetHomeTeamAbbr(@scoreEvent)))"
                                             Color="Color.Tertiary" Variant="Variant.Filled">Picked</MudButton>
                                     }
                                     else
                                     {
                                         <MudButton Disabled="@IsGameStartedOrDisabledPicks(@scoreEvent)"
-                                            OnClick="@((e) => SelectPick(@GameHelpers.GetAwayTeamAbbr(@scoreEvent)))"
+                                            OnClick="@((e) => SelectPick(@GameHelpers.GetHomeTeamAbbr(@scoreEvent)))"
                                             Color="Color.Warning" Variant="Variant.Filled">Pick</MudButton>
                                     }
 

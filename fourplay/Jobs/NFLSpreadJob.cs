@@ -1,5 +1,6 @@
 using fourplay.Data;
 using fourplay.Helpers;
+using fourplay.Services.Interfaces;
 using Quartz;
 using Serilog;
 namespace fourplay.Jobs;

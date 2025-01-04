@@ -7,7 +7,7 @@
         <MudItem xs="12">
             <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((!@_loading ? "invisible" : ""))" />
         </MudItem>
-        @if (_scores is not null && _odds is not null && _leagueId > 0)
+        @if (!_loading & _scores is not null && _odds is not null && _leagueId > 0)
         {
 
             <MudItem xs="12">
@@ -43,14 +43,18 @@
                                         @GameHelpers.GetAwayTeamAbbr(@scoreEvent)
                                     </MudText>
                                     <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
-                                        @GetSpread(@GameHelpers.GetHomeTeamAbbr(@scoreEvent))
+                                        @GetSpread(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))
                                     </MudPaper>
-                                    <MudBadge Content="@GetUserPicks(scoreEvent,GameHelpers.GetAwayTeamAbbr(scoreEvent))"
-                                        Color="Color.Primary" Overlap="true">
-                                        <MudIconButton Disabled="@GameHelpers.IsGameStarted(@scoreEvent)"
-                                            OnClick="@((_) => ShowDialog(@scoreEvent.Competitors[1].Team.Abbreviation, @scoreEvent.Competitors[1].Team.Logo.ToString()))"
-                                            Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
-                                    </MudBadge>
+                                    @if (GameHelpers.IsGameStarted(@scoreEvent))
+                                    {
+                                        <MudBadge Content="@GetUserPicks(scoreEvent,GameHelpers.GetAwayTeamAbbr(scoreEvent))"
+                                            Color="Color.Primary" Overlap="true">
+                                            <MudIconButton Disabled="@GameHelpers.IsGameStarted(@scoreEvent)"
+                                                OnClick="@((_) => ShowDialog(@GameHelpers.GetAwayTeamAbbr(@scoreEvent), @GameHelpers.GetAwayTeamLogo(@scoreEvent)))"
+                                                Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                                        </MudBadge>
+                                    }
+
                                 </MudStack>
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
                                     <MudIcon Icon="@GetIcon(scoreEvent, GameHelpers.GetHomeTeam(scoreEvent),
@@ -60,14 +64,18 @@
                                         @GameHelpers.GetHomeTeamAbbr(@scoreEvent)
                                     </MudText>
                                     <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
-                                        @GetSpread(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))
+                                        @GetSpread(@GameHelpers.GetHomeTeamAbbr(@scoreEvent))
                                     </MudPaper>
-                                    <MudBadge Content="@GetUserPicks(scoreEvent, @scoreEvent.Competitors[0].Team.Abbreviation)"
-                                        Color="Color.Primary" Overlap="true">
-                                        <MudIconButton Disabled="@GameHelpers.IsGameStarted(@scoreEvent)"
-                                            OnClick="@((_) => ShowDialog(@scoreEvent.Competitors[0].Team.Abbreviation, @scoreEvent.Competitors[0].Team.Logo.ToString()))"
-                                            Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
-                                    </MudBadge>
+                                    @if (GameHelpers.IsGameStarted(@scoreEvent))
+                                    {
+                                        <MudBadge Content="@GetUserPicks(scoreEvent,GameHelpers.GetHomeTeamAbbr(scoreEvent))"
+                                            Color="Color.Primary" Overlap="true">
+                                            <MudIconButton Disabled="@GameHelpers.IsGameStarted(@scoreEvent)"
+                                                OnClick="@((_) => ShowDialog(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), @GameHelpers.GetHomeTeamLogo(@scoreEvent)))"
+                                                Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                                        </MudBadge>
+                                    }
+
                                 </MudStack>
                             </MudPaper>
                         </MudPaper>

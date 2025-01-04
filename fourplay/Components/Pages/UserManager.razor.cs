@@ -48,6 +48,10 @@ public partial class UserManager : ComponentBase, IDisposable {
         }
     }
 
+    private async Task ClearPostSeasonScores() {
+        await _db.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [NFLPostSeasonScores]");
+        Snackbar.Add("Truncated NFLPostSeasonScores", Severity.Success);
+    }
     public async Task AddUser() {
         var parameters = new DialogParameters<AddUserDialog>();
 

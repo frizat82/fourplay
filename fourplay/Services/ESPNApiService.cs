@@ -1,8 +1,9 @@
 using System.Text.Json;
 using fourplay.Helpers;
+using fourplay.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
-
+namespace fourplay.Services;
 public class ESPNApiService : IESPNApiService {
     private readonly HttpClient _httpClient;
     private readonly IMemoryCache _memory;

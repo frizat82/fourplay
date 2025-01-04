@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using fourplay.Helpers;
 using Serilog;
-
+using System.Runtime.CompilerServices;
+using fourplay.Services.Interfaces;
+[assembly: InternalsVisibleTo("unitTests")]
 namespace fourplay.Components.Pages;
 [Authorize]
 public partial class Picks : ComponentBase {
@@ -17,9 +19,9 @@ public partial class Picks : ComponentBase {
     [Inject] private IDbContextFactory<ApplicationDbContext> _dbContextFactory { get; set; } = default!;
     [Inject] private ILoginHelper _loginHelper { get; set; } = default!;
     [Inject] ILocalStorageService _localStorage { get; set; } = default!;
-    private ESPNScores? _scores = null;
-    private List<NFLSpreads>? _odds = null;
-    private List<string> _picks = new();
+    internal ESPNScores? _scores = null;
+    internal List<NFLSpreads>? _odds = null;
+    internal List<string> _picks = new();
     private int _leagueId = 0;
     private bool _loading = true;
     private bool _locked = false;

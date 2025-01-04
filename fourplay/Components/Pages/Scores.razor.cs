@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Blazored.LocalStorage;
 using fourplay.Helpers;
 using Serilog;
+using fourplay.Services.Interfaces;
 
 namespace fourplay.Components.Pages;
 [Authorize]
@@ -15,6 +16,7 @@ public partial class Scores : ComponentBase, IDisposable {
     [Inject] private ApplicationDbContext? _db { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     private ESPNScores? _scores = null;
+    private Dictionary<string, List<string>> _userPicks = new();
     private System.Timers.Timer _timer = new();
     private List<NFLSpreads>? _odds = null;
     [Inject] ILocalStorageService _localStorage { get; set; } = default!;
@@ -30,6 +32,18 @@ public partial class Scores : ComponentBase, IDisposable {
         _timer.Interval = TimeSpan.FromMinutes(5).TotalMilliseconds;
         _timer.AutoReset = true;
         _timer.Enabled = true;
+        foreach (var scoreEvent in _scores?.Events) {
+            foreach (var competition in scoreEvent.Competitions.OrderBy(x => x.Competitors[1].Team.Abbreviation)) {
+                if (GameHelpers.IsGameStarted(competition)) {
+                    _userPicks.Add(GameHelpers.GetHomeTeamAbbr(competition), await GetUserPicks(GameHelpers.GetHomeTeamAbbr(competition)));
+                    _userPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), await GetUserPicks(GameHelpers.GetAwayTeamAbbr(competition)));
+                }
+                else {
+                    _userPicks.Add(GameHelpers.GetHomeTeamAbbr(competition), new List<string>());
+                    _userPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), new List<string>());
+                }
+            }
+        }
         _loading = false;
     }
     protected override async Task OnAfterRenderAsync(bool firstRender) {
@@ -71,19 +85,25 @@ public partial class Scores : ComponentBase, IDisposable {
         else
             return Color.Error;
     }
+    public async Task<List<string>> GetUserPicks(string teamAbbr) {
+        var picks = await _db?.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
+    && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr).Select(y => y.User.NormalizedUserName).ToListAsync();
+        if (picks is null) {
+            return new List<string>();
+        }
+        return picks!;
+    }
+
     public int GetUserPicks(Competition competition, string teamAbbr) {
         if (!GameHelpers.IsGameStarted(competition)) return 0;
-        var picks = _db?.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
-        && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr);
-        return picks.Count();
+        return _userPicks[teamAbbr].Count!;
     }
     private void TimeElapsed(object? sender, System.Timers.ElapsedEventArgs e) => RunTimer();
     private async Task ShowDialog(string teamAbbr, string logo) {
-        var usrNames = await _db?.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
-        && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr).Select(y => y.User.NormalizedUserName).ToListAsync();
+        var usrNames = _userPicks![teamAbbr];
         if (usrNames.Count > 0) {
             var parameters = new DialogParameters<PickDialog> {
-            { x => x.UserNames, usrNames },
+            { x => x.UserNames, usrNames! },
             { x => x.TeamAbbr, teamAbbr},
             {x => x.Logo, logo}};
             await _dialogService.ShowAsync<PickDialog>("User Picks", parameters, new DialogOptions {
