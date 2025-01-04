@@ -1,4 +1,5 @@
 using System.Text.Json;
+using fourplay.Helpers;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
@@ -12,7 +13,7 @@ public class ESPNApiService : IESPNApiService {
         // Add any additional configuration for the HttpClient here
     }
     public async Task<ESPNScores?> GetWeekScores(int week, int year, bool postSeason = false) {
-        return await _memory.GetOrCreateAsync<ESPNScores?>($"scores:{week}:{year}", async (option) => {
+        return await _memory.GetOrCreateAsync<ESPNScores?>($"scores:{week}:{year}:{postSeason}", async (option) => {
             option.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
             try {
                 // Replace the endpoint with the actual ESPN API endpoint for NFL spreads
@@ -25,7 +26,7 @@ public class ESPNApiService : IESPNApiService {
                     };
                     ESPNApiServiceJsonConverter.Settings.Converters.ToList().ForEach(x => options.Converters.Add(x));
                     // Deserialize the JSON response into a .NET object
-                    foreach (var map in Helpers.NFLTeamAbbrMapping) {
+                    foreach (var map in NFLTeamMappingHelpers.NFLTeamAbbrMapping) {
                         if (responseString.Contains($"\"{map.Key}\""))
                             responseString = responseString.Replace($"\"{map.Key}\"", $"\"{map.Value}\"");
                     }
@@ -138,7 +139,7 @@ public class ESPNApiService : IESPNApiService {
                         PropertyNameCaseInsensitive = true
                     };
                     ESPNApiServiceJsonConverter.Settings.Converters.ToList().ForEach(x => options.Converters.Add(x));
-                    foreach (var map in Helpers.NFLTeamAbbrMapping) {
+                    foreach (var map in NFLTeamMappingHelpers.NFLTeamAbbrMapping) {
                         if (responseString.Contains($"\"{map.Key}\""))
                             responseString = responseString.Replace($"\"{map.Key}\"", $"\"{map.Value}\"");
                     }

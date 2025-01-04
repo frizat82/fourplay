@@ -5,7 +5,7 @@ using MudBlazor;
 using NodaTime;
 using Microsoft.EntityFrameworkCore;
 using Blazored.LocalStorage;
-using System;
+using fourplay.Helpers;
 using Serilog;
 
 namespace fourplay.Components.Pages;
@@ -57,7 +57,7 @@ public partial class Scores : ComponentBase, IDisposable {
     }
     public string GetIcon(Competition competition, Competitor baseTeam, Competitor compareTeam) {
         var spread = GetSpread(baseTeam.Team.Abbreviation) ?? 0;
-        if (!IsGameStarted(competition)) return Icons.Material.Filled.GppGood;
+        if (!GameHelpers.IsGameStarted(competition)) return Icons.Material.Filled.GppGood;
         if ((baseTeam.Score + spread - compareTeam.Score) > 0)
             return Icons.Material.Filled.GppGood;
         else
@@ -65,13 +65,14 @@ public partial class Scores : ComponentBase, IDisposable {
     }
     public Color GetColor(Competition competition, Competitor baseTeam, Competitor compareTeam) {
         var spread = GetSpread(baseTeam.Team.Abbreviation) ?? 0;
-        if (!IsGameStarted(competition)) return Color.Success;
+        if (!GameHelpers.IsGameStarted(competition)) return Color.Success;
         if ((baseTeam.Score + spread - compareTeam.Score) > 0)
             return Color.Success;
         else
             return Color.Error;
     }
-    public int GetUserPicks(string teamAbbr) {
+    public int GetUserPicks(Competition competition, string teamAbbr) {
+        if (!GameHelpers.IsGameStarted(competition)) return 0;
         var picks = _db?.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
         && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr);
         return picks.Count();
@@ -96,7 +97,6 @@ public partial class Scores : ComponentBase, IDisposable {
         _scores = await _espn.GetScores();
         await InvokeAsync(StateHasChanged);
     }
-    private bool IsGameStarted(Competition competition) => competition.Status.Type.Name != TypeName.StatusScheduled;
     public void Dispose() {
         Dispose(true);
         GC.SuppressFinalize(this);
@@ -148,6 +148,5 @@ public partial class Scores : ComponentBase, IDisposable {
             }
         }
         return null;
-
     }
 }

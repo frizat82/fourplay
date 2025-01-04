@@ -121,6 +121,13 @@ public partial class UserManager : ComponentBase, IDisposable {
         Log.Information("Started Spread Job");
         Snackbar.Add("Started Spread Job", Severity.Success);
     }
+    public async Task RunScores() {
+        // Create a scheduler
+        var scheduler = await _schedulerFactory.GetScheduler();
+        await scheduler.TriggerJob(new JobKey("NFL Scores"));
+        Log.Information("Started Scores Job");
+        Snackbar.Add("Started Scores Job", Severity.Success);
+    }
     public async Task RunUserJob() {
         // Create a scheduler
         var scheduler = await _schedulerFactory.GetScheduler();

@@ -4,6 +4,7 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
+using fourplay.Helpers;
 using Serilog;
 
 namespace fourplay.Components.Pages;
@@ -115,10 +116,9 @@ public partial class Picks : ComponentBase {
         }
         return "          ";
     }
+    public bool IsGameStartedOrDisabledPicks(Competition competition) => GameHelpers.IsGameStarted(competition) || IsDisabled();
     private bool IsSelected(string teamAbbreviation) => _picks.Contains(teamAbbreviation);
     private bool IsDisabled() => _picks.Count == 4;
-    private bool IsGameStarted(Competition competition) => competition.Status.Type.Name != TypeName.StatusScheduled;
-    private bool IsGameStartedOrDisabled(Competition competition) => IsGameStarted(competition) || IsDisabled();
     private bool IsPicksLocked() => _locked;
 
 }

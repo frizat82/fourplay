@@ -1,4 +1,5 @@
 ﻿@page "/scores"
+@using fourplay.Helpers
 
 <PageTitle>Scores</PageTitle>
 <MudContainer>
@@ -6,7 +7,7 @@
         <MudItem xs="12">
             <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((!@_loading ? "invisible" : ""))" />
         </MudItem>
-        @if (_scores is not null && _leagueId > 0)
+        @if (_scores is not null && _odds is not null && _leagueId > 0)
         {
 
             <MudItem xs="12">
@@ -22,46 +23,48 @@
                             <MudPaper class="pa-3" Elevation="15">
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Row="true">
 
-                                    <MudImage Src="@scoreEvent.Competitors[1].Team.Logo.ToString()" Width="50" />
-                                    <MudText Typo="Typo.h6">@scoreEvent.Competitors[1].Score</MudText>
+                                    <MudImage Src="@GameHelpers.GetAwayTeamLogo(@scoreEvent)" Width="50" />
+                                    <MudText Typo="Typo.h6">@GameHelpers.GetAwayTeamScore(@scoreEvent)</MudText>
 
 
                                     <MudText>@DisplayDetails(@scoreEvent)</MudText>
 
-                                    <MudText Typo="Typo.h6">@scoreEvent.Competitors[0].Score</MudText>
-                                    <MudImage Src="@scoreEvent.Competitors[0].Team.Logo.ToString()" Width="50" />
+                                    <MudText Typo="Typo.h6">@GameHelpers.GetHomeTeamScore(@scoreEvent)</MudText>
+                                    <MudImage Src="@GameHelpers.GetHomeTeamLogo(@scoreEvent)" Width="50" />
 
                                 </MudStack>
                             </MudPaper>
                             <MudPaper class="pa-2 ma-2" Elevation="5">
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
-                                    <MudIcon Icon="@GetIcon(scoreEvent, scoreEvent.Competitors[1], scoreEvent.Competitors[0])"
-                                        Color="@GetColor(scoreEvent, scoreEvent.Competitors[1], scoreEvent.Competitors[0])" />
+                                    <MudIcon
+                                        Icon="@GetIcon(scoreEvent, GameHelpers.GetAwayTeam(scoreEvent), GameHelpers.GetHomeTeam(scoreEvent))"
+                                        Color="@GetColor(scoreEvent, GameHelpers.GetAwayTeam(scoreEvent), GameHelpers.GetHomeTeam(scoreEvent))" />
                                     <MudText>
-                                        @scoreEvent.Competitors[0].Team.Abbreviation
+                                        @GameHelpers.GetAwayTeamAbbr(@scoreEvent)
                                     </MudText>
                                     <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
-                                        @GetSpread(@scoreEvent.Competitors[1].Team.Abbreviation)
+                                        @GetSpread(@GameHelpers.GetHomeTeamAbbr(@scoreEvent))
                                     </MudPaper>
-                                    <MudBadge Content="@GetUserPicks(@scoreEvent.Competitors[1].Team.Abbreviation)"
+                                    <MudBadge Content="@GetUserPicks(scoreEvent,GameHelpers.GetAwayTeamAbbr(scoreEvent))"
                                         Color="Color.Primary" Overlap="true">
-                                        <MudIconButton
+                                        <MudIconButton Disabled="@GameHelpers.IsGameStarted(@scoreEvent)"
                                             OnClick="@((_) => ShowDialog(@scoreEvent.Competitors[1].Team.Abbreviation, @scoreEvent.Competitors[1].Team.Logo.ToString()))"
                                             Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
                                     </MudBadge>
                                 </MudStack>
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
-                                    <MudIcon Icon="@GetIcon(scoreEvent, scoreEvent.Competitors[0], scoreEvent.Competitors[1])"
-                                        Color="@GetColor(scoreEvent, scoreEvent.Competitors[0], scoreEvent.Competitors[1])" />
+                                    <MudIcon Icon="@GetIcon(scoreEvent, GameHelpers.GetHomeTeam(scoreEvent),
+                                       GameHelpers.GetAwayTeam(scoreEvent))" Color="@GetColor(scoreEvent, GameHelpers.GetHomeTeam(scoreEvent),
+                                      GameHelpers.GetAwayTeam(scoreEvent))" />
                                     <MudText>
-                                        @scoreEvent.Competitors[1].Team.Abbreviation
+                                        @GameHelpers.GetHomeTeamAbbr(@scoreEvent)
                                     </MudText>
                                     <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
-                                        @GetSpread(@scoreEvent.Competitors[0].Team.Abbreviation)
+                                        @GetSpread(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))
                                     </MudPaper>
-                                    <MudBadge Content="@GetUserPicks(@scoreEvent.Competitors[0].Team.Abbreviation)"
+                                    <MudBadge Content="@GetUserPicks(scoreEvent, @scoreEvent.Competitors[0].Team.Abbreviation)"
                                         Color="Color.Primary" Overlap="true">
-                                        <MudIconButton
+                                        <MudIconButton Disabled="@GameHelpers.IsGameStarted(@scoreEvent)"
                                             OnClick="@((_) => ShowDialog(@scoreEvent.Competitors[0].Team.Abbreviation, @scoreEvent.Competitors[0].Team.Logo.ToString()))"
                                             Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
                                     </MudBadge>
