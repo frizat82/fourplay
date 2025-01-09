@@ -50,6 +50,7 @@ public partial class UserManager : ComponentBase, IDisposable {
 
     private async Task ClearPostSeasonScores() {
         await _db.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [NFLPostSeasonScores]");
+        await _db.SaveChangesAsync();
         Snackbar.Add("Truncated NFLPostSeasonScores", Severity.Success);
     }
     public async Task AddUser() {
