@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using fourplay.Data;
 using fourplay.Models.Enum;
 
-public class NFLPicks {
+public class NFLPostSeasonPicks {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 
     public int Id { get; set; }
@@ -11,7 +11,9 @@ public class NFLPicks {
     // Foreign key to the AspNetUsers table
     public string UserId { get; set; }
     public ApplicationUser User { get; set; }
-    public string Team { get; set; }
+    public string HomeTeam { get; set; }
+    public string AwayTeam { get; set; }
+    public PickType Pick { get; set; }
     public int NFLWeek { get; set; }
     public int Season { get; set; }
     public DateTime DateCreated { get; set; }

@@ -8,6 +8,7 @@ using fourplay.Helpers;
 using Serilog;
 using System.Runtime.CompilerServices;
 using fourplay.Services.Interfaces;
+using fourplay.Models.Enum;
 [assembly: InternalsVisibleTo("unitTests")]
 namespace fourplay.Components.Pages;
 [Authorize]
@@ -22,14 +23,21 @@ public partial class Picks : ComponentBase {
     internal ESPNScores? _scores = null;
     internal List<NFLSpreads>? _odds = null;
     internal List<string> _picks = new();
+    internal Dictionary<Competition, PickType> _picksOverUnder = new();
     private int _leagueId = 0;
     private bool _loading = true;
     private bool _locked = false;
+    private bool _isPostseason = false;
+    private long _week = 0;
 
     protected override async Task OnInitializedAsync() {
         _loading = true;
         using var db = _dbContextFactory.CreateDbContext();
-        _scores = await _espn.GetScores();
+        _scores = await _espn!.GetScores();
+        if (_scores is null) return;
+        if (_scores!.Season.Type == (int)TypeOfSeason.PostSeason)
+            _isPostseason = true;
+        _week = _scores!.Week!.Number;
         _odds = db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
         var usrId = await _loginHelper.GetUserDetails();
         if (usrId is not null) {
@@ -83,7 +91,19 @@ public partial class Picks : ComponentBase {
             await InvokeAsync(StateHasChanged);
         }
     }
-
+    private double? GetOverUnder(string teamAbbr) {
+        //TODO: Add Caching
+        using var db = _dbContextFactory.CreateDbContext();
+        if (_leagueId != 0) {
+            var spread = _odds.FirstOrDefault(x => x.HomeTeam == teamAbbr);
+            if (spread is not null)
+                return spread.OverUnder;
+            spread = _odds.FirstOrDefault(x => x.AwayTeam == teamAbbr);
+            if (spread is not null)
+                return spread.OverUnder;
+        }
+        return null;
+    }
     private double? GetSpread(string teamAbbr) {
         //TODO: Add Caching
         using var db = _dbContextFactory.CreateDbContext();
@@ -99,7 +119,17 @@ public partial class Picks : ComponentBase {
             }
         }
         return null;
+    }
+    private void UnSelectOverUnderPick(Competition competition) {
+        if (!IsPicksLocked()) {
+            _picksOverUnder.Remove(competition);
+        }
+    }
 
+    private void SelectOverUnderPick(Competition competition, PickType pickType) {
+        if (!IsPicksLocked()) {
+            _picksOverUnder.Add(competition, pickType);
+        }
     }
     private void UnSelectPick(string teamAbbreviation) {
         if (!IsPicksLocked()) {
@@ -116,11 +146,18 @@ public partial class Picks : ComponentBase {
         if (competition.Status.Type.Name == TypeName.StatusScheduled) {
             return competition.Date.ToLocalTime().ToString("ddd, MMMM dd HH:mm");
         }
+        else if (competition.Status.Type.Name == TypeName.StatusInProgress) {
+            return "In Progress";
+        }
+        else if (competition.Status.Type.Name == TypeName.StatusFinal) {
+            return "Final";
+        }
         return "          ";
     }
     public bool IsGameStartedOrDisabledPicks(Competition competition) => GameHelpers.IsGameStarted(competition) || IsDisabled();
     private bool IsSelected(string teamAbbreviation) => _picks.Contains(teamAbbreviation);
-    private bool IsDisabled() => _picks.Count == 4;
+    private bool IsOverUnderSelected(Competition competition) => _picksOverUnder.ContainsKey(competition);
+    private bool IsDisabled() => _picks.Count == 4 || _picks.Count + _picksOverUnder.Count == 4;
     private bool IsPicksLocked() => _locked;
 
 }

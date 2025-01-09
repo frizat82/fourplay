@@ -111,7 +111,11 @@ public partial class UserManager : ComponentBase, IDisposable {
                 }
                 Log.Information("Adding {Season} {Juice} {LeagueName}", addedLeague.Season, addedLeague.Juice, addedLeague.LeagueName);
                 var createdLeague = _db.LeagueInfo.Where(x => x.LeagueName == addedLeague.LeagueName).First();
-                await _db.LeagueJuiceMapping.AddAsync(new LeagueJuiceMapping() { Juice = addedLeague.Juice, League = createdLeague, Season = addedLeague.Season });
+                await _db.LeagueJuiceMapping.AddAsync(new LeagueJuiceMapping() {
+                    Juice = addedLeague.Juice,
+                    JuiceConference = addedLeague.JuiceConference, JuiceDivisonal = addedLeague.JuiceDivisional,
+                    League = createdLeague, Season = addedLeague.Season
+                });
                 await _db.SaveChangesAsync();
                 Snackbar.Add("League Season Added", Severity.Success);
             }

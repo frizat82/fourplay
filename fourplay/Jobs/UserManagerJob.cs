@@ -42,6 +42,10 @@ public class UserManagerJob : IJob {
         */
         Log.Information("Updatting Base 0 WeeklyCost");
         await _db.LeagueJuiceMapping.Where(b => b.WeeklyCost == 0).ExecuteUpdateAsync(setters => setters.SetProperty(b => b.WeeklyCost, 5));
+        Log.Information("Updatting Base 0 JuiceDivisional");
+        await _db.LeagueJuiceMapping.Where(b => b.JuiceDivisonal == 0).ExecuteUpdateAsync(setters => setters.SetProperty(b => b.JuiceDivisonal, 10));
+        Log.Information("Updatting Base 0 JuiceConference");
+        await _db.LeagueJuiceMapping.Where(b => b.JuiceConference == 0).ExecuteUpdateAsync(setters => setters.SetProperty(b => b.JuiceConference, 6));
     }
     /// <summary>
     /// Create base user
@@ -97,45 +101,5 @@ public class UserManagerJob : IJob {
             Log.Information("User Added To Role {@Identity}", newUserRole);
         }
     }
-    /*
-    internal async Task PopulateDatabaseWithRandomData()
-    {
-        var faker = new Faker();
 
-        // Add random users
-        var currentUsers = await _db.LeagueUsers.ToListAsync();
-        if (currentUsers.Count < 10)
-        {
-            for (int i = 0; i < 10 - urrentUsers.Count; i++)
-            {
-                var user = new LeagueUsers
-                {
-                    GoogleEmail = faker.Internet.Email()
-                };
-                await _db.LeagueUsers.AddAsync(user);
-            }
-
-        }
-        await _db.SaveChangesAsync();
-
-        // Add random scores
-        var users = await _db.LeagueUsers.ToListAsync();
-
-
-        await _db.SaveChangesAsync();
-
-        // Add random spreads
-        foreach (var gameId in games)
-        {
-            var spread = new NFLSpreads
-            {
-                GameId = gameId,
-                Spread = faker.Random.Double(-10, 10)
-            };
-            await _db.NFLSpreads.AddAsync(spread);
-        }
-
-        await _db.SaveChangesAsync();
-    }
-*/
 }

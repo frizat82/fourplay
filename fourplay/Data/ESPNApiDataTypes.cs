@@ -30,7 +30,7 @@ public partial class Event {
 
 }
 
-public partial class Competition {
+public class Competition {
 
     [JsonPropertyName("date")]
     //[JsonConverter(typeof(IsoDateTimeOffsetConverter))]
@@ -41,6 +41,9 @@ public partial class Competition {
 
     [JsonPropertyName("status")]
     public Status Status { get; set; }
+    public override int GetHashCode() {
+        return HashCode.Combine(Date.ToString("yyyyMMddHHmmss"), Competitors[0].Team.Abbreviation, Competitors[1].Team.Abbreviation);
+    }
 
 }
 
@@ -724,7 +727,7 @@ public partial class EventSeason {
     public long Type { get; set; }
 
     [JsonPropertyName("slug")]
-    public Slug Slug { get; set; }
+    public TypeOfSeason Slug { get; set; }
 }
 
 public partial class Weather {
@@ -949,7 +952,7 @@ public enum TypeAbbreviation { Std };
 
 public enum Language { EnUs };
 
-public enum Slug { RegularSeason = 2, PreSeason = 1 };
+public enum TypeOfSeason { PostSeason = 3, RegularSeason = 2, PreSeason = 1 };
 
 public partial struct RelUnion {
     public NoteType? Enum;
@@ -990,7 +993,7 @@ internal static class ESPNApiServiceJsonConverter {
                 TypeAbbreviationConverter.Singleton,
                 LanguageConverter.Singleton,
                 RelUnionConverter.Singleton,
-                SlugConverter.Singleton,
+                TypeOfSeasonConverter.Singleton,
                 new DateOnlyConverter(),
                 new TimeOnlyConverter(),
                 IsoDateTimeOffsetConverter.Singleton,
@@ -2021,28 +2024,28 @@ internal class RelUnionConverter : JsonConverter<RelUnion> {
     public static readonly RelUnionConverter Singleton = new();
 }
 
-internal class SlugConverter : JsonConverter<Slug> {
-    public override bool CanConvert(Type t) => t == typeof(Slug);
+internal class TypeOfSeasonConverter : JsonConverter<TypeOfSeason> {
+    public override bool CanConvert(Type t) => t == typeof(TypeOfSeason);
 
-    public override Slug Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+    public override TypeOfSeason Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var value = reader.GetString();
         if (value == "regular-season") {
-            return Slug.RegularSeason;
+            return TypeOfSeason.RegularSeason;
         }
         else if (value == "pre-sesaon")
-            return Slug.PreSeason;
-        return Slug.PreSeason;
+            return TypeOfSeason.PreSeason;
+        return TypeOfSeason.PreSeason;
     }
 
-    public override void Write(Utf8JsonWriter writer, Slug value, JsonSerializerOptions options) {
-        if (value == Slug.RegularSeason) {
+    public override void Write(Utf8JsonWriter writer, TypeOfSeason value, JsonSerializerOptions options) {
+        if (value == TypeOfSeason.RegularSeason) {
             JsonSerializer.Serialize(writer, "regular-season", options);
             return;
         }
         return;
     }
 
-    public static readonly SlugConverter Singleton = new();
+    public static readonly TypeOfSeasonConverter Singleton = new();
 }
 
 public class DateOnlyConverter : JsonConverter<DateOnly> {

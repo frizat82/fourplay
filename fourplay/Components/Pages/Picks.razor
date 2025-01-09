@@ -1,5 +1,6 @@
 ﻿@page "/picks"
 @using fourplay.Helpers
+@using fourplay.Models.Enum
 
 <PageTitle>Picks</PageTitle>
 <MudContainer>
@@ -51,12 +52,36 @@
                                             OnClick="@((e) => SelectPick(@GameHelpers.GetAwayTeamAbbr(@scoreEvent)))"
                                             Color="Color.Warning" Variant="Variant.Filled">Pick</MudButton>
                                     }
+                                    @if (@_isPostseason)
+                                    {
+                                        @if (IsOverUnderSelected(@scoreEvent))
+                                        {
+                                            <MudButton OnClick="@((e) => UnSelectOverUnderPick(@scoreEvent))"
+                                                Color="Color.Tertiary" Variant="Variant.Filled">@GetOverUnder(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))</MudButton>
+                                        }
+                                        else
+                                        {
+                                            <MudButton Disabled="@IsGameStartedOrDisabledPicks(@scoreEvent)"
+                                                OnClick="@((e) => SelectOverUnderPick(@scoreEvent, PickType.Over))"
+                                                Color="Color.Warning" Variant="Variant.Filled">@GetOverUnder(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))</MudButton>
+                                        }
+                                        @if (IsOverUnderSelected(@scoreEvent))
+                                        {
+                                            <MudButton OnClick="@((e) => UnSelectOverUnderPick(@scoreEvent))"
+                                                Color="Color.Tertiary" Variant="Variant.Filled">-@GetOverUnder(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))</MudButton>
+                                        }
+                                        else
+                                        {
+                                            <MudButton Disabled="@IsGameStartedOrDisabledPicks(@scoreEvent)"
+                                                OnClick="@((e) => SelectOverUnderPick(@scoreEvent, PickType.Under))"
+                                                Color="Color.Warning" Variant="Variant.Filled"> -@GetOverUnder(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))</MudButton>
+                                        }
+                                    }
                                 </MudStack>
                             </MudPaper>
                             <MudDivider></MudDivider>
                             <MudSpacer />
                             <MudItem Class="d-flex justify-end flex-grow-1 gap-4 pr-4">
-                                <!--<MudIcon Icon="@Icons.Material.Filled.AlternateEmail"/>-->
                                 <MudText>@DisplayDetails(@scoreEvent)</MudText>
                             </MudItem>
                             <MudDivider></MudDivider>

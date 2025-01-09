@@ -26,7 +26,6 @@
                                     <MudImage Src="@GameHelpers.GetAwayTeamLogo(@scoreEvent)" Width="50" />
                                     <MudText Typo="Typo.h6">@GameHelpers.GetAwayTeamScore(@scoreEvent)</MudText>
 
-
                                     <MudText>@DisplayDetails(@scoreEvent)</MudText>
 
                                     <MudText Typo="Typo.h6">@GameHelpers.GetHomeTeamScore(@scoreEvent)</MudText>
@@ -45,15 +44,15 @@
                                     <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
                                         @GetSpread(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))
                                     </MudPaper>
-                                    @if (GameHelpers.IsGameStarted(@scoreEvent))
-                                    {
-                                        <MudBadge Content="@GetUserPicks(scoreEvent,GameHelpers.GetAwayTeamAbbr(scoreEvent))"
-                                            Color="Color.Primary" Overlap="true">
-                                            <MudIconButton Disabled="@GameHelpers.IsGameStarted(@scoreEvent)"
-                                                OnClick="@((_) => ShowDialog(@GameHelpers.GetAwayTeamAbbr(@scoreEvent), @GameHelpers.GetAwayTeamLogo(@scoreEvent)))"
-                                                Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
-                                        </MudBadge>
-                                    }
+
+                                    <MudBadge Class="@((!GameHelpers.IsGameStarted(@scoreEvent) ? "invisible" : ""))"
+                                        Content="@GetUserPicks(scoreEvent,GameHelpers.GetAwayTeamAbbr(scoreEvent))"
+                                        Color="Color.Primary" Overlap="true">
+                                        <MudIconButton Disabled="@GameHelpers.IsGameStarted(@scoreEvent)"
+                                            OnClick="@((_) => ShowDialog(@GameHelpers.GetAwayTeamAbbr(@scoreEvent), @GameHelpers.GetAwayTeamLogo(@scoreEvent)))"
+                                            Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                                    </MudBadge>
+
 
                                 </MudStack>
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
@@ -66,15 +65,14 @@
                                     <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
                                         @GetSpread(@GameHelpers.GetHomeTeamAbbr(@scoreEvent))
                                     </MudPaper>
-                                    @if (GameHelpers.IsGameStarted(@scoreEvent))
-                                    {
-                                        <MudBadge Content="@GetUserPicks(scoreEvent,GameHelpers.GetHomeTeamAbbr(scoreEvent))"
-                                            Color="Color.Primary" Overlap="true">
-                                            <MudIconButton Disabled="@GameHelpers.IsGameStarted(@scoreEvent)"
-                                                OnClick="@((_) => ShowDialog(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), @GameHelpers.GetHomeTeamLogo(@scoreEvent)))"
-                                                Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
-                                        </MudBadge>
-                                    }
+                                    <MudBadge Class="@((!GameHelpers.IsGameStarted(@scoreEvent) ? "invisible" : ""))"
+                                        Content="@GetUserPicks(scoreEvent,GameHelpers.GetHomeTeamAbbr(scoreEvent))"
+                                        Color="Color.Primary" Overlap="true">
+                                        <MudIconButton Disabled="@GameHelpers.IsGameStarted(@scoreEvent)"
+                                            OnClick="@((_) => ShowDialog(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), @GameHelpers.GetHomeTeamLogo(@scoreEvent)))"
+                                            Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
+                                    </MudBadge>
+
 
                                 </MudStack>
                             </MudPaper>

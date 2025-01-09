@@ -86,7 +86,7 @@ public partial class Scores : ComponentBase, IDisposable {
             return Color.Error;
     }
     public async Task<List<string>> GetUserPicks(string teamAbbr) {
-        var picks = await _db?.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
+        var picks = await _db!.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
     && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr).Select(y => y.User.NormalizedUserName).ToListAsync();
         if (picks is null) {
             return new List<string>();
@@ -114,7 +114,7 @@ public partial class Scores : ComponentBase, IDisposable {
         }
     }
     protected async Task RunTimer() {
-        _scores = await _espn.GetScores();
+        _scores = await _espn!.GetScores();
         await InvokeAsync(StateHasChanged);
     }
     public void Dispose() {
@@ -128,27 +128,13 @@ public partial class Scores : ComponentBase, IDisposable {
         }
     }
 
-    private DateTime ConvertTimeToCST(DateTime utcDateTime) {
-        // Create an instance of the BclDateTimeZone representing the Central Standard Time (CST) zone.
-        var cstZone = DateTimeZoneProviders.Tzdb["America/Chicago"];
-
-        // Change the Kind to Local.
-        var utc = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
-        // Create an Instant from the UTC DateTime.
-        var instant = Instant.FromDateTimeUtc(utc);
-
-        // Convert the instant to the Central Standard Time.
-        var zonedDateTime = instant.InZone(cstZone);
-
-        // Return the DateTime in CST.
-        return zonedDateTime.ToDateTimeUnspecified();
-    }
     private string DisplayDetails(Competition? competition) {
         if (competition.Status.Type.Name == TypeName.StatusFinal) {
             return "FINAL";
         }
         else if (competition.Status.Type.Name == TypeName.StatusScheduled) {
-            return competition.Date.ToLocalTime().ToString("ddd h:mm");
+            //return competition.Date.ToLocalTime().ToString("ddd h:mm");
+            return TimeZoneHelpers.ConvertTimeToCST(competition.Date.DateTime).ToString("ddd h:mm");
         }
         else if (competition.Status.Type.Name == TypeName.StatusInProgress) {
             return $"Q{competition.Status.Period} {competition.Status.DisplayClock}";
