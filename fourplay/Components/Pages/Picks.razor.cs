@@ -27,7 +27,7 @@ public partial class Picks : ComponentBase {
     private int _leagueId = 0;
     private bool _loading = true;
     private bool _locked = false;
-    private bool _isPostseason = false;
+    private bool _isPostSeason = false;
     private long _week = 0;
 
     protected override async Task OnInitializedAsync() {
@@ -36,7 +36,7 @@ public partial class Picks : ComponentBase {
         _scores = await _espn!.GetScores();
         if (_scores is null) return;
         if (_scores!.Season.Type == (int)TypeOfSeason.PostSeason)
-            _isPostseason = true;
+            _isPostSeason = true;
         _week = _scores!.Week!.Number;
         _odds = db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
         var usrId = await _loginHelper.GetUserDetails();
@@ -93,32 +93,45 @@ public partial class Picks : ComponentBase {
     }
     private double? GetOverUnder(string teamAbbr) {
         //TODO: Add Caching
-        using var db = _dbContextFactory.CreateDbContext();
-        if (_leagueId != 0) {
-            var spread = _odds.FirstOrDefault(x => x.HomeTeam == teamAbbr);
-            if (spread is not null)
-                return spread.OverUnder;
-            spread = _odds.FirstOrDefault(x => x.AwayTeam == teamAbbr);
-            if (spread is not null)
-                return spread.OverUnder;
-        }
-        return null;
+        var spread = GetOverUnderFromAbbreviation(teamAbbr);
+        return spread + CalculateLeagueSpread();
     }
     private double? GetSpread(string teamAbbr) {
         //TODO: Add Caching
+        var spread = GetSpreadFromAbbreviation(teamAbbr);
+        return spread + CalculateLeagueSpread();
+    }
+    //TODO Juice Calculator BASED On WEEK and PLAYOFFS
+    private double CalculateLeagueSpread() {
+        var baseSpread = GetLeagueJuice();
+        if (!_isPostSeason)
+            return baseSpread.Juice;
+        if (_week == 1)
+            return baseSpread.Juice;
+        if (_week < 3)
+            return baseSpread.Juice + 1;
+        if (_week == 3)
+            return baseSpread.JuiceConference;
+        return 0;
+    }
+    private double? GetSpreadFromAbbreviation(string teamAbbr) {
+        var spread = _odds!.FirstOrDefault(x => x.HomeTeam == teamAbbr);
+        if (spread is not null)
+            return spread.HomeTeamSpread;
+        spread = _odds!.First(x => x.AwayTeam == teamAbbr);
+        return spread.AwayTeamSpread;
+    }
+    private double? GetOverUnderFromAbbreviation(string teamAbbr) {
+        var spread = _odds!.FirstOrDefault(x => x.HomeTeam == teamAbbr);
+        if (spread is not null)
+            return spread.OverUnder;
+        spread = _odds!.First(x => x.AwayTeam == teamAbbr);
+        return spread.OverUnder;
+    }
+    private LeagueJuiceMapping GetLeagueJuice() {
         using var db = _dbContextFactory.CreateDbContext();
-        if (_leagueId != 0) {
-            var spread = _odds.FirstOrDefault(x => x.HomeTeam == teamAbbr);
-            var leagueSpread = db.LeagueJuiceMapping.FirstOrDefault(x => x.Id == _leagueId && x.Season == _scores!.Season.Year);
-            if (leagueSpread is not null) {
-                if (spread is not null)
-                    return spread.HomeTeamSpread + leagueSpread.Juice;
-                spread = _odds.FirstOrDefault(x => x.AwayTeam == teamAbbr);
-                if (spread is not null)
-                    return spread.AwayTeamSpread + leagueSpread.Juice;
-            }
-        }
-        return null;
+        var leagueSpread = db.LeagueJuiceMapping.FirstOrDefault(x => x.Id == _leagueId && x.Season == _scores!.Season.Year);
+        return leagueSpread;
     }
     private void UnSelectOverUnderPick(Competition competition) {
         if (!IsPicksLocked()) {
@@ -142,9 +155,9 @@ public partial class Picks : ComponentBase {
             _picks.Add(teamAbbreviation);
         }
     }
-    private string? DisplayDetails(Competition? competition) {
+    private string? DisplayDetails(Competition competition) {
         if (competition.Status.Type.Name == TypeName.StatusScheduled) {
-            return competition.Date.ToLocalTime().ToString("ddd, MMMM dd HH:mm");
+            return TimeZoneHelpers.ConvertTimeToCST(competition.Date.DateTime).ToString("ddd, MMMM dd HH:mm");
         }
         else if (competition.Status.Type.Name == TypeName.StatusInProgress) {
             return "In Progress";
