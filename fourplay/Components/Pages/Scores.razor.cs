@@ -23,6 +23,7 @@ public partial class Scores : ComponentBase, IDisposable {
     private int _leagueId = 0;
     [Inject] IDialogService _dialogService { get; set; } = default!;
     private bool _loading = true;
+    private bool _isPostSeason = false;
     protected override async Task OnInitializedAsync() {
         _loading = true;
         _scores = await _espn.GetScores();
@@ -32,6 +33,8 @@ public partial class Scores : ComponentBase, IDisposable {
         _timer.Interval = TimeSpan.FromMinutes(5).TotalMilliseconds;
         _timer.AutoReset = true;
         _timer.Enabled = true;
+        if (_scores!.Season.Type == (int)TypeOfSeason.PostSeason)
+            _isPostSeason = true;
         foreach (var scoreEvent in _scores?.Events) {
             foreach (var competition in scoreEvent.Competitions.OrderBy(x => x.Competitors[1].Team.Abbreviation)) {
                 if (GameHelpers.IsGameStarted(competition)) {

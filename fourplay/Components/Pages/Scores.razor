@@ -11,7 +11,8 @@
         {
 
             <MudItem xs="12">
-                <MudText Align="Align.Center" Typo="Typo.h3">Week @_scores?.Week?.Number</MudText>
+                <MudText Align="Align.Center" Typo="Typo.h3">@GameHelpers.GetWeekName(@_scores!.Week!.Number,
+                @_isPostSeason)</MudText>
             </MudItem>
             <MudSpacer />
             @foreach (var score in _scores?.Events?.OrderBy(x => x.Date))
@@ -53,7 +54,6 @@
                                             Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
                                     </MudBadge>
 
-
                                 </MudStack>
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
                                     <MudIcon Icon="@GetIcon(scoreEvent, GameHelpers.GetHomeTeam(scoreEvent),
@@ -72,8 +72,6 @@
                                             OnClick="@((_) => ShowDialog(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), @GameHelpers.GetHomeTeamLogo(@scoreEvent)))"
                                             Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
                                     </MudBadge>
-
-
                                 </MudStack>
                             </MudPaper>
                         </MudPaper>

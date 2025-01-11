@@ -49,9 +49,13 @@ public partial class UserManager : ComponentBase, IDisposable {
     }
 
     private async Task ClearPostSeasonScores() {
-        await _db.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [NFLPostSeasonScores]");
+        int records = 0;
+        foreach (var score in _db.NFLPostSeasonScores) {
+            _db.NFLPostSeasonScores.Remove(score);
+            ++records;
+        }
         await _db.SaveChangesAsync();
-        Snackbar.Add("Truncated NFLPostSeasonScores", Severity.Success);
+        Snackbar.Add($"Removed {records} NFLPostSeasonScores", Severity.Success);
     }
     public async Task AddUser() {
         var parameters = new DialogParameters<AddUserDialog>();

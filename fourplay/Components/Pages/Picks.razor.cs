@@ -157,7 +157,7 @@ public partial class Picks : ComponentBase {
     }
     private string? DisplayDetails(Competition competition) {
         if (competition.Status.Type.Name == TypeName.StatusScheduled) {
-            return TimeZoneHelpers.ConvertTimeToCST(competition.Date.DateTime).ToString("ddd, MMMM dd HH:mm");
+            return TimeZoneHelpers.ConvertTimeToCST(competition.Date.DateTime).ToString("ddd, MMMM dd hh:mm tt");
         }
         else if (competition.Status.Type.Name == TypeName.StatusInProgress) {
             return "In Progress";
