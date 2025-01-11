@@ -26,7 +26,10 @@ public partial class Scores : ComponentBase, IDisposable {
     private bool _isPostSeason = false;
     protected override async Task OnInitializedAsync() {
         _loading = true;
-        _scores = await _espn.GetScores();
+        _scores = await _espn!.GetScores();
+        while (_scores is null) {
+            _scores = await _espn.GetScores();
+        }
         _odds = await _db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToListAsync();
         await RunTimer();
         _timer.Elapsed += TimeElapsed;

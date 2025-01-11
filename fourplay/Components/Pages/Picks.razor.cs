@@ -34,7 +34,9 @@ public partial class Picks : ComponentBase {
         _loading = true;
         using var db = _dbContextFactory.CreateDbContext();
         _scores = await _espn!.GetScores();
-        if (_scores is null) return;
+        while (_scores is null) {
+            _scores = await _espn.GetScores();
+        }
         if (_scores!.Season.Type == (int)TypeOfSeason.PostSeason)
             _isPostSeason = true;
         _week = _scores!.Week!.Number;
@@ -80,9 +82,18 @@ public partial class Picks : ComponentBase {
         if (usrId is not null) {
             await db.NFLPicks.AddRangeAsync(_picks.Select(x => new NFLPicks() {
                 LeagueId = _leagueId,
-                NFLWeek = (int)_scores.Week.Number,
+                NFLWeek = (int)_scores!.Week.Number,
                 Season = (int)_scores!.Season.Year,
                 Team = x,
+                UserId = usrId.Id
+            }));
+            await db.NFLPostSeasonPicks.AddRangeAsync(_picksOverUnder.Select(x => new NFLPostSeasonPicks() {
+                LeagueId = _leagueId,
+                NFLWeek = (int)_scores!.Week.Number,
+                Season = (int)_scores!.Season.Year,
+                HomeTeam = @GameHelpers.GetHomeTeamAbbr(x.Key),
+                AwayTeam = @GameHelpers.GetAwayTeamAbbr(x.Key),
+                Pick = x.Value,
                 UserId = usrId.Id
             }));
             await db.SaveChangesAsync();
@@ -167,6 +178,7 @@ public partial class Picks : ComponentBase {
         }
         return "          ";
     }
+    public bool IsGameStartedOrDisabledPicks(Competition competition, PickType pickType) => GameHelpers.IsGameStarted(competition) || IsDisabled() || (IsOverUnderSelected(competition) && _picksOverUnder[competition] == pickType);
     public bool IsGameStartedOrDisabledPicks(Competition competition) => GameHelpers.IsGameStarted(competition) || IsDisabled();
     private bool IsSelected(string teamAbbreviation) => _picks.Contains(teamAbbreviation);
     private bool IsOverUnderSelected(Competition competition) => _picksOverUnder.ContainsKey(competition);
