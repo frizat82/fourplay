@@ -21,7 +21,7 @@ public partial class Picks : ComponentBase {
     [Inject] private ILoginHelper _loginHelper { get; set; } = default!;
     [Inject] ILocalStorageService _localStorage { get; set; } = default!;
     internal ESPNScores? _scores = null;
-    internal List<NFLSpreads>? _odds = null;
+    internal List<NFLSpreads>? _odds = new();
     internal List<string> _picks = new();
     internal Dictionary<Competition, PickType> _picksOverUnder = new();
     private int _leagueId = 0;
@@ -102,9 +102,11 @@ public partial class Picks : ComponentBase {
             await InvokeAsync(StateHasChanged);
         }
     }
-    private double? GetOverUnder(string teamAbbr) {
+    private double? GetOverUnder(string teamAbbr, PickType pickType) {
         //TODO: Add Caching
         var spread = GetOverUnderFromAbbreviation(teamAbbr);
+        if (pickType == PickType.Over)
+            return spread - CalculateLeagueSpread();
         return spread + CalculateLeagueSpread();
     }
     private double? GetSpread(string teamAbbr) {
@@ -178,10 +180,11 @@ public partial class Picks : ComponentBase {
         }
         return "          ";
     }
-    public bool IsGameStartedOrDisabledPicks(Competition competition, PickType pickType) => GameHelpers.IsGameStarted(competition) || IsDisabled() || (IsOverUnderSelected(competition) && _picksOverUnder[competition] == pickType);
+    public bool IsGameStartedOrDisabledPicks(Competition competition, PickType pickType) => GameHelpers.IsGameStarted(competition) || IsDisabled() || IsOverUnderSelected(competition, pickType);
     public bool IsGameStartedOrDisabledPicks(Competition competition) => GameHelpers.IsGameStarted(competition) || IsDisabled();
     private bool IsSelected(string teamAbbreviation) => _picks.Contains(teamAbbreviation);
     private bool IsOverUnderSelected(Competition competition) => _picksOverUnder.ContainsKey(competition);
+    private bool IsOverUnderSelected(Competition competition, PickType pickType) => _picksOverUnder.ContainsKey(competition) && _picksOverUnder[competition] == pickType;
     private bool IsDisabled() => _picks.Count == 4 || _picks.Count + _picksOverUnder.Count == 4;
     private bool IsPicksLocked() => _locked;
 

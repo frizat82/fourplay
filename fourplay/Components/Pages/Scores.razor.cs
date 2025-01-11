@@ -18,7 +18,7 @@ public partial class Scores : ComponentBase, IDisposable {
     private ESPNScores? _scores = null;
     private Dictionary<string, List<string>> _userPicks = new();
     private System.Timers.Timer _timer = new();
-    private List<NFLSpreads>? _odds = null;
+    private List<NFLSpreads>? _odds = new();
     [Inject] ILocalStorageService _localStorage { get; set; } = default!;
     private int _leagueId = 0;
     [Inject] IDialogService _dialogService { get; set; } = default!;
