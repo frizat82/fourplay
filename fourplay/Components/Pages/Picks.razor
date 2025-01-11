@@ -72,7 +72,7 @@
                                         </MudText>
                                         @if (IsOverUnderSelected(@scoreEvent, PickType.Over))
                                         {
-                                            <MudButton OnClick="@((e) => UnSelectOverUnderPick(@scoreEvent))" Style="width: 110px;"
+                                            <MudButton OnClick="@((e) => UnSelectOverUnderPick(@scoreEvent, PickType.Over))" Style="width: 110px;"
                                                 Color="Color.Tertiary" Variant="Variant.Filled">Overed</MudButton>
 
                                         }
@@ -120,7 +120,7 @@
 
                                         @if (IsOverUnderSelected(@scoreEvent, PickType.Under))
                                         {
-                                            <MudButton OnClick="@((e) => UnSelectOverUnderPick(@scoreEvent))" Style="width: 110px;"
+                                            <MudButton OnClick="@((e) => UnSelectOverUnderPick(@scoreEvent, PickType.Under))" Style="width: 110px;"
                                                 Color="Color.Tertiary" Variant="Variant.Filled">Undered</MudButton>
                                         }
                                         else

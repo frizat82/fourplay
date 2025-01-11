@@ -23,7 +23,7 @@ public partial class Picks : ComponentBase {
     internal ESPNScores? _scores = null;
     internal List<NFLSpreads>? _odds = new();
     internal List<string> _picks = new();
-    internal Dictionary<Competition, PickType> _picksOverUnder = new();
+    internal Dictionary<Competition, HashSet<PickType>> _picksOverUnder = new();
     private int _leagueId = 0;
     private bool _loading = true;
     private bool _locked = false;
@@ -87,15 +87,17 @@ public partial class Picks : ComponentBase {
                 Team = x,
                 UserId = usrId.Id
             }));
-            await db.NFLPostSeasonPicks.AddRangeAsync(_picksOverUnder.Select(x => new NFLPostSeasonPicks() {
+            await db.NFLPostSeasonPicks.AddRangeAsync(_picksOverUnder.SelectMany(x =>
+            x.Value.Select(y =>
+            new NFLPostSeasonPicks() {
                 LeagueId = _leagueId,
                 NFLWeek = (int)_scores!.Week.Number,
                 Season = (int)_scores!.Season.Year,
                 HomeTeam = @GameHelpers.GetHomeTeamAbbr(x.Key),
                 AwayTeam = @GameHelpers.GetAwayTeamAbbr(x.Key),
-                Pick = x.Value,
+                Pick = y,
                 UserId = usrId.Id
-            }));
+            })).ToList());
             await db.SaveChangesAsync();
             Snackbar.Add("Picks Added", Severity.Success);
             _locked = true;
@@ -143,18 +145,21 @@ public partial class Picks : ComponentBase {
     }
     private LeagueJuiceMapping GetLeagueJuice() {
         using var db = _dbContextFactory.CreateDbContext();
-        var leagueSpread = db.LeagueJuiceMapping.FirstOrDefault(x => x.Id == _leagueId && x.Season == _scores!.Season.Year);
+        var leagueSpread = db.LeagueJuiceMapping.First(x => x.Id == _leagueId && x.Season == _scores!.Season.Year);
         return leagueSpread;
     }
-    private void UnSelectOverUnderPick(Competition competition) {
+    private void UnSelectOverUnderPick(Competition competition, PickType pickType) {
         if (!IsPicksLocked()) {
-            _picksOverUnder.Remove(competition);
+            if (_picksOverUnder.ContainsKey(competition))
+                _picksOverUnder[competition].Remove(pickType);
         }
     }
-
     private void SelectOverUnderPick(Competition competition, PickType pickType) {
         if (!IsPicksLocked()) {
-            _picksOverUnder.Add(competition, pickType);
+            if (_picksOverUnder.ContainsKey(competition))
+                _picksOverUnder[competition].Add(pickType);
+            else
+                _picksOverUnder.Add(competition, [pickType]);
         }
     }
     private void UnSelectPick(string teamAbbreviation) {
@@ -184,7 +189,7 @@ public partial class Picks : ComponentBase {
     public bool IsGameStartedOrDisabledPicks(Competition competition) => GameHelpers.IsGameStarted(competition) || IsDisabled();
     private bool IsSelected(string teamAbbreviation) => _picks.Contains(teamAbbreviation);
     private bool IsOverUnderSelected(Competition competition) => _picksOverUnder.ContainsKey(competition);
-    private bool IsOverUnderSelected(Competition competition, PickType pickType) => _picksOverUnder.ContainsKey(competition) && _picksOverUnder[competition] == pickType;
+    private bool IsOverUnderSelected(Competition competition, PickType pickType) => _picksOverUnder.ContainsKey(competition) && _picksOverUnder[competition].Contains(pickType);
     private bool IsDisabled() => _picks.Count == 4 || _picks.Count + _picksOverUnder.Count == 4;
     private bool IsPicksLocked() => _locked;
 
