@@ -17,6 +17,20 @@ public static class GameHelpers {
             };
         }
     }
+    public static int GetRequiredPicks(long week, bool isPostSeason = false) {
+        if (!isPostSeason) {
+            return 4;
+        }
+        else {
+            return week switch {
+                1 => 3,
+                2 => 3,
+                3 => 2,
+                4 => 1,
+                _ => throw new ArgumentException("Invalid week number")
+            };
+        }
+    }
     public static string GetAwayTeamAbbr(Competition competition) => GetAwayTeam(competition).Team.Abbreviation;
     public static string GetHomeTeamAbbr(Competition competition) => GetHomeTeam(competition).Team.Abbreviation;
     public static Competitor GetAwayTeam(Competition competition) => competition.Competitors[1];

@@ -8,12 +8,10 @@ using Serilog;
 namespace fourplay.Services;
 public class LeaderboardService : ILeaderboardService {
     private IDbContextFactory<ApplicationDbContext> _dbContextFactory { get; set; }
-    private IESPNApiService? _espn { get; set; }
     private readonly IMemoryCache _memory;
     public LeaderboardService(IESPNApiService espnService, IMemoryCache memoryCache, IDbContextFactory<ApplicationDbContext> dbFactory) {
         _memory = memoryCache;
         _dbContextFactory = dbFactory;
-        _espn = espnService;
     }
     public async Task<DataTable> InteralLeaderboard(int leagueId, long seasonYear) {
         var dataTable = new DataTable();
@@ -24,11 +22,6 @@ public class LeaderboardService : ILeaderboardService {
         }
         Log.Information("Loading Scoreboard {LeagueId}", leagueId);
         try {
-            if (_espn == null) {
-                Log.Error("ESPN API service is not initialized.");
-                return dataTable;
-            }
-
             var allUsers = await db.LeagueUserMapping
                     .Include(lum => lum.User) // Ensure the User entity is included
                     .ToListAsync();

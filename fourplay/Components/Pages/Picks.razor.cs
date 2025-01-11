@@ -116,15 +116,12 @@ public partial class Picks : ComponentBase {
         var spread = GetSpreadFromAbbreviation(teamAbbr);
         return spread + CalculateLeagueSpread();
     }
-    //TODO Juice Calculator BASED On WEEK and PLAYOFFS
     private double CalculateLeagueSpread() {
         var baseSpread = GetLeagueJuice();
         if (!_isPostSeason)
             return baseSpread.Juice;
-        if (_week == 1)
-            return baseSpread.Juice;
         if (_week < 3)
-            return baseSpread.Juice + 1;
+            return baseSpread.JuiceDivisonal;
         if (_week == 3)
             return baseSpread.JuiceConference;
         return 0;
@@ -190,7 +187,7 @@ public partial class Picks : ComponentBase {
     private bool IsSelected(string teamAbbreviation) => _picks.Contains(teamAbbreviation);
     private bool IsOverUnderSelected(Competition competition) => _picksOverUnder.ContainsKey(competition);
     private bool IsOverUnderSelected(Competition competition, PickType pickType) => _picksOverUnder.ContainsKey(competition) && _picksOverUnder[competition].Contains(pickType);
-    private bool IsDisabled() => _picks.Count == 4 || _picks.Count + _picksOverUnder.Count == 4;
+    private bool IsDisabled() => _picks.Count == @GameHelpers.GetRequiredPicks(_week, _isPostSeason) || _picks.Count + _picksOverUnder.Count == @GameHelpers.GetRequiredPicks(_week, _isPostSeason);
     private bool IsPicksLocked() => _locked;
 
 }
