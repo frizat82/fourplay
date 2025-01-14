@@ -95,6 +95,22 @@ public partial class Scores : ComponentBase, IDisposable {
         else
             return Icons.Material.Filled.GppBad;
     }
+    public string GetIcon(Competition competition, PickType pickType) {
+        var overUnder = SpreadCalculator.GetOverUnder(GameHelpers.GetAwayTeamAbbr(competition), pickType) ?? 0;
+        if (!GameHelpers.IsGameStarted(competition)) return Icons.Material.Filled.GppGood;
+        if (pickType == PickType.Over) {
+            if (GameHelpers.GetHomeTeamScore(competition) + GameHelpers.GetAwayTeamScore(competition) > overUnder)
+                return Icons.Material.Filled.GppGood;
+            else
+                return Icons.Material.Filled.GppBad;
+        }
+        else {
+            if (GameHelpers.GetHomeTeamScore(competition) + GameHelpers.GetAwayTeamScore(competition) < overUnder)
+                return Icons.Material.Filled.GppGood;
+            else
+                return Icons.Material.Filled.GppBad;
+        }
+    }
     public Color GetColor(Competition competition, Competitor baseTeam, Competitor compareTeam) {
         var spread = SpreadCalculator.GetSpread(baseTeam.Team.Abbreviation) ?? 0;
         if (!GameHelpers.IsGameStarted(competition)) return Color.Success;
@@ -102,6 +118,22 @@ public partial class Scores : ComponentBase, IDisposable {
             return Color.Success;
         else
             return Color.Error;
+    }
+    public Color GetColor(Competition competition, PickType pickType) {
+        var overUnder = SpreadCalculator.GetOverUnder(GameHelpers.GetAwayTeamAbbr(competition), pickType) ?? 0;
+        if (!GameHelpers.IsGameStarted(competition)) return Color.Success;
+        if (pickType == PickType.Over) {
+            if (GameHelpers.GetHomeTeamScore(competition) + GameHelpers.GetAwayTeamScore(competition) > overUnder)
+                return Color.Success;
+            else
+                return Color.Error;
+        }
+        else {
+            if (GameHelpers.GetHomeTeamScore(competition) + GameHelpers.GetAwayTeamScore(competition) < overUnder)
+                return Color.Success;
+            else
+                return Color.Error;
+        }
     }
     public async Task<List<string>> GetUserNamedPicks(string teamAbbr) {
         var picks = await _db!.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
