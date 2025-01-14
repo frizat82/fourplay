@@ -102,8 +102,10 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions => {
     };
     // Only if we use GOOGLE FALLBACK
     googleOptions.Events.OnTicketReceived = async context => {
-        var validEmails = new[] { "markmjohnson@gmail.com", "jpmulcahy@gmail.com", "patutroska@gmail.com",
-        "brithepartsguy@gmail.com", "bbock72@gmail.com" };
+        // Resolve the DbContext from the IServiceProvider
+        var dbContext = context.HttpContext.RequestServices.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+        using var db = dbContext.CreateDbContext();
+        var validEmails = db.LeagueUsers.Select(x => x.GoogleEmail).ToList();
         async Task AccessDenied(string email) {
             Log.Warning("Logging in {User} Denied", email);
             await context.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
