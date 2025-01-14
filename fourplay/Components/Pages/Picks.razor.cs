@@ -40,7 +40,6 @@ public partial class Picks : ComponentBase {
         }
         _isPostSeason = _scores!.IsPostSeason();
         _week = _scores!.Week!.Number;
-        SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year, _isPostSeason);
         _user = await _loginHelper!.GetUserDetails()!;
         if (_user is not null) {
             var picks = db.NFLPicks.Where(x => x.UserId == _user.Id && x.Season == _scores!.Season.Year
@@ -71,6 +70,7 @@ public partial class Picks : ComponentBase {
                     Navigation.NavigateTo("/leagues");
                 }
                 _leagueId = leagueId;
+                SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year, _isPostSeason);
                 await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex) {

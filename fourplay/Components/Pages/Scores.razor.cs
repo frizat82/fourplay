@@ -36,7 +36,6 @@ public partial class Scores : ComponentBase, IDisposable {
         }
         _isPostSeason = _scores!.IsPostSeason();
         _week = _scores!.Week!.Number;
-        SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year, _isPostSeason);
         await RunTimer();
         _timer.Elapsed += TimeElapsed;
         _timer.Interval = TimeSpan.FromMinutes(5).TotalMilliseconds;
@@ -75,6 +74,7 @@ public partial class Scores : ComponentBase, IDisposable {
                     Navigation.NavigateTo("/leagues");
                 }
                 _leagueId = leagueId;
+                SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year, _isPostSeason);
                 await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex) {
@@ -122,19 +122,23 @@ public partial class Scores : ComponentBase, IDisposable {
 
     public int GetUserPicks(Competition competition, string teamAbbr) {
         if (!GameHelpers.IsGameStarted(competition)) return 0;
-        return _userPicks[teamAbbr].Count!;
+        return _userPicks[teamAbbr].Count + _userOverPicks[teamAbbr].Count + _userUnderPicks[teamAbbr].Count;
     }
     private void TimeElapsed(object? sender, System.Timers.ElapsedEventArgs e) => RunTimer();
     private async Task ShowDialog(string teamAbbr, string logo) {
         var usrNames = _userPicks![teamAbbr];
-        if (usrNames.Count > 0) {
+        var usrOverNames = _userOverPicks[teamAbbr];
+        var usrUnderNames = _userUnderPicks[teamAbbr];
+        if (usrNames.Count + usrOverNames.Count + usrUnderNames.Count > 0) {
             var parameters = new DialogParameters<PickDialog> {
-            { x => x.UserNames, usrNames! },
+            { x => x.UserNames, usrNames },
+               { x => x.UserNamesOver, usrOverNames },
+                  { x => x.UserNamesUnder, usrUnderNames },
             { x => x.TeamAbbr, teamAbbr},
             {x => x.Logo, logo}};
             await _dialogService.ShowAsync<PickDialog>("User Picks", parameters, new DialogOptions {
                 CloseOnEscapeKey = true,
-                NoHeader = true,
+                NoHeader = false,
                 CloseButton = false
             });
         }

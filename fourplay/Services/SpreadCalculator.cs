@@ -7,8 +7,7 @@ using SportslineOdds;
 namespace fourplay.Services;
 public class SpreadCalculator : ISpreadCalculator {
     private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
-    private List<NFLSpreads>? _odds = new();
-    private readonly ESPNScores _scores;
+    private List<NFLSpreads> _odds = new();
     private bool _isPostSeason = false;
     private long _week = 0;
     private long _season = 0;
@@ -73,7 +72,7 @@ public class SpreadCalculator : ISpreadCalculator {
 
     public LeagueJuiceMapping GetLeagueJuice() {
         using var db = _dbContextFactory.CreateDbContext();
-        var leagueSpread = db.LeagueJuiceMapping.First(x => x.Id == _leagueId && x.Season == _scores.Season.Year);
+        var leagueSpread = db.LeagueJuiceMapping.First(x => x.Id == _leagueId && x.Season == _season);
         return leagueSpread;
 
     }
