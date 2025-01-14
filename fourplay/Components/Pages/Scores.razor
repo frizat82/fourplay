@@ -27,8 +27,8 @@
                 @foreach (var scoreEvent in score.Competitions.OrderBy(x => x.Competitors[1].Team.Abbreviation))
                 {
                     <MudItem xs="12" lg="4">
-                        <MudPaper class="pa-3" Elevation="15">
-                            <MudPaper class="pa-3" Elevation="15">
+                        <MudPaper Class="pa-3" Elevation="15">
+                            <MudPaper Class="pa-3" Elevation="15">
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Row="true">
 
                                     <MudImage Src="@GameHelpers.GetAwayTeamLogo(@scoreEvent)" Width="50" />
@@ -41,7 +41,7 @@
 
                                 </MudStack>
                             </MudPaper>
-                            <MudPaper class="pa-2 ma-2" Elevation="5">
+                            <MudPaper Class="pa-2 ma-2" Elevation="5">
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
                                     <MudIcon
                                         Icon="@GetIcon(scoreEvent, GameHelpers.GetAwayTeam(scoreEvent), GameHelpers.GetHomeTeam(scoreEvent))"
@@ -52,12 +52,6 @@
                                     <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
                                         @SpreadCalculator.GetSpread(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))
                                     </MudPaper>
-                                    @if (_isPostSeason)
-                                    {
-                                        <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
-                                            O @SpreadCalculator.GetOverUnder(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Over)
-                                        </MudPaper>
-                                    }
                                     <MudBadge Class="@((!GameHelpers.IsGameStarted(@scoreEvent) ? "invisible" : ""))"
                                         Content="@GetUserPicks(scoreEvent,GameHelpers.GetAwayTeamAbbr(scoreEvent))"
                                         Color="Color.Primary" Overlap="true">
@@ -77,12 +71,6 @@
                                     <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
                                         @SpreadCalculator.GetSpread(@GameHelpers.GetHomeTeamAbbr(@scoreEvent))
                                     </MudPaper>
-                                    @if (_isPostSeason)
-                                    {
-                                        <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
-                                            U @SpreadCalculator.GetOverUnder(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Under)
-                                        </MudPaper>
-                                    }
                                     <MudBadge Class="@((!GameHelpers.IsGameStarted(@scoreEvent) ? "invisible" : ""))"
                                         Content="@GetUserPicks(scoreEvent,GameHelpers.GetHomeTeamAbbr(scoreEvent))"
                                         Color="Color.Primary" Overlap="true">
@@ -92,6 +80,22 @@
                                             Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
                                     </MudBadge>
                                 </MudStack>
+                                @if (_isPostSeason)
+                                {
+                                    <MudStack Class="pa-2 ma-2" AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
+                                        <MudIcon Icon="@GetIcon(scoreEvent, PickType.Over)"
+                                            Color="@GetColor(scoreEvent, PickType.Over)" />
+                                        <MudPaper Typo="Typo.h3" Class="d-flex justify-start flex-grow-1 gap-4 pr-4" Elevation="0">
+                                            (O) @SpreadCalculator.GetOverUnder(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Over)
+                                        </MudPaper>
+                                        <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
+                                            (U) @SpreadCalculator.GetOverUnder(@GameHelpers.GetHomeTeamAbbr(@scoreEvent),
+                                                 PickType.Under)
+                                        </MudPaper>
+                                        <MudIcon Icon="@GetIcon(scoreEvent, PickType.Under)"
+                                            Color="@GetColor(scoreEvent, PickType.Under)" />
+                                    </MudStack>
+                                }
                             </MudPaper>
                         </MudPaper>
                     </MudItem>
