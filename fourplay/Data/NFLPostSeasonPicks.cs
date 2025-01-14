@@ -11,10 +11,12 @@ public class NFLPostSeasonPicks {
     // Foreign key to the AspNetUsers table
     public string UserId { get; set; }
     public ApplicationUser User { get; set; }
-    public string HomeTeam { get; set; }
-    public string AwayTeam { get; set; }
+    public string Team { get; set; }
     public PickType Pick { get; set; }
     public int NFLWeek { get; set; }
     public int Season { get; set; }
     public DateTime DateCreated { get; set; }
+    public override int GetHashCode() {
+        return HashCode.Combine(LeagueId, UserId, Pick, NFLWeek, Season, Team);
+    }
 }

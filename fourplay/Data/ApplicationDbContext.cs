@@ -99,7 +99,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                         .HasForeignKey(e => e.LeagueId)
                         .IsRequired();
             entity.HasKey(e => e.Id);
-            entity.HasIndex(x => new { x.UserId, x.LeagueId, x.NFLWeek, x.Season, x.HomeTeam, x.AwayTeam }).IsUnique(true);
+            entity.HasIndex(x => new { x.UserId, x.LeagueId, x.NFLWeek, x.Season, x.Team, x.Pick }).IsUnique(true);
             entity.Property(e => e.DateCreated).HasColumnType("timestamp")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
         });

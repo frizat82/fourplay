@@ -13,13 +13,13 @@
             <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((!@_loading ? "invisible" : ""))" />
         </MudItem>
 
-        @if (!_loading && (_odds.Count() == 0))
+        @if (!_loading && SpreadCalculator.DoOddsExist())
         {
             <MudItem xs="12">
                 <MudText Align="Align.Center" Typo="Typo.h3">Odds Not Posted Yet</MudText>
             </MudItem>
         }
-        else if (!_loading && _scores is not null && _odds.Count() > 0 && _leagueId > 0)
+        else if (!_loading && _scores is not null && SpreadCalculator.DoOddsExist() && _leagueId > 0)
         {
             <MudItem xs="12">
                 <MudText Align="Align.Center" Typo="Typo.h3">@GameHelpers.GetWeekName(@_scores!.Week!.Number,
@@ -50,7 +50,7 @@
                                     <MudImage Src="@GameHelpers.GetAwayTeamLogo(@scoreEvent)" Width="50" />
 
                                     <MudText Typo="Typo.h6" Class="fixed-width d-flex justify-center">
-                                        @GetSpread(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))
+                                        @SpreadCalculator.GetSpread(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))
                                     </MudText>
 
                                     @if (IsSelected(@GameHelpers.GetAwayTeamAbbr(@scoreEvent)))
@@ -64,22 +64,22 @@
                                             OnClick="@((e) => SelectPick(@GameHelpers.GetAwayTeamAbbr(@scoreEvent)))"
                                             Color="Color.Warning" Variant="Variant.Filled">Pick</MudButton>
                                     }
-                                    @if (@_isPostSeason && @GetOverUnder(@GameHelpers.GetAwayTeamAbbr(@scoreEvent), PickType.Over) is not null)
+                                    @if (@_isPostSeason && @SpreadCalculator.GetOverUnder(@GameHelpers.GetAwayTeamAbbr(@scoreEvent), PickType.Over) is not null)
                                     {
 
                                         <MudText Typo="Typo.h6" Class="fixed-width d-flex justify-center">
-                                            @GetOverUnder(@GameHelpers.GetAwayTeamAbbr(@scoreEvent), PickType.Over)
+                                            @SpreadCalculator.GetOverUnder(@GameHelpers.GetAwayTeamAbbr(@scoreEvent), PickType.Over)
                                         </MudText>
-                                        @if (IsOverUnderSelected(@scoreEvent, PickType.Over))
+                                        @if (IsOverUnderSelected(@GameHelpers.GetAwayTeamAbbr(@scoreEvent), PickType.Over))
                                         {
-                                            <MudButton OnClick="@((e) => UnSelectOverUnderPick(@scoreEvent, PickType.Over))" Style="width: 110px;"
+                                            <MudButton OnClick="@((e) => UnSelectOverUnderPick(@GameHelpers.GetAwayTeamAbbr(@scoreEvent), PickType.Over))" Style="width: 110px;"
                                                 Color="Color.Tertiary" Variant="Variant.Filled">Overed</MudButton>
 
                                         }
                                         else
                                         {
-                                            <MudButton Disabled="@IsGameStartedOrDisabledPicks(@scoreEvent, PickType.Over)"
-                                                Style="width: 110px;" OnClick="@((e) => SelectOverUnderPick(@scoreEvent, PickType.Over))"
+                                            <MudButton Disabled="@IsGameStartedOrDisabledPicks(@scoreEvent)"
+                                                Style="width: 110px;" OnClick="@((e) => SelectOverUnderPick(@GameHelpers.GetAwayTeamAbbr(@scoreEvent), PickType.Over))"
                                                 Color="Color.Warning" Variant="Variant.Filled">Over</MudButton>
 
                                         }
@@ -97,7 +97,7 @@
                                     <MudImage Src="@GameHelpers.GetHomeTeamLogo(@scoreEvent)" Width="50" />
 
                                     <MudText Typo="Typo.h6" Class="fixed-width d-flex justify-center">
-                                        @GetSpread(@GameHelpers.GetHomeTeamAbbr(@scoreEvent))
+                                        @SpreadCalculator.GetSpread(@GameHelpers.GetHomeTeamAbbr(@scoreEvent))
                                     </MudText>
 
                                     @if (IsSelected(@GameHelpers.GetHomeTeamAbbr(@scoreEvent)))
@@ -111,22 +111,22 @@
                                             OnClick="@((e) => SelectPick(@GameHelpers.GetHomeTeamAbbr(@scoreEvent)))"
                                             Color="Color.Warning" Variant="Variant.Filled">Pick</MudButton>
                                     }
-                                    @if (@_isPostSeason && @GetOverUnder(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Under) is not null)
+                                    @if (@_isPostSeason && @SpreadCalculator.GetOverUnder(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Under) is not null)
                                     {
 
                                         <MudText Typo="Typo.h6" Class="fixed-width d-flex justify-center">
-                                            @GetOverUnder(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Under)
+                                            @SpreadCalculator.GetOverUnder(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Under)
                                         </MudText>
 
-                                        @if (IsOverUnderSelected(@scoreEvent, PickType.Under))
+                                        @if (IsOverUnderSelected(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Under))
                                         {
-                                            <MudButton OnClick="@((e) => UnSelectOverUnderPick(@scoreEvent, PickType.Under))" Style="width: 110px;"
+                                            <MudButton OnClick="@((e) => UnSelectOverUnderPick(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Under))" Style="width: 110px;"
                                                 Color="Color.Tertiary" Variant="Variant.Filled">Undered</MudButton>
                                         }
                                         else
                                         {
-                                            <MudButton Disabled="@IsGameStartedOrDisabledPicks(@scoreEvent, PickType.Under)"
-                                                Style="width: 110px;" OnClick="@((e) => SelectOverUnderPick(@scoreEvent, PickType.Under))"
+                                            <MudButton Disabled="@IsGameStartedOrDisabledPicks(@scoreEvent)"
+                                                Style="width: 110px;" OnClick="@((e) => SelectOverUnderPick(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Under))"
                                                 Color="Color.Warning" Variant="Variant.Filled">Under</MudButton>
                                         }
                                     }

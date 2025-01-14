@@ -31,6 +31,16 @@ public static class GameHelpers {
             };
         }
     }
+    public static Competition GetCompetitionFromHomeAwayAbbr(string homeTeamAbbr, string awayTeamAbbr, ESPNScores scores) {
+        foreach (var scoreEvent in scores.Events) {
+            foreach (var competition in scoreEvent.Competitions) {
+                if (GetHomeTeamAbbr(competition) == homeTeamAbbr && GetAwayTeamAbbr(competition) == awayTeamAbbr) {
+                    return competition;
+                }
+            }
+        }
+        throw new ArgumentException("Competition not found");
+    }
     public static string GetAwayTeamAbbr(Competition competition) => GetAwayTeam(competition).Team.Abbreviation;
     public static string GetHomeTeamAbbr(Competition competition) => GetHomeTeam(competition).Team.Abbreviation;
     public static Competitor GetAwayTeam(Competition competition) => competition.Competitors[1];

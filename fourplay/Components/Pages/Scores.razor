@@ -1,5 +1,6 @@
 ﻿@page "/scores"
 @using fourplay.Helpers
+@using fourplay.Models.Enum
 
 <PageTitle>Scores</PageTitle>
 <MudContainer>
@@ -7,11 +8,11 @@
         <MudItem xs="12">
             <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((!@_loading ? "invisible" : ""))" />
         </MudItem>
-        @if (!_loading & _scores is not null && _odds is not null && _leagueId > 0)
+        @if (!_loading & _scores is not null && SpreadCalculator.DoOddsExist() && _leagueId > 0)
         {
 
             <MudItem xs="12">
-                <MudText Align="Align.Center" Typo="Typo.h3">@GameHelpers.GetWeekName(@_scores!.Week!.Number,
+                <MudText Align="Align.Center" Typo="Typo.h3">@GameHelpers.GetWeekName(@_week,
                 @_isPostSeason)</MudText>
             </MudItem>
             <MudSpacer />
@@ -43,7 +44,7 @@
                                         @GameHelpers.GetAwayTeamAbbr(@scoreEvent)
                                     </MudText>
                                     <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
-                                        @GetSpread(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))
+                                        @SpreadCalculator.GetSpread(@GameHelpers.GetAwayTeamAbbr(@scoreEvent))
                                     </MudPaper>
 
                                     <MudBadge Class="@((!GameHelpers.IsGameStarted(@scoreEvent) ? "invisible" : ""))"
@@ -53,7 +54,12 @@
                                             OnClick="@((_) => ShowDialog(@GameHelpers.GetAwayTeamAbbr(@scoreEvent), @GameHelpers.GetAwayTeamLogo(@scoreEvent)))"
                                             Icon="@Icons.Material.Filled.Person" Color="Color.Default" />
                                     </MudBadge>
-
+                                    @if (_isPostSeason)
+                                    {
+                                        <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
+                                            O @SpreadCalculator.GetOverUnder(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Over)
+                                        </MudPaper>
+                                    }
                                 </MudStack>
                                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceAround" Row="true">
                                     <MudIcon Icon="@GetIcon(scoreEvent, GameHelpers.GetHomeTeam(scoreEvent),
@@ -63,8 +69,14 @@
                                         @GameHelpers.GetHomeTeamAbbr(@scoreEvent)
                                     </MudText>
                                     <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
-                                        @GetSpread(@GameHelpers.GetHomeTeamAbbr(@scoreEvent))
+                                        @SpreadCalculator.GetSpread(@GameHelpers.GetHomeTeamAbbr(@scoreEvent))
                                     </MudPaper>
+                                    @if (_isPostSeason)
+                                    {
+                                        <MudPaper Typo="Typo.h3" Class="d-flex justify-end flex-grow-1 gap-4 pr-4" Elevation="0">
+                                            U @SpreadCalculator.GetOverUnder(@GameHelpers.GetHomeTeamAbbr(@scoreEvent), PickType.Under)
+                                        </MudPaper>
+                                    }
                                     <MudBadge Class="@((!GameHelpers.IsGameStarted(@scoreEvent) ? "invisible" : ""))"
                                         Content="@GetUserPicks(scoreEvent,GameHelpers.GetHomeTeamAbbr(scoreEvent))"
                                         Color="Color.Primary" Overlap="true">

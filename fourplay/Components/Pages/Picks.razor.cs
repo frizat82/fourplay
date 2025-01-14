@@ -16,19 +16,20 @@ public partial class Picks : ComponentBase {
     [Inject] ISnackbar Snackbar { get; set; } = default!;
     [Inject] private IESPNApiService? _espn { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private ISpreadCalculator SpreadCalculator { get; set; } = default!;
 
     [Inject] private IDbContextFactory<ApplicationDbContext> _dbContextFactory { get; set; } = default!;
     [Inject] private ILoginHelper _loginHelper { get; set; } = default!;
     [Inject] ILocalStorageService _localStorage { get; set; } = default!;
     internal ESPNScores? _scores = null;
-    internal List<NFLSpreads>? _odds = new();
-    internal List<string> _picks = new();
-    internal Dictionary<Competition, HashSet<PickType>> _picksOverUnder = new();
+    internal HashSet<string> _picks = new();
+    internal HashSet<NFLPostSeasonPicks> _picksOverUnder = new();
     private int _leagueId = 0;
     private bool _loading = true;
     private bool _locked = false;
     private bool _isPostSeason = false;
     private long _week = 0;
+    private ApplicationUser _user;
 
     protected override async Task OnInitializedAsync() {
         _loading = true;
@@ -37,17 +38,24 @@ public partial class Picks : ComponentBase {
         while (_scores is null) {
             _scores = await _espn.GetScores();
         }
-        if (_scores!.Season.Type == (int)TypeOfSeason.PostSeason)
-            _isPostSeason = true;
+        _isPostSeason = _scores!.IsPostSeason();
         _week = _scores!.Week!.Number;
-        _odds = db.NFLSpreads.Where(x => x.Season == _scores!.Season.Year && x.NFLWeek == _scores.Week.Number).ToList();
-        var usrId = await _loginHelper.GetUserDetails();
-        if (usrId is not null) {
-            var picks = db.NFLPicks.Where(x => x.UserId == usrId.Id && x.Season == _scores!.Season.Year
+        SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year, _isPostSeason);
+        _user = await _loginHelper!.GetUserDetails()!;
+        if (_user is not null) {
+            var picks = db.NFLPicks.Where(x => x.UserId == _user.Id && x.Season == _scores!.Season.Year
             && x.NFLWeek == _scores.Week.Number);
             if (picks.Any()) {
-                _picks = await picks.Select(x => x.Team).ToListAsync();
+                _picks = picks.Select(x => x.Team).ToHashSet();
                 _locked = true;
+            }
+            if (_isPostSeason) {
+                var postSeasonPicks = db.NFLPostSeasonPicks.Where(x => x.UserId == _user.Id && x.Season == _scores!.Season.Year
+                && x.NFLWeek == _scores.Week.Number);
+                if (postSeasonPicks.Any()) {
+                    _picksOverUnder = postSeasonPicks.ToHashSet();
+                    _locked = true;
+                }
             }
         }
         _loading = false;
@@ -78,85 +86,53 @@ public partial class Picks : ComponentBase {
     private async Task SubmitPicks() {
         Log.Information("Submitting Picks");
         using var db = _dbContextFactory.CreateDbContext();
-        var usrId = await _loginHelper.GetUserDetails();
-        if (usrId is not null) {
-            await db.NFLPicks.AddRangeAsync(_picks.Select(x => new NFLPicks() {
-                LeagueId = _leagueId,
-                NFLWeek = (int)_scores!.Week.Number,
-                Season = (int)_scores!.Season.Year,
-                Team = x,
-                UserId = usrId.Id
-            }));
-            await db.NFLPostSeasonPicks.AddRangeAsync(_picksOverUnder.SelectMany(x =>
-            x.Value.Select(y =>
-            new NFLPostSeasonPicks() {
-                LeagueId = _leagueId,
-                NFLWeek = (int)_scores!.Week.Number,
-                Season = (int)_scores!.Season.Year,
-                HomeTeam = @GameHelpers.GetHomeTeamAbbr(x.Key),
-                AwayTeam = @GameHelpers.GetAwayTeamAbbr(x.Key),
-                Pick = y,
-                UserId = usrId.Id
-            })).ToList());
+        if (_user is not null) {
+            if (!_isPostSeason) {
+                await db.NFLPicks.AddRangeAsync(_picks.Select(x => new NFLPicks() {
+                    LeagueId = _leagueId,
+                    NFLWeek = (int)_scores!.Week.Number,
+                    Season = (int)_scores!.Season.Year,
+                    Team = x,
+                    UserId = _user.Id
+                }));
+            }
+            else {
+                await db.NFLPostSeasonPicks.AddRangeAsync(_picksOverUnder);
+                await db.NFLPostSeasonPicks.AddRangeAsync(_picks.Select(x => new NFLPostSeasonPicks() {
+                    LeagueId = _leagueId,
+                    NFLWeek = (int)_scores!.Week.Number,
+                    Season = (int)_scores!.Season.Year,
+                    Team = x,
+                    Pick = PickType.Spread,
+                    UserId = _user.Id
+                }));
+            }
             await db.SaveChangesAsync();
             Snackbar.Add("Picks Added", Severity.Success);
             _locked = true;
             await InvokeAsync(StateHasChanged);
         }
     }
-    private double? GetOverUnder(string teamAbbr, PickType pickType) {
-        //TODO: Add Caching
-        var spread = GetOverUnderFromAbbreviation(teamAbbr);
-        if (pickType == PickType.Over)
-            return spread - CalculateLeagueSpread();
-        return spread + CalculateLeagueSpread();
+    private NFLPostSeasonPicks CompetitionToPostSeasonPick(string teamAbbr, PickType pickType) {
+        return new NFLPostSeasonPicks() {
+            LeagueId = _leagueId,
+            NFLWeek = (int)_scores!.Week.Number,
+            Season = (int)_scores!.Season.Year,
+            Team = teamAbbr,
+            Pick = pickType,
+            UserId = _user.Id
+        };
     }
-    private double? GetSpread(string teamAbbr) {
-        //TODO: Add Caching
-        var spread = GetSpreadFromAbbreviation(teamAbbr);
-        return spread + CalculateLeagueSpread();
-    }
-    private double CalculateLeagueSpread() {
-        var baseSpread = GetLeagueJuice();
-        if (!_isPostSeason)
-            return baseSpread.Juice;
-        if (_week < 3)
-            return baseSpread.JuiceDivisonal;
-        if (_week == 3)
-            return baseSpread.JuiceConference;
-        return 0;
-    }
-    private double? GetSpreadFromAbbreviation(string teamAbbr) {
-        var spread = _odds!.FirstOrDefault(x => x.HomeTeam == teamAbbr);
-        if (spread is not null)
-            return spread.HomeTeamSpread;
-        spread = _odds!.First(x => x.AwayTeam == teamAbbr);
-        return spread.AwayTeamSpread;
-    }
-    private double? GetOverUnderFromAbbreviation(string teamAbbr) {
-        var spread = _odds!.FirstOrDefault(x => x.HomeTeam == teamAbbr);
-        if (spread is not null)
-            return spread.OverUnder;
-        spread = _odds!.First(x => x.AwayTeam == teamAbbr);
-        return spread.OverUnder;
-    }
-    private LeagueJuiceMapping GetLeagueJuice() {
-        using var db = _dbContextFactory.CreateDbContext();
-        var leagueSpread = db.LeagueJuiceMapping.First(x => x.Id == _leagueId && x.Season == _scores!.Season.Year);
-        return leagueSpread;
-    }
-    private void UnSelectOverUnderPick(Competition competition, PickType pickType) {
+    private void UnSelectOverUnderPick(string teamAbbr, PickType pickType) {
         if (!IsPicksLocked()) {
-            if (_picksOverUnder.ContainsKey(competition))
-                _picksOverUnder[competition].Remove(pickType);
+            var pick = CompetitionToPostSeasonPick(teamAbbr, pickType);
+            _picksOverUnder.Remove(pick);
         }
     }
-    private void SelectOverUnderPick(Competition competition, PickType pickType) {
+    private void SelectOverUnderPick(string teamAbbr, PickType pickType) {
         if (!IsPicksLocked()) {
-            if (_picksOverUnder.ContainsKey(competition))
-                _picksOverUnder[competition].Add(pickType);
-            else
-                _picksOverUnder.Add(competition, [pickType]);
+            var pick = CompetitionToPostSeasonPick(teamAbbr, pickType);
+            _picksOverUnder.Add(pick);
         }
     }
     private void UnSelectPick(string teamAbbreviation) {
@@ -182,11 +158,13 @@ public partial class Picks : ComponentBase {
         }
         return "          ";
     }
-    public bool IsGameStartedOrDisabledPicks(Competition competition, PickType pickType) => GameHelpers.IsGameStarted(competition) || IsDisabled() || IsOverUnderSelected(competition, pickType);
+    //public bool IsGameStartedOrDisabledPicks(Competition competition, PickType pickType) => GameHelpers.IsGameStarted(competition) || IsDisabled() || IsOverUnderSelected(competition, pickType);
     public bool IsGameStartedOrDisabledPicks(Competition competition) => GameHelpers.IsGameStarted(competition) || IsDisabled();
     private bool IsSelected(string teamAbbreviation) => _picks.Contains(teamAbbreviation);
-    private bool IsOverUnderSelected(Competition competition) => _picksOverUnder.ContainsKey(competition);
-    private bool IsOverUnderSelected(Competition competition, PickType pickType) => _picksOverUnder.ContainsKey(competition) && _picksOverUnder[competition].Contains(pickType);
+    private bool IsOverUnderSelected(string teamAbbr, PickType pickType) {
+        var pick = CompetitionToPostSeasonPick(teamAbbr, pickType);
+        return _picksOverUnder.Contains(pick);
+    }
     private bool IsDisabled() => _picks.Count == @GameHelpers.GetRequiredPicks(_week, _isPostSeason) || _picks.Count + _picksOverUnder.Count == @GameHelpers.GetRequiredPicks(_week, _isPostSeason);
     private bool IsPicksLocked() => _locked;
 
