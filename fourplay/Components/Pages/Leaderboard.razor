@@ -34,20 +34,22 @@
                                 var cellValue = context[column.ColumnName]?.ToString();
                                 if (cellValue == "True" || cellValue == "False" || cellValue == "Invalid")
                                 {
-                                    <MudTd>
+                                   
                                         @if (cellValue == "True")
                                         {
-                                            <MudIcon Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle" />
+                                             <MudTd Class="border-solid border-1 mud-border-primary mud-theme-primary"/>
+                                            <!--<MudIcon Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle" />-->
                                         }
                                         else if (cellValue == "Invalid")
                                         {
-                                            <MudIcon Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Warning" />
+                                                <MudTd Class="border-solid border-1 mud-border-primary mud-theme-warning"/>
+                                            <!--<MudIcon Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Warning" />-->
                                         }
                                         else
                                         {
-                                            <MudIcon Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Cancel" />
+                                                <MudTd Class="border-solid border-1 mud-border-primary mud-theme-error"/>
+                                            <!--<MudIcon Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Cancel" />-->
                                         }
-                                    </MudTd>
                                 }
                                 else
                                 {

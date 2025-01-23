@@ -15,9 +15,11 @@ public class NFLSpreadJob : IJob {
         _espn = espn;
     }
     public async Task Execute(IJobExecutionContext context) {
-        // TODO: Implement logic to grab NFL spreads
         Log.Information("Grabbing NFL Spreads at " + DateTime.Now);
         var scoreboard = await _espn.GetScores();
+        if (scoreboard is null)
+            return;
+        var isPostSeason = scoreboard.IsPostSeason();
         var newGames = scoreboard?.Events.SelectMany(x => x.Competitions).Where(y => y.Status.Type.Name == TypeName.StatusScheduled);
         var odds = await _sportsOdds.GetOdds();
         var spreads = new List<NFLSpreads>();
@@ -68,16 +70,24 @@ public class NFLSpreadJob : IJob {
         }
         if (spreads.Any()) {
             Log.Information("Load NFL Spreads at " + DateTime.Now);
-            await _context.NFLSpreads.AddRangeAsync(spreads);
+            if (!isPostSeason)
+                await _context.NFLSpreads.AddRangeAsync(spreads);
+            else
+                await _context.NFLPostSeasonSpreads.AddRangeAsync(spreads);
             await _context.SaveChangesAsync();
             //TODO: remove eventually
-            await UpsertEntitiesAsync(spreads);
+            //await UpsertEntitiesAsync(spreads, isPostSeason);
         }
         Log.Information("NFL Spreads Complete at " + DateTime.Now);
     }
-    public async Task UpsertEntitiesAsync(IEnumerable<NFLSpreads> entities) {
+    public async Task UpsertEntitiesAsync(IEnumerable<NFLSpreads> entities, bool isPostSeason = false) {
         foreach (var entity in entities) {
-            var existingEntity = await _context.NFLSpreads.FindAsync(entity.Season, entity.NFLWeek, entity.HomeTeam); if (existingEntity != null) {
+            NFLSpreads? existingEntity;
+            if (!isPostSeason)
+                existingEntity = await _context.NFLSpreads.FindAsync(entity.Season, entity.NFLWeek, entity.HomeTeam);
+            else
+                existingEntity = await _context.NFLPostSeasonSpreads.FindAsync(entity.Season, entity.NFLWeek, entity.HomeTeam);
+            if (existingEntity != null) {
                 // Update the existing entity
                 _context.Entry(existingEntity).CurrentValues.SetValues(entity);
             }

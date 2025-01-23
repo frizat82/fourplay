@@ -23,7 +23,10 @@ public class SpreadCalculator : ISpreadCalculator {
         _season = season;
         _leagueId = leagueId;
         using var db = _dbContextFactory.CreateDbContext();
-        _odds = db.NFLSpreads.Where(x => x.Season == _season && x.NFLWeek == _week).ToList();
+        if (!isPostSeason)
+            _odds = db.NFLSpreads.Where(x => x.Season == _season && x.NFLWeek == _week).ToList();
+        else
+            _odds = db.NFLPostSeasonSpreads.Where(x => x.Season == _season && x.NFLWeek == _week).ToList();
     }
     public bool DoOddsExist() {
         return _odds!.Count > 0;
