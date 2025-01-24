@@ -10,8 +10,8 @@
 <MudContainer>
     <MudGrid>
     
-                <MudProgressLinear Color="Color.Primary" Indeterminate="true"
-                    Class="@((!@_loading ? "invisible" : ""))" />
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true"
+            Class="@((!@_loading ? "invisible" : ""))" />
            
 
         @if (!_loading && !SpreadCalculator.DoOddsExist())
@@ -35,7 +35,7 @@
                         Submit Picks
                     </MudButton>
                     <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="@(!IsDisabled())"
-                        OnClick="@((e) => _picks.Clear())">Clear Picks
+                        OnClick="@(() => ClearPicks())">Clear Picks
                     </MudButton>
                 </MudItem>
             }

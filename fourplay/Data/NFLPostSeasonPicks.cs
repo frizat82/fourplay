@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using fourplay.Data;
 using fourplay.Models.Enum;
 
-public class NFLPostSeasonPicks {
+public class NFLPostSeasonPicks : IEquatable<NFLPostSeasonPicks> {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 
     public int Id { get; set; }
@@ -17,6 +17,29 @@ public class NFLPostSeasonPicks {
     public int Season { get; set; }
     public DateTime DateCreated { get; set; }
     public override int GetHashCode() {
-        return HashCode.Combine(LeagueId, UserId, Pick, NFLWeek, Season, Team);
+        return HashCode.Combine(Team, Pick);
+    }
+
+    public override bool Equals(object obj) {
+        return Equals(obj as NFLPostSeasonPicks);
+    }
+
+    public bool Equals(NFLPostSeasonPicks other) {
+        if (other == null)
+            return false;
+
+        return Team == other.Team && Pick == other.Pick && Season == other.Season
+        && NFLWeek == other.NFLWeek && UserId == other.UserId && LeagueId == other.LeagueId;
+    }
+
+    public static bool operator ==(NFLPostSeasonPicks left, NFLPostSeasonPicks right) {
+        if (left is null)
+            return right is null;
+
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(NFLPostSeasonPicks left, NFLPostSeasonPicks right) {
+        return !(left == right);
     }
 }

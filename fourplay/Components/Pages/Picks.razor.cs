@@ -50,9 +50,15 @@ public partial class Picks : ComponentBase {
             }
             if (_isPostSeason) {
                 var postSeasonPicks = db.NFLPostSeasonPicks.Where(x => x.UserId == _user.Id && x.Season == _scores!.Season.Year
-                && x.NFLWeek == _scores.Week.Number);
+                && x.NFLWeek == _scores.Week.Number && x.Pick != PickType.Spread);
                 if (postSeasonPicks.Any()) {
                     _picksOverUnder = postSeasonPicks.ToHashSet();
+                    _locked = true;
+                }
+                postSeasonPicks = db.NFLPostSeasonPicks.Where(x => x.UserId == _user.Id && x.Season == _scores!.Season.Year
+                && x.NFLWeek == _scores.Week.Number && x.Pick == PickType.Spread);
+                if (postSeasonPicks.Any()) {
+                    _picks = postSeasonPicks.Select(x => x.Team).ToHashSet();
                     _locked = true;
                 }
             }
@@ -145,6 +151,10 @@ public partial class Picks : ComponentBase {
         if (!IsPicksLocked()) {
             _picks.Add(teamAbbreviation);
         }
+    }
+    private void ClearPicks() {
+        _picks.Clear();
+        _picksOverUnder.Clear();
     }
     private string? DisplayDetails(Competition competition) {
         if (competition.Status.Type.Name == TypeName.StatusScheduled) {
