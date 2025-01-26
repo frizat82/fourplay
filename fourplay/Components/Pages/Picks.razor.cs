@@ -160,7 +160,8 @@ public partial class Picks : ComponentBase {
         if (competition.Status.Type.Name == TypeName.StatusScheduled) {
             return TimeZoneHelpers.ConvertTimeToCST(competition.Date.DateTime).ToString("ddd, MMMM dd hh:mm tt");
         }
-        else if (competition.Status.Type.Name == TypeName.StatusInProgress) {
+        else if (competition.Status.Type.Name == TypeName.StatusInProgress || competition.Status.Type.Name == TypeName.StatusHalftime
+         || competition.Status.Type.Name == TypeName.StatusEndPeriod) {
             return "In Progress";
         }
         else if (competition.Status.Type.Name == TypeName.StatusFinal) {

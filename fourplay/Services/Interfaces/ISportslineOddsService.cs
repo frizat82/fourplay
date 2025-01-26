@@ -1,5 +1,5 @@
 namespace fourplay.Services.Interfaces;
-using SportslineOdds;
+using fourplay.Data;
 
 public interface ISportslineOddsService {
     public Task<SportslineOddsData?> GetOdds();

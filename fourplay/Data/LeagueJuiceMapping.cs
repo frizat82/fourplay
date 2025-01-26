@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
-
+namespace fourplay.Data;
 public class LeagueJuiceMapping {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }

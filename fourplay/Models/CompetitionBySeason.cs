@@ -1,4 +1,4 @@
-
+using fourplay.Data;
 namespace fourplay.Models;
 
 public class CompetitionBySeason {

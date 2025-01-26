@@ -1,4 +1,5 @@
 using fourplay.Models.Enum;
+using fourplay.Data;
 
 namespace fourplay.Services.Interfaces;
 public interface ISpreadCalculator {

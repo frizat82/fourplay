@@ -1,15 +1,15 @@
 <MudDialog>
     <DialogContent>
            <MudSelect Label="User Email" @bind-Value="_user">
-        @foreach (var user in @Users)
+        @foreach (var user in @Users.OrderBy(x => x.Email))
         {
-          <MudSelectItem Value="@user">@user</MudSelectItem>
+          <MudSelectItem Value="@user">@user.Email</MudSelectItem>
         }
             </MudSelect>
             <MudSelect Label="League Name" @bind-Value="_league">
-        @foreach (var league in @Leagues)
+        @foreach (var league in @Leagues.OrderBy(x => x.LeagueName))
         {
-            <MudSelectItem Value="@league">@league</MudSelectItem>
+            <MudSelectItem Value="@league">@league.LeagueName</MudSelectItem>
         }
             </MudSelect>
     </DialogContent>

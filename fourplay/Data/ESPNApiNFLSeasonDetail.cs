@@ -1,8 +1,7 @@
 
 using System.Text.Json.Serialization;
-
-public partial class ESPNApiNFLSeasonDetail
-{
+namespace fourplay.Data;
+public partial class ESPNApiNFLSeasonDetail {
     [JsonPropertyName("$ref")]
     public Uri Ref { get; set; }
 
@@ -41,14 +40,12 @@ public partial class ESPNApiNFLSeasonDetail
     public Athletes Leaders { get; set; }
 }
 
-public partial class Athletes
-{
+public partial class Athletes {
     [JsonPropertyName("$ref")]
     public Uri Ref { get; set; }
 }
 
-public partial class SeasonDetailType
-{
+public partial class SeasonDetailType {
     [JsonPropertyName("$ref")]
     public Uri Ref { get; set; }
 
@@ -105,8 +102,7 @@ public partial class SeasonDetailType
     public string Slug { get; set; }
 }
 
-public partial class WeekSeasonDetail
-{
+public partial class WeekSeasonDetail {
     [JsonPropertyName("$ref")]
     public Uri Ref { get; set; }
 
@@ -138,8 +134,7 @@ public partial class WeekSeasonDetail
     public Athletes Qbr { get; set; }
 }
 
-public partial class Types
-{
+public partial class Types {
     [JsonPropertyName("$ref")]
     public Uri Ref { get; set; }
 

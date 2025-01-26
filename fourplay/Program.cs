@@ -25,7 +25,6 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
     .ReadFrom.Services(services));
-builder.Services.AddMudServices();
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
@@ -63,7 +62,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<ISpreadCalculator, SpreadCalculator>();
+builder.Services.AddTransient<ISpreadCalculator, SpreadCalculator>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 builder.Services.AddHttpClient<IESPNApiService, ESPNApiService>(x => {

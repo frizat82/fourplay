@@ -1,5 +1,7 @@
 ﻿@page "/leaderboard"
 @using System.Data
+@using fourplay.Models
+@using fourplay.Models.Enum
 
 <PageTitle>Leaderboard</PageTitle>
 <MudContainer>
@@ -12,48 +14,47 @@
             <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((!@_loading ? "invisible" : ""))" />
         </MudItem>
         <MudItem xs="12">
-            @if (_dataTable.Rows.Count > 0)
+            @if (_leaderboardModel.Count > 0)
             {
                 <MudPaper class="pa-3 full-width" Elevation="3">
-                    <MudTable T="DataRow" Items="_dataTable.Rows.Cast<DataRow>()" Bordered="true" Striped="true" Dense="true"
+                    <MudTable T="LeaderboardModel" Items="_leaderboardModel" Bordered="true" Striped="true" Dense="true"
                         ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info" Breakpoint="Breakpoint.None">
                         <HeaderContent>
-                            @foreach (DataColumn column in _dataTable.Columns)
+                            <MudTh>User</MudTh>
+                            <MudTh>
+                                <MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="Sort">Total
+                                </MudTableSortLabel>
+                            </MudTh>
+                            @for (int i = 16; i > 0; i--)
                             {
-                                @if (@column.ColumnName == "Total") {
-                                    <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="Sort">@column.ColumnName</MudTableSortLabel></MudTh>
-                                }
-                                else {
-                                <MudTh>@column.ColumnName</MudTh>
-                                }
+                                <MudTh>@($"Week {i}")</MudTh>
                             }
                         </HeaderContent>
                         <RowTemplate>
-                            @foreach (var column in _dataTable.Columns.Cast<DataColumn>())
+                            @foreach (var userTotal in _leaderboardModel)
                             {
-                                var cellValue = context[column.ColumnName]?.ToString();
-                                if (cellValue == "True" || cellValue == "False" || cellValue == "Invalid")
+                                <MudTd>@userTotal.User.Email</MudTd>
+                                <MudTd>@userTotal.Total</MudTd>
+                                @for (int i = 16; i > 0; i--)
                                 {
-                                   
-                                        @if (cellValue == "True")
-                                        {
-                                             <MudTd Class="border-solid border-1 mud-border-primary mud-theme-primary"/>
-                                            <!--<MudIcon Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle" />-->
-                                        }
-                                        else if (cellValue == "Invalid")
-                                        {
-                                                <MudTd Class="border-solid border-1 mud-border-primary mud-theme-warning"/>
-                                            <!--<MudIcon Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Warning" />-->
-                                        }
-                                        else
-                                        {
-                                                <MudTd Class="border-solid border-1 mud-border-primary mud-theme-error"/>
-                                            <!--<MudIcon Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Cancel" />-->
-                                        }
-                                }
-                                else
-                                {
-                                    <MudTd>@cellValue</MudTd>
+                                    var cellValue = userTotal.WeekResults[i - 1];
+
+                                    @if (cellValue.WeekResult == WeekResult.Won)
+                                    {
+                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-primary" />
+                                        <!--<MudIcon Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle" />-->
+                                    }
+                                    @if (cellValue.WeekResult == WeekResult.MissingPicks)
+                                    {
+                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-warning" />
+                                        <!--<MudIcon Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Warning" />-->
+                                    }
+                                    else
+                                    {
+                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-error" />
+                                        <!--<MudIcon Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Cancel" />-->
+                                    }
+
                                 }
                             }
                         </RowTemplate>

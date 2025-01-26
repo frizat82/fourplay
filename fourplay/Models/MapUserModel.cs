@@ -1,5 +1,7 @@
+using fourplay.Data;
+
 namespace fourplay.Models;
 public class MapUserModel {
-    public string LeagueName { get; set; }
-    public string Email {get;set;}
+    public LeagueInfo League { get; set; }
+    public ApplicationUser User { get; set; }
 }

@@ -1,4 +1,5 @@
 namespace fourplay.Services.Interfaces;
+using fourplay.Data;
 public interface IESPNApiService {
     public Task<ESPNScores?> GetWeekScores(int week, int year, bool postSeason = false);
     /*

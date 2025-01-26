@@ -1,9 +1,12 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Globalization;
+
+namespace fourplay.Data;
+
 public partial class ESPNScores {
     [JsonPropertyName("leagues")]
-    public League[] Leagues { get; set; }
+    public ESPNLeague[] Leagues { get; set; }
 
     [JsonPropertyName("season")]
     public Season Season { get; set; }
@@ -39,7 +42,7 @@ public class Competition {
     public Competitor[] Competitors { get; set; }
 
     [JsonPropertyName("status")]
-    public Status Status { get; set; }
+    public ESPNStatus Status { get; set; }
     public override int GetHashCode() {
         return HashCode.Combine(Date.ToString("yyyyMMddHHmmss"), Competitors[0].Team.Abbreviation, Competitors[1].Team.Abbreviation);
     }
@@ -307,7 +310,7 @@ public partial class Links {
     public Web Web { get; set; }
 
     [JsonPropertyName("source")]
-    public Source Source { get; set; }
+    public ESPNSource Source { get; set; }
 
     [JsonPropertyName("mobile")]
     public Mobile Mobile { get; set; }
@@ -343,7 +346,7 @@ public partial class Mobile {
     public ArtworkElement ProgressiveDownload { get; set; }
 }
 
-public partial class Source {
+public partial class ESPNSource {
     [JsonPropertyName("mezzanine")]
     public ArtworkElement Mezzanine { get; set; }
 
@@ -610,7 +613,7 @@ public partial class LastPlayType {
     public string Abbreviation { get; set; }
 }
 
-public partial class Status {
+public partial class ESPNStatus {
     [JsonPropertyName("clock")]
     public double Clock { get; set; }
 
@@ -752,7 +755,7 @@ public partial class EventWeek {
     public long Number { get; set; }
 }
 
-public partial class League {
+public partial class ESPNLeague {
     [JsonPropertyName("id")]
     [JsonConverter(typeof(ParseStringConverter))]
     public long Id { get; set; }

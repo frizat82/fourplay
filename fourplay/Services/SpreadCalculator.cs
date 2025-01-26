@@ -2,7 +2,6 @@ using fourplay.Data;
 using fourplay.Models.Enum;
 using fourplay.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using SportslineOdds;
 
 namespace fourplay.Services;
 public class SpreadCalculator : ISpreadCalculator {

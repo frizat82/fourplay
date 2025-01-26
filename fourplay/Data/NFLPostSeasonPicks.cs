@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using fourplay.Data;
 using fourplay.Models.Enum;
-
+namespace fourplay.Data;
 public class NFLPostSeasonPicks : IEquatable<NFLPostSeasonPicks> {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 
