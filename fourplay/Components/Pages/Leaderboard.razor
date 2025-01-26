@@ -27,7 +27,8 @@
                             </MudTh>
                             @for (int i = 16; i > 0; i--)
                             {
-                                <MudTh>@($"Week {i}")</MudTh>
+                                var weekName = $"Week {i}";
+                                <MudTh>@weekName</MudTh>
                             }
                         </HeaderContent>
                         <RowTemplate>
@@ -41,17 +42,20 @@
 
                                     @if (cellValue.WeekResult == WeekResult.Won)
                                     {
-                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-primary" />
+
+                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-primary">@cellValue.Score
+                                        </MudTd>
                                         <!--<MudIcon Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle" />-->
                                     }
                                     @if (cellValue.WeekResult == WeekResult.MissingPicks)
                                     {
-                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-warning" />
+                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-warning">@cellValue.Score
+                                        </MudTd>
                                         <!--<MudIcon Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Warning" />-->
                                     }
                                     else
                                     {
-                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-error" />
+                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-error">@cellValue.Score</MudTd>
                                         <!--<MudIcon Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Cancel" />-->
                                     }
 
