@@ -76,7 +76,7 @@ public class NFLSpreadJob : IJob {
                 await _context.NFLPostSeasonSpreads.AddRangeAsync(spreads);
             await _context.SaveChangesAsync();
             //TODO: remove eventually
-            //await UpsertEntitiesAsync(spreads, isPostSeason);
+            await UpsertEntitiesAsync(spreads, isPostSeason);
         }
         Log.Information("NFL Spreads Complete at " + DateTime.Now);
     }

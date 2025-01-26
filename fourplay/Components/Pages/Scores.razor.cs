@@ -43,22 +43,12 @@ public partial class Scores : ComponentBase, IDisposable {
         _timer.Enabled = true;
         foreach (var scoreEvent in _scores?.Events!) {
             foreach (var competition in scoreEvent.Competitions.OrderBy(x => x.Competitors[1].Team.Abbreviation)) {
-                if (GameHelpers.IsGameStarted(competition)) {
-                    _userPicks.Add(GameHelpers.GetHomeTeamAbbr(competition), await GetUserNamedPicks(GameHelpers.GetHomeTeamAbbr(competition)));
-                    _userPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), await GetUserNamedPicks(GameHelpers.GetAwayTeamAbbr(competition)));
-                    _userOverPicks.Add(GameHelpers.GetHomeTeamAbbr(competition), await GetUserNamedOverUnderPicks(GameHelpers.GetHomeTeamAbbr(competition), PickType.Over));
-                    _userOverPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), await GetUserNamedOverUnderPicks(GameHelpers.GetAwayTeamAbbr(competition), PickType.Over));
-                    _userUnderPicks.Add(GameHelpers.GetHomeTeamAbbr(competition), await GetUserNamedOverUnderPicks(GameHelpers.GetHomeTeamAbbr(competition), PickType.Under));
-                    _userUnderPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), await GetUserNamedOverUnderPicks(GameHelpers.GetAwayTeamAbbr(competition), PickType.Under));
-                }
-                else {
-                    _userPicks.Add(GameHelpers.GetHomeTeamAbbr(competition), new List<string>());
-                    _userPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), new List<string>());
-                    _userOverPicks.Add(GameHelpers.GetHomeTeamAbbr(competition), new List<string>());
-                    _userOverPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), new List<string>());
-                    _userUnderPicks.Add(GameHelpers.GetHomeTeamAbbr(competition), new List<string>());
-                    _userUnderPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), new List<string>());
-                }
+                _userPicks.Add(GameHelpers.GetHomeTeamAbbr(competition), new List<string>());
+                _userPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), new List<string>());
+                _userOverPicks.Add(GameHelpers.GetHomeTeamAbbr(competition), new List<string>());
+                _userOverPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), new List<string>());
+                _userUnderPicks.Add(GameHelpers.GetHomeTeamAbbr(competition), new List<string>());
+                _userUnderPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), new List<string>());
             }
         }
         _loading = false;
@@ -75,6 +65,18 @@ public partial class Scores : ComponentBase, IDisposable {
                 }
                 _leagueId = leagueId;
                 SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year, _isPostSeason);
+                foreach (var scoreEvent in _scores?.Events!) {
+                    foreach (var competition in scoreEvent.Competitions.OrderBy(x => x.Competitors[1].Team.Abbreviation)) {
+                        if (GameHelpers.IsGameStarted(competition)) {
+                            _userPicks[GameHelpers.GetHomeTeamAbbr(competition)] = await GetUserNamedPicks(GameHelpers.GetHomeTeamAbbr(competition));
+                            _userPicks[GameHelpers.GetAwayTeamAbbr(competition)] = await GetUserNamedPicks(GameHelpers.GetAwayTeamAbbr(competition));
+                            _userOverPicks[GameHelpers.GetHomeTeamAbbr(competition)] = await GetUserNamedOverUnderPicks(GameHelpers.GetHomeTeamAbbr(competition), PickType.Over);
+                            _userOverPicks[GameHelpers.GetAwayTeamAbbr(competition)] = await GetUserNamedOverUnderPicks(GameHelpers.GetAwayTeamAbbr(competition), PickType.Over);
+                            _userUnderPicks[GameHelpers.GetHomeTeamAbbr(competition)] = await GetUserNamedOverUnderPicks(GameHelpers.GetHomeTeamAbbr(competition), PickType.Under);
+                            _userUnderPicks[GameHelpers.GetAwayTeamAbbr(competition)] = await GetUserNamedOverUnderPicks(GameHelpers.GetAwayTeamAbbr(competition), PickType.Under);
+                        }
+                    }
+                }
                 await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex) {
