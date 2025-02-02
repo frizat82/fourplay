@@ -51,7 +51,6 @@ public partial class Scores : ComponentBase, IDisposable {
                 _userUnderPicks.Add(GameHelpers.GetAwayTeamAbbr(competition), new List<string>());
             }
         }
-        _loading = false;
     }
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender || _leagueId == 0) {
@@ -64,7 +63,7 @@ public partial class Scores : ComponentBase, IDisposable {
                     Navigation.NavigateTo("/leagues");
                 }
                 _leagueId = leagueId;
-                SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year, _isPostSeason);
+                SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year);
                 foreach (var scoreEvent in _scores?.Events!) {
                     foreach (var competition in scoreEvent.Competitions.OrderBy(x => x.Competitors[1].Team.Abbreviation)) {
                         if (GameHelpers.IsGameStarted(competition)) {
@@ -88,6 +87,7 @@ public partial class Scores : ComponentBase, IDisposable {
             Log.Information("_leagueId is 0");
             Navigation.NavigateTo("/leagues");
         }
+        _loading = false;
     }
     public string GetIcon(Competition competition, Competitor baseTeam, Competitor compareTeam) {
         var spread = SpreadCalculator.GetSpread(baseTeam.Team.Abbreviation) ?? 0;

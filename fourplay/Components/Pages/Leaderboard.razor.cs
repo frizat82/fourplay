@@ -25,6 +25,7 @@ public partial class Leaderboard : ComponentBase {
         _loading = false;
         await InvokeAsync(StateHasChanged);
     }
+    private int GetMaxWeek() => _leaderboardModel.Max(x => x.WeekResults.Max(y => y.Week));
     public Func<DataRow, object> Sort => (DataRow row) => {
         var value = row["Total"].ToString();
         if (value is null || value == "")

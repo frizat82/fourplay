@@ -63,7 +63,6 @@ public partial class Picks : ComponentBase {
                 }
             }
         }
-        _loading = false;
     }
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender || _leagueId == 0) {
@@ -76,7 +75,7 @@ public partial class Picks : ComponentBase {
                     Navigation.NavigateTo("/leagues");
                 }
                 _leagueId = leagueId;
-                SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year, _isPostSeason);
+                SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year);
                 await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex) {
@@ -88,6 +87,7 @@ public partial class Picks : ComponentBase {
             Log.Information("_leagueId is 0");
             Navigation.NavigateTo("/leagues");
         }
+        _loading = false;
     }
     private async Task SubmitPicks() {
         Log.Information("Submitting Picks");

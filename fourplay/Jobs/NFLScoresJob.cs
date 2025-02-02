@@ -1,6 +1,7 @@
 using fourplay.Data;
 using fourplay.Models;
 using fourplay.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Serilog;
 
@@ -19,7 +20,7 @@ public class NFLScoresJob : IJob {
         var postSeasonScoreList = new List<NFLScores>();
         var scoreList = new List<NFLScores>();
         for (var i = -2; i < 2; i++) {
-            for (var j = 1; j < 18; j++) {
+            for (var j = 1; j < 19; j++) {
                 // TODO: how do i know the year?
                 var scores = await _espn.GetWeekScores(j, DateTime.Now.AddYears(i).Year);
                 if (scores is null)
@@ -31,7 +32,7 @@ public class NFLScoresJob : IJob {
                 else
                     break;
             }
-            for (var j = 1; j < 6; j++) {
+            for (var j = 1; j < 5; j++) {
                 // TODO: how do i know the year?
                 var scores = await _espn.GetWeekScores(j, DateTime.Now.AddYears(i).Year, true);
                 if (scores is null)
@@ -45,14 +46,27 @@ public class NFLScoresJob : IJob {
             }
         }
         if (scoreList.Any()) {
-            await _context.NFLScores.AddRangeAsync(scoreList);
+            foreach (var dbScore in scoreList) {
+                var record = _context.NFLScores.FirstOrDefault(x => x.Season == dbScore.Season && x.NFLWeek == dbScore.NFLWeek && x.HomeTeam == dbScore.HomeTeam);
+                if (record is not null) {
+                    await _context.NFLScores.Where(x => x.Season == dbScore.Season && x.NFLWeek == dbScore.NFLWeek && x.HomeTeam == dbScore.HomeTeam).ExecuteDeleteAsync();
+                }
+                _context.NFLScores.Add(dbScore);
+            }
             await _context.SaveChangesAsync();
         }
         if (postSeasonScoreList.Any()) {
-            await _context.NFLPostSeasonScores.AddRangeAsync(postSeasonScoreList);
+            foreach (var dbScore in postSeasonScoreList) {
+                dbScore.NFLWeek += 18;
+                var record = _context.NFLScores.FirstOrDefault(x => x.Season == dbScore.Season && x.NFLWeek == dbScore.NFLWeek && x.HomeTeam == dbScore.HomeTeam);
+                if (record is null) {
+                    await _context.NFLScores.Where(x => x.Season == dbScore.Season && x.NFLWeek == dbScore.NFLWeek && x.HomeTeam == dbScore.HomeTeam).ExecuteDeleteAsync();
+                }
+                _context.NFLScores.Add(dbScore);
+            }
             await _context.SaveChangesAsync();
         }
-
+        Log.Information("Grabbed NFL scores at " + DateTime.Now);
     }
     private List<NFLScores> ParseCompetition(IEnumerable<CompetitionBySeason> competitions, int week) {
         var scoreList = new List<NFLScores>();
@@ -69,9 +83,7 @@ public class NFLScoresJob : IJob {
                 dbScore.NFLWeek = week;
                 dbScore.Season = (int)result.Season.Year;
                 dbScore.GameTime = result.Competition.Date.UtcDateTime;
-                var record = _context.NFLScores.FirstOrDefault(x => x.Season == dbScore.Season && x.NFLWeek == dbScore.NFLWeek && x.HomeTeam == dbScore.HomeTeam);
-                if (record is null)
-                    scoreList.Add(dbScore);
+                scoreList.Add(dbScore);
             }
         }
         return scoreList;

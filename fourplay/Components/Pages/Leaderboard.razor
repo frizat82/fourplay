@@ -25,40 +25,32 @@
                                 <MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="Sort">Total
                                 </MudTableSortLabel>
                             </MudTh>
-                            @for (int i = 16; i > 0; i--)
+                            @for (int i = GetMaxWeek(); i > 0; i--)
                             {
-                                var weekName = $"Week {i}";
+                                var weekName = $"W{i}";
                                 <MudTh>@weekName</MudTh>
                             }
                         </HeaderContent>
                         <RowTemplate>
-                            @foreach (var userTotal in _leaderboardModel)
+                            <MudTd>@context.User.Email</MudTd>
+                            <MudTd>@context.Total</MudTd>
+                            @for (int i = GetMaxWeek(); i > 0; i--)
                             {
-                                <MudTd>@userTotal.User.Email</MudTd>
-                                <MudTd>@userTotal.Total</MudTd>
-                                @for (int i = 16; i > 0; i--)
+                                var cellValue = @context.WeekResults[i - 1];
+                                if (@cellValue.WeekResult == WeekResult.Won)
                                 {
-                                    var cellValue = userTotal.WeekResults[i - 1];
 
-                                    @if (cellValue.WeekResult == WeekResult.Won)
-                                    {
-
-                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-primary">@cellValue.Score
-                                        </MudTd>
-                                        <!--<MudIcon Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle" />-->
-                                    }
-                                    @if (cellValue.WeekResult == WeekResult.MissingPicks)
-                                    {
-                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-warning">@cellValue.Score
-                                        </MudTd>
-                                        <!--<MudIcon Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Warning" />-->
-                                    }
-                                    else
-                                    {
-                                        <MudTd Class="border-solid border-1 mud-border-primary mud-theme-error">@cellValue.Score</MudTd>
-                                        <!--<MudIcon Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Cancel" />-->
-                                    }
-
+                                    <MudTd Class="border-solid border-2 mud-border-white mud-theme-success">@cellValue.Score
+                                    </MudTd>
+                                }
+                                else if (@cellValue.WeekResult == WeekResult.MissingPicks)
+                                {
+                                    <MudTd Class="border-solid border-2 mud-border-white mud-theme-warning">@cellValue.Score
+                                    </MudTd>
+                                }
+                                else
+                                {
+                                    <MudTd Class="border-solid border-2 mud-border-white mud-theme-error">@cellValue.Score</MudTd>
                                 }
                             }
                         </RowTemplate>

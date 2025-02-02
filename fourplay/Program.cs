@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
-using fourplay.Components;
 using fourplay.Components.Account;
 using fourplay.Data;
 using Quartz;
@@ -24,6 +23,7 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .MinimumLevel.Override("Quartz", Serilog.Events.LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("System.Net.Http.HttpClient", Serilog.Events.LogEventLevel.Warning)
     .ReadFrom.Services(services));
 
 // Add MudBlazor services

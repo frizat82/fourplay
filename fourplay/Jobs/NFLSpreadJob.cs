@@ -59,6 +59,8 @@ public class NFLSpreadJob : IJob {
                 var matchedGame = newGames.Where(x => x.Date == spread.GameTime).SelectMany(x => x.Competitors).Where(y => y.HomeAway == HomeAway.Home).FirstOrDefault(z => z.Team.Abbreviation == spread.HomeTeam);
                 if (matchedGame is not null) {
                     spread.NFLWeek = (int)scoreboard.Week.Number;
+                    if (isPostSeason)
+                        spread.NFLWeek += 18;
                     spread.Season = (int)scoreboard.Season.Year;
                     var record = _context.NFLSpreads.FirstOrDefault(x => x.Season == spread.Season && x.NFLWeek == spread.NFLWeek && x.HomeTeam == spread.HomeTeam);
                     if (record is null) {
@@ -70,23 +72,16 @@ public class NFLSpreadJob : IJob {
         }
         if (spreads.Any()) {
             Log.Information("Load NFL Spreads at " + DateTime.Now);
-            if (!isPostSeason)
-                await _context.NFLSpreads.AddRangeAsync(spreads);
-            else
-                await _context.NFLPostSeasonSpreads.AddRangeAsync(spreads);
+            await _context.NFLSpreads.AddRangeAsync(spreads);
             await _context.SaveChangesAsync();
             //TODO: remove eventually
-            await UpsertEntitiesAsync(spreads, isPostSeason);
+            await UpsertEntitiesAsync(spreads);
         }
         Log.Information("NFL Spreads Complete at " + DateTime.Now);
     }
-    public async Task UpsertEntitiesAsync(IEnumerable<NFLSpreads> entities, bool isPostSeason = false) {
+    public async Task UpsertEntitiesAsync(IEnumerable<NFLSpreads> entities) {
         foreach (var entity in entities) {
-            NFLSpreads? existingEntity;
-            if (!isPostSeason)
-                existingEntity = await _context.NFLSpreads.FindAsync(entity.Season, entity.NFLWeek, entity.HomeTeam);
-            else
-                existingEntity = await _context.NFLPostSeasonSpreads.FindAsync(entity.Season, entity.NFLWeek, entity.HomeTeam);
+            var existingEntity = await _context.NFLSpreads.FindAsync(entity.Season, entity.NFLWeek, entity.HomeTeam);
             if (existingEntity != null) {
                 // Update the existing entity
                 _context.Entry(existingEntity).CurrentValues.SetValues(entity);

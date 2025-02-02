@@ -8,8 +8,6 @@ public class LeaderboardModel {
     public ApplicationUser User { get; set; }
     public long Total { get; set; }
     public LeaderboardWeekResults[] WeekResults { get; set; }
-    public LeaderboardWeekResults[] PostSeasonWeekResults { get; set; }
-
 }
 
 public class LeaderboardWeekResults {

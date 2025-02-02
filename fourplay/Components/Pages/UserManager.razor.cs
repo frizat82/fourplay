@@ -50,12 +50,12 @@ public partial class UserManager : ComponentBase, IDisposable {
 
     private async Task ClearPostSeasonScores() {
         int records = 0;
-        foreach (var score in _db.NFLPostSeasonScores) {
-            _db.NFLPostSeasonScores.Remove(score);
+        foreach (var score in _db.NFLScores) {
+            _db.NFLScores.Remove(score);
             ++records;
         }
         await _db.SaveChangesAsync();
-        Snackbar.Add($"Removed {records} NFLPostSeasonScores", Severity.Success);
+        Snackbar.Add($"Removed {records} NFLScores", Severity.Success);
     }
     public async Task AddUser() {
         var parameters = new DialogParameters<AddUserDialog>();
