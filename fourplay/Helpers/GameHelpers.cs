@@ -18,7 +18,8 @@ public static class GameHelpers {
             };
         }
     }
-    public static int GetRequiredPicks(long week, bool isPostSeason = false) {
+    // Uses ESPN Style for Post Season which is resetting weeks to 1-4
+    public static int GetESPNRequiredPicks(long week, bool isPostSeason = false) {
         if (!isPostSeason) {
             return 4;
         }
@@ -28,6 +29,20 @@ public static class GameHelpers {
                 2 => 3,
                 3 => 2,
                 4 => 1,
+                _ => throw new ArgumentException("Invalid week number")
+            };
+        }
+    }
+    public static int GetRequiredPicks(long week) {
+        if (week < 19) {
+            return 4;
+        }
+        else {
+            return week switch {
+                19 => 3,
+                20 => 3,
+                21 => 2,
+                22 => 1,
                 _ => throw new ArgumentException("Invalid week number")
             };
         }

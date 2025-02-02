@@ -100,8 +100,8 @@ public class LeaderboardService : ILeaderboardService {
             .Where(pick => pick.UserId == user.UserId && pick.Season == seasonYear && pick.NFLWeek == postSeasonWeek)
             .ToListAsync();
 
-        if (userPicks.Count < GameHelpers.GetRequiredPicks(postSeasonWeek, true)) {
-            Log.Information("Missing PostSeason Picks {Week} {Count} {Required}", week, userPicks.Count, GameHelpers.GetRequiredPicks(postSeasonWeek, true));
+        if (userPicks.Count < GameHelpers.GetRequiredPicks(week)) {
+            Log.Information("Missing PostSeason Picks {Week} {Count} {Required}", week, userPicks.Count, GameHelpers.GetRequiredPicks(week));
             weekResult.WeekResult = WeekResult.MissingPicks;
         }
         else {
@@ -147,8 +147,8 @@ public class LeaderboardService : ILeaderboardService {
             .Where(pick => pick.UserId == user.UserId && pick.Season == seasonYear && pick.NFLWeek == week)
             .ToListAsync();
 
-        if (userPicks.Count < GameHelpers.GetRequiredPicks(week, false)) {
-            Log.Information("Missing Picks {Week} {Count} {Required}", week, userPicks.Count, GameHelpers.GetRequiredPicks(week, false));
+        if (userPicks.Count < GameHelpers.GetESPNRequiredPicks(week, false)) {
+            Log.Information("Missing Picks {Week} {Count} {Required}", week, userPicks.Count, GameHelpers.GetESPNRequiredPicks(week, false));
             weekResult.WeekResult = WeekResult.MissingPicks;
         }
         else {

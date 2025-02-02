@@ -176,7 +176,7 @@ public partial class Picks : ComponentBase {
         var pick = CompetitionToPostSeasonPick(teamAbbr, pickType);
         return _picksOverUnder.Contains(pick);
     }
-    private bool IsDisabled() => _picks.Count == @GameHelpers.GetRequiredPicks(_week, _isPostSeason) || _picks.Count + _picksOverUnder.Count == @GameHelpers.GetRequiredPicks(_week, _isPostSeason);
+    private bool IsDisabled() => _picks.Count == @GameHelpers.GetESPNRequiredPicks(_week, _isPostSeason) || _picks.Count + _picksOverUnder.Count == @GameHelpers.GetESPNRequiredPicks(_week, _isPostSeason);
     private bool IsPicksLocked() => _locked;
 
 }
