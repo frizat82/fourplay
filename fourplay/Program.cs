@@ -14,6 +14,7 @@ using fourplay.Jobs;
 using Serilog.Formatting.Compact;
 using fourplay.Services.Interfaces;
 using fourplay.Services;
+using fourplay.Components;
 Environment.SetEnvironmentVariable("DOTNET_hostBuilder:reloadConfigOnChange", "false");
 var builder = WebApplication.CreateBuilder(args);
 

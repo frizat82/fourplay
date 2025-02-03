@@ -17,7 +17,7 @@
             @if (_leaderboardModel.Count > 0)
             {
                 <MudPaper class="pa-3 full-width" Elevation="3">
-                    <MudTable T="LeaderboardModel" Items="_leaderboardModel" Bordered="true" Striped="true" Dense="true"
+                    <MudTable T="LeaderboardModel" Items="_leaderboardModel" Bordered="true" Dense="true"
                         ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info" Breakpoint="Breakpoint.None">
                         <HeaderContent>
                             <MudTh>User</MudTh>
@@ -33,7 +33,14 @@
                         </HeaderContent>
                         <RowTemplate>
                             <MudTd>@context.User.Email</MudTd>
-                            <MudTd>@context.Total</MudTd>
+                            @if (@context.Total > 0)
+                            {
+                                <MudTd Class="border-solid border-3 mud-border-white mud-theme-success">@context.Total</MudTd>
+                            }
+                            else
+                            {
+                                <MudTd Class="border-solid border-3 mud-border-white mud-theme-error">@context.Total</MudTd>
+                            }
                             @for (int i = GetMaxWeek(); i > 0; i--)
                             {
                                 var cellValue = @context.WeekResults[i - 1];
