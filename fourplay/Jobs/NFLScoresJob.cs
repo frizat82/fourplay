@@ -36,13 +36,11 @@ public class NFLScoresJob : IJob {
                 // TODO: how do i know the year?
                 var scores = await _espn.GetWeekScores(j, DateTime.Now.AddYears(i).Year, true);
                 if (scores is null)
-                    break;
+                    continue;
                 var results = scores.Events.SelectMany(x => x.Competitions, (x, y) => new CompetitionBySeason { Season = x.Season, Competition = y }).Where(y => y.Competition.Status.Type.Name == TypeName.StatusFinal);
                 if (results.Any()) {
                     postSeasonScoreList.AddRange(ParseCompetition(results, j));
                 }
-                else
-                    break;
             }
         }
         if (scoreList.Any()) {
@@ -59,7 +57,7 @@ public class NFLScoresJob : IJob {
             foreach (var dbScore in postSeasonScoreList) {
                 dbScore.NFLWeek += 18;
                 var record = _context.NFLScores.FirstOrDefault(x => x.Season == dbScore.Season && x.NFLWeek == dbScore.NFLWeek && x.HomeTeam == dbScore.HomeTeam);
-                if (record is null) {
+                if (record is not null) {
                     await _context.NFLScores.Where(x => x.Season == dbScore.Season && x.NFLWeek == dbScore.NFLWeek && x.HomeTeam == dbScore.HomeTeam).ExecuteDeleteAsync();
                 }
                 _context.NFLScores.Add(dbScore);

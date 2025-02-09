@@ -171,7 +171,7 @@ public class ESPNApiService : IESPNApiService {
         // Remove teams with Abbr "NFC" or "AFC" and fix Pro Bowl
         foreach (var scoreEvent in scores.Events) {
             scoreEvent.Competitions = scoreEvent.Competitions
-                .Where(c => !c.Competitors.Any(team => team.Team.Abbr == "NFC" || team.Team.Abbr == "AFC"))
+                .Where(c => !c.Competitors.Any(team => team.Team.Abbreviation == "NFC" || team.Team.Abbreviation == "AFC"))
                 .ToArray();
         }
         // Move back Super Bowl to a proper week
