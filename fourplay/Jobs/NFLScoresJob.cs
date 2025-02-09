@@ -32,7 +32,7 @@ public class NFLScoresJob : IJob {
                 else
                     break;
             }
-            for (var j = 1; j < 5; j++) {
+            for (var j = 1; j < 6; j++) {
                 // TODO: how do i know the year?
                 var scores = await _espn.GetWeekScores(j, DateTime.Now.AddYears(i).Year, true);
                 if (scores is null)

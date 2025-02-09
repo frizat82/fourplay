@@ -14,7 +14,7 @@
 
         <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((!@_loading ? "invisible" : ""))" />
 
-        @if (!_loading & _scores is not null && SpreadCalculator.DoOddsExist() && _leagueId > 0)
+        @if (ShowScores())
         {
 
             <MudItem xs="12">

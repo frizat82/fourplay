@@ -78,10 +78,48 @@
                     </MudButton>
                     <MudButton Class="ma-2 pa-2" Variant="Variant.Filled" @onclick="RunScores">Run Scores Job
                     </MudButton>
-                    <MudButton Class="ma-2 pa-2" Variant="Variant.Filled" @onclick="ClearPostSeasonScores">Clear
+                    <MudButton Class="ma-2 pa-2" Variant="Variant.Filled" @onclick="ClearScores">Clear
                         PostSeason Scores
                     </MudButton>
                 </MudItem>
+            </MudPaper>
+        </MudItem>
+
+        <MudSpacer />
+        <MudItem xs="12" lg="4">
+            <MudPaper Class="border-solid border-2 mud-border-primary ma-4 pa-4" Elevation="3">
+                <MudText Align="Align.Center" Typo="Typo.h3">Add User</MudText>
+
+                <MudDataGrid Loading="@_loadingScores" T="NFLScores" ReadOnly="true" Items="@_scores"
+                    EditMode="DataGridEditMode.Form" Bordered="true" Dense="true"
+                    EditTrigger="DataGridEditTrigger.Manual">
+                    <Columns>
+                        <PropertyColumn Property="x => x.Season" />
+                        <PropertyColumn Property="x => x.NFLWeek" />
+                        <PropertyColumn Property="x => x.HomeTeam" />
+                        <PropertyColumn Property="x => x.HomeTeamScore" />
+                        <PropertyColumn Property="x => x.AwayTeam" />
+                        <PropertyColumn Property="x => x.AwayTeamScore" />
+                    </Columns>
+                </MudDataGrid>
+            </MudPaper>
+
+            <MudSpacer />
+            <MudPaper Class="border-solid border-2 mud-border-primary ma-4 pa-4" Elevation="3">
+                <MudText Align="Align.Center" Typo="Typo.h3">Add User</MudText>
+
+                <MudDataGrid Loading="@_loadingScores" T="NFLSpreads" ReadOnly="true" Items="@_spreads"
+                    EditMode="DataGridEditMode.Form" Bordered="true" Dense="true"
+                    EditTrigger="DataGridEditTrigger.Manual">
+                    <Columns>
+                        <PropertyColumn Property="x => x.Season" />
+                        <PropertyColumn Property="x => x.NFLWeek" />
+                        <PropertyColumn Property="x => x.HomeTeam" />
+                        <PropertyColumn Property="x => x.HomeTeamSpread" />
+                        <PropertyColumn Property="x => x.AwayTeam" />
+                        <PropertyColumn Property="x => x.AwayTeamSpread" />
+                    </Columns>
+                </MudDataGrid>
             </MudPaper>
         </MudItem>
     </MudGrid>

@@ -15,7 +15,7 @@ public class ESPNApiService : IESPNApiService {
         // Add any additional configuration for the HttpClient here
     }
     public async Task<ESPNScores?> GetWeekScores(int week, int year, bool postSeason = false) {
-        return await _memory.GetOrCreateAsync<ESPNScores?>($"scores:{week}:{year}:{postSeason}", async (option) => {
+        return await _memory.GetOrCreateAsync($"scores:{week}:{year}:{postSeason}", async (option) => {
             option.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
             try {
                 // Replace the endpoint with the actual ESPN API endpoint for NFL spreads
@@ -35,7 +35,7 @@ public class ESPNApiService : IESPNApiService {
                     var deserializedObject = JsonSerializer.Deserialize<ESPNScores>(responseString, options);
 
                     // Use the deserialized object as needed
-                    return deserializedObject;
+                    return FixESPNProbBowlWeek(deserializedObject);
                 }
                 else {
                     Log.Error($"Error: {response.ReasonPhrase}");
@@ -150,7 +150,7 @@ public class ESPNApiService : IESPNApiService {
 
                     // Use the deserialized object as needed
                     Log.Error($"Deserialized object: {deserializedObject}");
-                    return deserializedObject;
+                    return FixESPNProbBowlWeek(deserializedObject);
                 }
                 else {
                     Log.Error($"Error: {response.ReasonPhrase}");
@@ -163,5 +163,28 @@ public class ESPNApiService : IESPNApiService {
             }
         }
     );
+    }
+    public ESPNScores? FixESPNProbBowlWeek(ESPNScores? scores) {
+        if (scores == null || scores.Events.Count() == 0)
+            return scores;
+
+        // Remove teams with Abbr "NFC" or "AFC" and fix Pro Bowl
+        foreach (var scoreEvent in scores.Events) {
+            scoreEvent.Competitions = scoreEvent.Competitions
+                .Where(c => !c.Competitors.Any(team => team.Team.Abbr == "NFC" || team.Team.Abbr == "AFC"))
+                .ToArray();
+        }
+        // Move back Super Bowl to a proper week
+        if (scores.IsPostSeason() && scores.Week.Number == 5) {
+            scores.Week.Number = 4;
+        }
+        // Update SeasonType and Week number
+        foreach (var scoreEvent in scores.Events) {
+            if (scoreEvent.IsPostSeason() && scoreEvent.Week.Number == 5) {
+                scoreEvent.Week.Number = 4;
+            }
+        }
+
+        return scores;
     }
 }

@@ -22,7 +22,7 @@
                         <HeaderContent>
                             <MudTh>User</MudTh>
                             <MudTh>
-                                <MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="Sort">Total
+                                <MudTableSortLabel SortBy="new Func<LeaderboardModel, object>(x=>x.Total)" InitialDirection="SortDirection.Descending">Total
                                 </MudTableSortLabel>
                             </MudTh>
                             @for (int i = GetMaxWeek(); i > 0; i--)
@@ -35,11 +35,11 @@
                             <MudTd>@context.User.Email</MudTd>
                             @if (@context.Total > 0)
                             {
-                                <MudTd Class="border-solid border-3 mud-border-white mud-theme-success">@context.Total</MudTd>
+                                <MudTd Class="border-solid border-2 mud-border-white mud-theme-success">@context.Total</MudTd>
                             }
                             else
                             {
-                                <MudTd Class="border-solid border-3 mud-border-white mud-theme-error">@context.Total</MudTd>
+                                <MudTd Class="border-solid border-2 mud-border-white mud-theme-error">@context.Total</MudTd>
                             }
                             @for (int i = GetMaxWeek(); i > 0; i--)
                             {

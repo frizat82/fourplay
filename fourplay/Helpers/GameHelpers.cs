@@ -29,6 +29,7 @@ public static class GameHelpers {
                 2 => 3,
                 3 => 2,
                 4 => 1,
+                5 => 1, // ESPN Treats Post Season Week 4 as the Pro Bowl - this sucks
                 _ => throw new ArgumentException("Invalid week number")
             };
         }

@@ -5,4 +5,9 @@ public static class ESPNScoresExtensions {
             return true;
         return false;
     }
+    public static bool IsPostSeason(this Event scoreEvent) {
+        if (scoreEvent!.Season.Type == (int)TypeOfSeason.PostSeason)
+            return true;
+        return false;
+    }
 }

@@ -52,6 +52,7 @@ public partial class Scores : ComponentBase, IDisposable {
             }
         }
     }
+    public bool ShowScores() => !_loading & _scores is not null && SpreadCalculator.DoOddsExist() && _leagueId > 0;
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender || _leagueId == 0) {
             try {
@@ -63,7 +64,7 @@ public partial class Scores : ComponentBase, IDisposable {
                     Navigation.NavigateTo("/leagues");
                 }
                 _leagueId = leagueId;
-                SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year);
+                SpreadCalculator.Configure(_leagueId, !_isPostSeason ? (int)_week : (int)_week + 18, (int)_scores!.Season.Year);
                 foreach (var scoreEvent in _scores?.Events!) {
                     foreach (var competition in scoreEvent.Competitions.OrderBy(x => x.Competitors[1].Team.Abbreviation)) {
                         if (GameHelpers.IsGameStarted(competition)) {
@@ -76,7 +77,6 @@ public partial class Scores : ComponentBase, IDisposable {
                         }
                     }
                 }
-                await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex) {
                 Log.Error(ex, "Error getting leagueId");
@@ -88,6 +88,7 @@ public partial class Scores : ComponentBase, IDisposable {
             Navigation.NavigateTo("/leagues");
         }
         _loading = false;
+        await InvokeAsync(StateHasChanged);
     }
     public string GetIcon(Competition competition, Competitor baseTeam, Competitor compareTeam) {
         var spread = SpreadCalculator.GetSpread(baseTeam.Team.Abbreviation) ?? 0;

@@ -14,13 +14,13 @@
             Class="@((!@_loading ? "invisible" : ""))" />
            
 
-        @if (!_loading && !SpreadCalculator.DoOddsExist())
+        @if (ShowNoOdds())
         {
             <MudItem xs="12">
                 <MudText Align="Align.Center" Typo="Typo.h3">Odds Not Posted Yet</MudText>
             </MudItem>
         }
-        else if (!_loading && _scores is not null && SpreadCalculator.DoOddsExist() && _leagueId > 0)
+        else if (ShowPicks())
         {
             <MudItem xs="12">
                 <MudText Align="Align.Center" Typo="Typo.h3">@GameHelpers.GetWeekName(@_scores!.Week!.Number,

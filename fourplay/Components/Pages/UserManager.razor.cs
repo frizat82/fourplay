@@ -15,16 +15,19 @@ public partial class UserManager : ComponentBase, IDisposable {
     [Inject] ISnackbar Snackbar { get; set; }
     [Inject] private IDialogService DialogService { get; set; } = default!;
     [Inject] private IDbContextFactory<ApplicationDbContext> _dbContextFactory { get; set; } = default!;
-    private ApplicationDbContext _db { get; set; }
+    private ApplicationDbContext _db { get; set; } = default!;
     private List<ApplicationUser> _users { get; set; } = new();
     private List<LeagueUserMapping> _userMapping { get; set; } = new();
     private List<LeagueInfo> _leagueInfo { get; set; } = new();
     private List<LeagueJuiceMapping> _leagueJuiceMapping { get; set; } = new();
+    private List<NFLScores> _scores { get; set; } = new();
+    private List<NFLSpreads> _spreads { get; set; } = new();
     private IEnumerable<LeagueUsers> _leagueUsers { get; set; } = new List<LeagueUsers>();
     [Inject] private ISchedulerFactory _schedulerFactory { get; set; } = default!;
     private bool _loadingUsers = true;
     private bool _loadingMappings = true;
     private bool _loadingJuice = true;
+    private bool _loadingScores = true;
 
     protected override async Task OnInitializedAsync() {
         _db = _dbContextFactory.CreateDbContext();
@@ -37,6 +40,9 @@ public partial class UserManager : ComponentBase, IDisposable {
         _leagueInfo = await _db.LeagueInfo.ToListAsync();
         _leagueJuiceMapping = await _db.LeagueJuiceMapping.ToListAsync();
         _loadingJuice = false;
+        _scores = await _db.NFLScores.ToListAsync();
+        _spreads = await _db.NFLSpreads.ToListAsync();
+        _loadingScores = false;
     }
     public void Dispose() {
         Dispose(true);
@@ -48,7 +54,7 @@ public partial class UserManager : ComponentBase, IDisposable {
         }
     }
 
-    private async Task ClearPostSeasonScores() {
+    private async Task ClearScores() {
         int records = 0;
         foreach (var score in _db.NFLScores) {
             _db.NFLScores.Remove(score);

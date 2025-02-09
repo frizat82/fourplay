@@ -175,10 +175,12 @@ public class LeaderboardService : ILeaderboardService {
             Log.Error("League ID is not set.");
             return new List<LeaderboardModel>();
         }
+#pragma warning disable CS8603 // Possible null reference return.
         return await _memory.GetOrCreateAsync($"leaderboard:{leagueId}", async (option) => {
             option.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
             return await InteralLeaderboard(leagueId, seasonYear);
         });
+#pragma warning restore CS8603 // Possible null reference return.
     }
     public async Task<List<LeaderboardModel>> CalculateUserTotals(List<LeaderboardModel> leaderboard, int leagueId, long seasonYear, int maxWeek) {
         Log.Information("Loading User Totals");
@@ -212,7 +214,7 @@ public class LeaderboardService : ILeaderboardService {
             // Nobody winning is the same thing as everyone losing
             if (winners.Count == 0) {
                 Log.Information("No winners week {Week} {Juice}", week, currentWeeklyCost);
-                allUsersWon = false;
+                allUsersWon = true;
             }
             // Fill in
             if (!allUsersWon) {

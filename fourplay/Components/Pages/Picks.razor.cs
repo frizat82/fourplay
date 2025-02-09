@@ -64,6 +64,8 @@ public partial class Picks : ComponentBase {
             }
         }
     }
+    public bool ShowNoOdds() => !_loading && !SpreadCalculator.DoOddsExist();
+    public bool ShowPicks() => !_loading && _scores is not null && SpreadCalculator.DoOddsExist() && _leagueId > 0;
     protected override async Task OnAfterRenderAsync(bool firstRender) {
         if (firstRender || _leagueId == 0) {
             try {
@@ -75,8 +77,7 @@ public partial class Picks : ComponentBase {
                     Navigation.NavigateTo("/leagues");
                 }
                 _leagueId = leagueId;
-                SpreadCalculator.Configure(_leagueId, (int)_week, (int)_scores!.Season.Year);
-                await InvokeAsync(StateHasChanged);
+                SpreadCalculator.Configure(_leagueId, !_isPostSeason ? (int)_week : (int)_week + 18, (int)_scores!.Season.Year);
             }
             catch (Exception ex) {
                 Log.Error(ex, "Error getting leagueId");
@@ -88,6 +89,7 @@ public partial class Picks : ComponentBase {
             Navigation.NavigateTo("/leagues");
         }
         _loading = false;
+        await InvokeAsync(StateHasChanged);
     }
     private async Task SubmitPicks() {
         Log.Information("Submitting Picks");
