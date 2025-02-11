@@ -506,6 +506,16 @@ namespace fourplay.Migrations
                     b.Property<int>("Juice")
                         .HasColumnType("integer");
 
+                    b.Property<int>("JuiceConference")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(6);
+
+                    b.Property<int>("JuiceDivisonal")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(10);
+
                     b.Property<int>("LeagueId")
                         .HasColumnType("integer");
 
@@ -747,6 +757,49 @@ namespace fourplay.Migrations
                     b.ToTable("NFLPicks");
                 });
 
+            modelBuilder.Entity("NFLPostSeasonPicks", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateCreated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("NFLWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Pick")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Season")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Team")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeagueId");
+
+                    b.HasIndex("UserId", "LeagueId", "NFLWeek", "Season", "Team", "Pick")
+                        .IsUnique();
+
+                    b.ToTable("NFLPostSeasonPicks");
+                });
+
             modelBuilder.Entity("NFLScores", b =>
                 {
                     b.Property<int>("Id")
@@ -824,6 +877,9 @@ namespace fourplay.Migrations
                     b.Property<int>("NFLWeek")
                         .HasColumnType("integer");
 
+                    b.Property<double>("OverUnder")
+                        .HasColumnType("double precision");
+
                     b.Property<int>("Season")
                         .HasColumnType("integer");
 
@@ -854,11 +910,19 @@ namespace fourplay.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NickName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -1036,6 +1100,25 @@ namespace fourplay.Migrations
                 });
 
             modelBuilder.Entity("NFLPicks", b =>
+                {
+                    b.HasOne("LeagueInfo", "League")
+                        .WithMany()
+                        .HasForeignKey("LeagueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("fourplay.Data.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("League");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NFLPostSeasonPicks", b =>
                 {
                     b.HasOne("LeagueInfo", "League")
                         .WithMany()

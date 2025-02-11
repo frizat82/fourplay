@@ -1,7 +1,8 @@
 using System;
 using System.Data;
 using Blazored.LocalStorage;
-using fourplay.Data;
+using fourplay.Models;
+using fourplay.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Serilog;
@@ -14,16 +15,17 @@ public partial class Leaderboard : ComponentBase {
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private ILeaderboardService _leaderboard { get; set; } = default!;
     private int _leagueId = 0;
-    private DataTable _dataTable = new();
+    private List<LeaderboardModel> _leaderboardModel = new();
     private bool _loading = true;
     private async Task BuildScoreboard() {
         Log.Information("Loading Scoreboard {LeagueId}", _leagueId);
         _loading = true;
         var scores = await _espn!.GetScores();
-        _dataTable = await _leaderboard.BuildLeaderboard(_leagueId, scores!.Season.Year);
+        _leaderboardModel = await _leaderboard.BuildLeaderboard(_leagueId, scores!.Season.Year);
         _loading = false;
         await InvokeAsync(StateHasChanged);
     }
+    private int GetMaxWeek() => _leaderboardModel.Max(x => x.WeekResults.Max(y => y.Week));
     public Func<DataRow, object> Sort => (DataRow row) => {
         var value = row["Total"].ToString();
         if (value is null || value == "")

@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
-
+namespace fourplay.Data;
 public class NFLSpreads {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
@@ -9,6 +9,7 @@ public class NFLSpreads {
     public string AwayTeam { get; set; }
     public double HomeTeamSpread { get; set; }
     public double AwayTeamSpread { get; set; }
+    public double OverUnder { get; set; }
     public DateTime GameTime { get; set; }
     public DateTime DateCreated { get; set; }
 }

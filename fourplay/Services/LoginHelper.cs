@@ -1,7 +1,10 @@
 using fourplay.Data;
+using fourplay.Services.Interfaces;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
+
 using System.Security.Claims;
+
+namespace fourplay.Services;
 
 public class LoginHelper : ILoginHelper {
     private ApplicationDbContext? _db { get; set; } = default!;

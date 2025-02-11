@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+namespace fourplay.Helpers;
 
 public static class NavigationHelpers {
     public static async Task HandleFirstRenderAsync(int leagueId, NavigationManager navigation, Action setInitialized) {

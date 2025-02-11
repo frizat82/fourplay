@@ -1,55 +1,48 @@
 using System.Text.Json;
+using fourplay.Helpers;
+using fourplay.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
-
-public class ESPNApiService : IESPNApiService
-{
+using fourplay.Data;
+namespace fourplay.Services;
+public class ESPNApiService : IESPNApiService {
     private readonly HttpClient _httpClient;
     private readonly IMemoryCache _memory;
 
-    public ESPNApiService(HttpClient httpClient, IMemoryCache memoryCache)
-    {
+    public ESPNApiService(HttpClient httpClient, IMemoryCache memoryCache) {
         _httpClient = httpClient;
         _memory = memoryCache;
         // Add any additional configuration for the HttpClient here
     }
-    public async Task<ESPNScores?> GetWeekScores(int week, int year)
-    {
-        return await _memory.GetOrCreateAsync<ESPNScores?>($"scores:{week}:{year}", async (option) =>
-        {
+    public async Task<ESPNScores?> GetWeekScores(int week, int year, bool postSeason = false) {
+        return await _memory.GetOrCreateAsync($"scores:{week}:{year}:{postSeason}", async (option) => {
             option.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-            try
-            {
+            try {
                 // Replace the endpoint with the actual ESPN API endpoint for NFL spreads
-                var response = await _httpClient.GetAsync($"/apis/site/v2/sports/football/nfl/scoreboard?dates={year}&seasontype=2&week={week}");
+                var response = await _httpClient.GetAsync($"/apis/site/v2/sports/football/nfl/scoreboard?dates={year}&seasontype={(postSeason ? 3 : 2)}&week={week}");
                 response.EnsureSuccessStatusCode();
-                if (response.IsSuccessStatusCode)
-                {
+                if (response.IsSuccessStatusCode) {
                     var responseString = await response.Content.ReadAsStringAsync();
-                    var options = new JsonSerializerOptions
-                    {
+                    var options = new JsonSerializerOptions {
                         PropertyNameCaseInsensitive = true
                     };
                     ESPNApiServiceJsonConverter.Settings.Converters.ToList().ForEach(x => options.Converters.Add(x));
                     // Deserialize the JSON response into a .NET object
-                    foreach (var map in Helpers.NFLTeamAbbrMapping)
-                    {
+                    foreach (var map in NFLTeamMappingHelpers.NFLTeamAbbrMapping) {
                         if (responseString.Contains($"\"{map.Key}\""))
                             responseString = responseString.Replace($"\"{map.Key}\"", $"\"{map.Value}\"");
                     }
                     var deserializedObject = JsonSerializer.Deserialize<ESPNScores>(responseString, options);
 
                     // Use the deserialized object as needed
-                    return deserializedObject;
+                    return FixESPNProbBowlWeek(deserializedObject);
                 }
-                else
-                {
+                else {
                     Log.Error($"Error: {response.ReasonPhrase}");
                     return null;
                 }
             }
-            catch (HttpRequestException e)
-            {
+            catch (HttpRequestException e) {
                 Log.Error($"HTTP Request error: {e.Message}");
                 return null;
             }
@@ -133,28 +126,22 @@ public class ESPNApiService : IESPNApiService
             });
         }
     */
-    public async Task<ESPNScores?> GetScores()
-    {
-        return await _memory.GetOrCreateAsync<ESPNScores?>("scores", async (option) =>
-        {
+    public async Task<ESPNScores?> GetScores() {
+        return await _memory.GetOrCreateAsync<ESPNScores?>("scores", async (option) => {
             option.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-            try
-            {
+            try {
                 // Replace the endpoint with the actual ESPN API endpoint for NFL spreads
                 var response = await _httpClient.GetAsync("/apis/site/v2/sports/football/nfl/scoreboard");
                 response.EnsureSuccessStatusCode();
-                if (response.IsSuccessStatusCode)
-                {
+                if (response.IsSuccessStatusCode) {
                     var responseString = await response.Content.ReadAsStringAsync();
                     if (String.IsNullOrEmpty(responseString))
                         return new ESPNScores();
-                    var options = new JsonSerializerOptions
-                    {
+                    var options = new JsonSerializerOptions {
                         PropertyNameCaseInsensitive = true
                     };
                     ESPNApiServiceJsonConverter.Settings.Converters.ToList().ForEach(x => options.Converters.Add(x));
-                    foreach (var map in Helpers.NFLTeamAbbrMapping)
-                    {
+                    foreach (var map in NFLTeamMappingHelpers.NFLTeamAbbrMapping) {
                         if (responseString.Contains($"\"{map.Key}\""))
                             responseString = responseString.Replace($"\"{map.Key}\"", $"\"{map.Value}\"");
                     }
@@ -163,20 +150,41 @@ public class ESPNApiService : IESPNApiService
 
                     // Use the deserialized object as needed
                     Log.Error($"Deserialized object: {deserializedObject}");
-                    return deserializedObject;
+                    return FixESPNProbBowlWeek(deserializedObject);
                 }
-                else
-                {
+                else {
                     Log.Error($"Error: {response.ReasonPhrase}");
                     return null;
                 }
             }
-            catch (HttpRequestException e)
-            {
+            catch (HttpRequestException e) {
                 Log.Error($"HTTP Request error: {e.Message}");
                 return null;
             }
         }
     );
+    }
+    public ESPNScores? FixESPNProbBowlWeek(ESPNScores? scores) {
+        if (scores == null || scores.Events.Count() == 0)
+            return scores;
+
+        // Remove teams with Abbr "NFC" or "AFC" and fix Pro Bowl
+        foreach (var scoreEvent in scores.Events) {
+            scoreEvent.Competitions = scoreEvent.Competitions
+                .Where(c => !c.Competitors.Any(team => team.Team.Abbreviation == "NFC" || team.Team.Abbreviation == "AFC"))
+                .ToArray();
+        }
+        // Move back Super Bowl to a proper week
+        if (scores.IsPostSeason() && scores.Week.Number == 5) {
+            scores.Week.Number = 4;
+        }
+        // Update SeasonType and Week number
+        foreach (var scoreEvent in scores.Events) {
+            if (scoreEvent.IsPostSeason() && scoreEvent.Week.Number == 5) {
+                scoreEvent.Week.Number = 4;
+            }
+        }
+
+        return scores;
     }
 }

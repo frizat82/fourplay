@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
-using fourplay.Components;
 using fourplay.Components.Account;
 using fourplay.Data;
 using Quartz;
@@ -13,6 +12,9 @@ using Microsoft.AspNetCore.Authentication;
 using Serilog;
 using fourplay.Jobs;
 using Serilog.Formatting.Compact;
+using fourplay.Services.Interfaces;
+using fourplay.Services;
+using fourplay.Components;
 Environment.SetEnvironmentVariable("DOTNET_hostBuilder:reloadConfigOnChange", "false");
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,8 +24,8 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .MinimumLevel.Override("Quartz", Serilog.Events.LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("System.Net.Http.HttpClient", Serilog.Events.LogEventLevel.Warning)
     .ReadFrom.Services(services));
-builder.Services.AddMudServices();
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
@@ -61,6 +63,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
+builder.Services.AddTransient<ISpreadCalculator, SpreadCalculator>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 builder.Services.AddHttpClient<IESPNApiService, ESPNApiService>(x => {
@@ -99,8 +102,10 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions => {
     };
     // Only if we use GOOGLE FALLBACK
     googleOptions.Events.OnTicketReceived = async context => {
-        var validEmails = new[] { "markmjohnson@gmail.com", "jpmulcahy@gmail.com", "patutroska@gmail.com",
-        "brithepartsguy@gmail.com", "bbock72@gmail.com" };
+        // Resolve the DbContext from the IServiceProvider
+        var dbContext = context.HttpContext.RequestServices.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+        using var db = dbContext.CreateDbContext();
+        var validEmails = db.LeagueUsers.Select(x => x.GoogleEmail).ToList();
         async Task AccessDenied(string email) {
             Log.Warning("Logging in {User} Denied", email);
             await context.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);

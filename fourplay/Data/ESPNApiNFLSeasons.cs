@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
+namespace fourplay.Data;
 
-public partial class ESPNApiNFLSeasons
-{
+public partial class ESPNApiNFLSeasons {
     [JsonPropertyName("count")]
     public long Count { get; set; }
 
@@ -18,8 +18,7 @@ public partial class ESPNApiNFLSeasons
     public Item[] Items { get; set; }
 }
 
-public partial class Item
-{
+public partial class Item {
     [JsonPropertyName("$ref")]
     public Uri Ref { get; set; }
 }

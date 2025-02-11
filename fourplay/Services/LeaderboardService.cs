@@ -1,33 +1,31 @@
 using System.Data;
-using System.Threading.Tasks;
 using fourplay.Data;
+using fourplay.Models;
+using fourplay.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
-
+using fourplay.Models.Enum;
+using fourplay.Helpers;
+namespace fourplay.Services;
 public class LeaderboardService : ILeaderboardService {
     private IDbContextFactory<ApplicationDbContext> _dbContextFactory { get; set; }
-    private IESPNApiService? _espn { get; set; }
     private readonly IMemoryCache _memory;
-    public LeaderboardService(IESPNApiService espnService, IMemoryCache memoryCache, IDbContextFactory<ApplicationDbContext> dbFactory) {
+    private readonly ISpreadCalculator _spreadCalculator;
+    public LeaderboardService(IMemoryCache memoryCache, IDbContextFactory<ApplicationDbContext> dbFactory, ISpreadCalculator spreadCalculator) {
         _memory = memoryCache;
         _dbContextFactory = dbFactory;
-        _espn = espnService;
+        _spreadCalculator = spreadCalculator;
     }
-    public async Task<DataTable> InteralLeaderboard(int leagueId, long seasonYear) {
-        var dataTable = new DataTable();
+    private async Task<List<LeaderboardModel>> InteralLeaderboard(int leagueId, long seasonYear) {
+        var leaderboard = new List<LeaderboardModel>();
         using var db = _dbContextFactory.CreateDbContext();
         if (db == null) {
             Log.Error("Database context is not initialized.");
-            return dataTable;
+            return leaderboard;
         }
         Log.Information("Loading Scoreboard {LeagueId}", leagueId);
         try {
-            if (_espn == null) {
-                Log.Error("ESPN API service is not initialized.");
-                return dataTable;
-            }
-
             var allUsers = await db.LeagueUserMapping
                     .Include(lum => lum.User) // Ensure the User entity is included
                     .ToListAsync();
@@ -45,11 +43,11 @@ public class LeaderboardService : ILeaderboardService {
 
             if (userScores == null) {
                 Log.Error("User scores not found.");
-                return dataTable;
+                return leaderboard;
             }
 
-            var spreads = await db.NFLSpreads.Where(spread => spread.Season == seasonYear).ToListAsync();
-
+            var maxWeek = userScores.Max(x => x.NFLWeek);
+            Log.Information("Season {MaxWeek}", maxWeek);
             //Log.Information("{@Spreads}", spreads);
             var leagueInfo = await db.LeagueJuiceMapping
                 .Where(li => li.LeagueId == leagueId)
@@ -58,71 +56,133 @@ public class LeaderboardService : ILeaderboardService {
 
             if (leagueInfo == null) {
                 Log.Error("League info not found.");
-                return dataTable;
+                return leaderboard;
             }
 
             //Log.Information("{@LeagueInfo}", leagueInfo);
-            dataTable = new DataTable();
-            dataTable.Columns.Add("User", typeof(string));
-            dataTable.Columns.Add("Total", typeof(double));
-            for (int week = 16; week >= 1; week--) {
-                dataTable.Columns.Add($"Week {week}");
-            }
-
             foreach (var user in leagueUsers) {
-                DataRow row = dataTable.NewRow();
-                row["User"] = user.User.Email;
-
-                for (int week = 1; week <= 16; week++) {
-                    var userPicks = await db.NFLPicks
-                        .Where(pick => pick.UserId == user.UserId && pick.Season == seasonYear && pick.NFLWeek == week)
-                        .ToListAsync();
-
-                    if (userPicks.Count < 4) {
-                        row[$"Week {week}"] = "Invalid";
+                var userPoints = new LeaderboardModel();
+                userPoints.WeekResults = new LeaderboardWeekResults[maxWeek];
+                userPoints.User = user.User;
+                //Log.Information("User Details {Id} {Email} {UserName} {NickName}", userPoints.User.Id, userPoints.User.Email, userPoints.User.UserName, userPoints.User.NickName);
+                // Regular Season
+                for (int week = 1; week <= maxWeek; week++) {
+                    var isPostSeason = week > 18;
+                    LeaderboardWeekResults weekResult;
+                    if (!isPostSeason) {
+                        weekResult = await CalculateRegularSeasonPicks(leagueId, seasonYear, db, userScores, user, week);
                     }
                     else {
-                        bool allPicksBeatSpread = userPicks.All(pick => {
-                            var score = userScores.FirstOrDefault(s => s.NFLWeek == week);
-                            var homeTeamSpread = spreads.FirstOrDefault(s => s.NFLWeek == week && s.HomeTeam == pick.Team);
-                            var awayTeamSpread = spreads.FirstOrDefault(s => s.NFLWeek == week && s.AwayTeam == pick.Team);
-                            if (score == null || homeTeamSpread == null || awayTeamSpread == null) return false;
-                            if (homeTeamSpread is not null) {
-                                var adjustedSpread = homeTeamSpread.HomeTeamSpread + leagueInfo!.Juice;
-                                return (score.HomeTeamScore - score.AwayTeamScore) > adjustedSpread;
-                            }
-                            else {
-                                var adjustedSpread = awayTeamSpread.AwayTeamSpread + leagueInfo!.Juice;
-                                return (score.AwayTeamScore - score.HomeTeamScore) > adjustedSpread;
-                            }
-                        });
-                        row[$"Week {week}"] = allPicksBeatSpread ? true : false;
+                        weekResult = await CalculatePostSeasonPicks(leagueId, seasonYear, db, userScores, user, week);
                     }
+                    userPoints.WeekResults[week - 1] = weekResult;
                 }
                 //Log.Information("{@Row}", row);
-                dataTable.Rows.Add(row);
+                leaderboard.Add(userPoints);
             }
+
             // Calc Totals
-            dataTable = await CalculateUserTotals(dataTable, leagueId, seasonYear);
+            leaderboard = await CalculateUserTotals(leaderboard, leagueId, seasonYear, maxWeek);
         }
         catch (Exception ex) {
             Log.Error(ex, "Error loading leaderboard");
-            return dataTable ?? new DataTable();
+            return leaderboard;
         }
-        return dataTable;
+        return leaderboard;
+    }
+    private async Task<LeaderboardWeekResults> CalculatePostSeasonPicks(int leagueId, long seasonYear, ApplicationDbContext db, List<NFLScores> userScores, LeagueUserMapping user, int week) {
+        // Normalize Week from 18 to basis 0
+        //Log.Information("Calculating Post Season Picks {Week}", week);
+        var postSeasonWeek = week - 18;
+        var weekResult = new LeaderboardWeekResults();
+        weekResult.Week = week;
+        var userPicks = await db.NFLPostSeasonPicks
+            .Where(pick => pick.UserId == user.UserId && pick.Season == seasonYear && pick.NFLWeek == postSeasonWeek)
+            .ToListAsync();
+
+        if (userPicks.Count < GameHelpers.GetRequiredPicks(week)) {
+            Log.Information("Missing PostSeason Picks {Week} {Count} {Required}", week, userPicks.Count, GameHelpers.GetRequiredPicks(week));
+            weekResult.WeekResult = WeekResult.MissingPicks;
+        }
+        else {
+            bool allPicksBeatSpread = userPicks.All(pick => {
+                _spreadCalculator.Configure(leagueId, week, (int)seasonYear);
+                if (!_spreadCalculator.DoOddsExist()) return false;
+                var score = userScores.FirstOrDefault(s => s.NFLWeek == week);
+                if (pick.Pick == PickType.Spread) {
+                    var spread = _spreadCalculator.GetSpread(pick.Team);
+                    if (score is null || spread is null) return false;
+                    var isHome = score.HomeTeam == pick.Team;
+                    if (isHome)
+                        return (score.HomeTeamScore - score.AwayTeamScore) > spread;
+                    else return (score.AwayTeamScore - score.HomeTeamScore) > spread;
+                }
+                else if (pick.Pick == PickType.Over) {
+                    var overUnder = _spreadCalculator.GetOverUnder(pick.Team, pick.Pick);
+                    if (score is null || overUnder is null) return false;
+                    if ((score.HomeTeamScore + score.AwayTeamScore) > overUnder)
+                        return true;
+                    else return false;
+                }
+                else if (pick.Pick == PickType.Under) {
+                    var overUnder = _spreadCalculator.GetOverUnder(pick.Team, pick.Pick);
+                    if (score is null || overUnder is null) return false;
+                    if ((score.HomeTeamScore + score.AwayTeamScore) < overUnder)
+                        return true;
+                    else
+                        return false;
+                }
+                return false;
+            });
+            weekResult.WeekResult = allPicksBeatSpread ? WeekResult.Won : WeekResult.Lost;
+        }
+
+        return weekResult;
+    }
+    private async Task<LeaderboardWeekResults> CalculateRegularSeasonPicks(int leagueId, long seasonYear, ApplicationDbContext db, List<NFLScores> userScores, LeagueUserMapping user, int week) {
+        //Log.Information("Calculating Season Picks {Week}", week);
+        var weekResult = new LeaderboardWeekResults();
+        weekResult.Week = week;
+        var userPicks = await db.NFLPicks
+            .Where(pick => pick.UserId == user.UserId && pick.Season == seasonYear && pick.NFLWeek == week)
+            .ToListAsync();
+
+        if (userPicks.Count < GameHelpers.GetESPNRequiredPicks(week, false)) {
+            Log.Information("Missing Picks {Week} {Count} {Required}", week, userPicks.Count, GameHelpers.GetESPNRequiredPicks(week, false));
+            weekResult.WeekResult = WeekResult.MissingPicks;
+        }
+        else {
+            bool allPicksBeatSpread = userPicks.All(pick => {
+                _spreadCalculator.Configure(leagueId, week, (int)seasonYear);
+                if (!_spreadCalculator.DoOddsExist()) return false;
+                var score = userScores.FirstOrDefault(s => s.NFLWeek == week);
+                var spread = _spreadCalculator.GetSpread(pick.Team);
+                if (score is null || spread is null) return false;
+                var isHome = score.HomeTeam == pick.Team;
+                if (isHome)
+                    return (score.HomeTeamScore - score.AwayTeamScore) > spread;
+                else return (score.AwayTeamScore - score.HomeTeamScore) > spread;
+
+            });
+            weekResult.WeekResult = allPicksBeatSpread ? WeekResult.Won : WeekResult.Lost;
+        }
+
+        return weekResult;
     }
 
-    public async Task<DataTable> BuildLeaderboard(int leagueId, long seasonYear) {
+    public async Task<List<LeaderboardModel>> BuildLeaderboard(int leagueId, long seasonYear) {
         if (leagueId == 0) {
             Log.Error("League ID is not set.");
-            return new DataTable();
+            return new List<LeaderboardModel>();
         }
+#pragma warning disable CS8603 // Possible null reference return.
         return await _memory.GetOrCreateAsync($"leaderboard:{leagueId}", async (option) => {
             option.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
             return await InteralLeaderboard(leagueId, seasonYear);
         });
+#pragma warning restore CS8603 // Possible null reference return.
     }
-    public async Task<DataTable> CalculateUserTotals(DataTable dataTable, int leagueId, long seasonYear) {
+    public async Task<List<LeaderboardModel>> CalculateUserTotals(List<LeaderboardModel> leaderboard, int leagueId, long seasonYear, int maxWeek) {
         Log.Information("Loading User Totals");
         using var db = _dbContextFactory.CreateDbContext();
         var baseWeeklyCost = await db.LeagueJuiceMapping
@@ -132,40 +192,41 @@ public class LeaderboardService : ILeaderboardService {
 
         if (baseWeeklyCost == 0) {
             Log.Error("Base weekly cost not found.");
-            return dataTable;
+            return leaderboard;
         }
         var userTotals = new Dictionary<string, decimal>();
         var currentWeeklyCost = baseWeeklyCost;
 
-        for (int week = 1; week <= 16; week++) {
-            var weekColumn = $"Week {week}";
+        for (int week = 1; week <= maxWeek; week++) {
             var winners = new List<string>();
             bool allUsersWon = true;
 
-            foreach (DataRow row in dataTable.Rows) {
-                var userEmail = row["User"].ToString();
-                if (userEmail != null && row[weekColumn].ToString() == "True") {
-                    winners.Add(userEmail);
+            foreach (var result in leaderboard) {
+                var resultWeek = result.WeekResults.FirstOrDefault(w => w.Week == week);
+                var userId = result.User.Id;
+                if (resultWeek.WeekResult == WeekResult.Won) {
+                    winners.Add(userId);
                 }
                 else {
                     allUsersWon = false;
-                    Log.Information("User {User} did not win {Week}", userEmail, week);
                 }
             }
             // Nobody winning is the same thing as everyone losing
             if (winners.Count == 0) {
-                allUsersWon = false;
+                Log.Information("No winners week {Week} {Juice}", week, currentWeeklyCost);
+                allUsersWon = true;
             }
             // Fill in
             if (!allUsersWon) {
-                foreach (DataRow row in dataTable.Rows) {
-                    var userEmail = row["User"].ToString();
-                    if (userEmail != null && row[weekColumn].ToString() != "True") {
-                        if (!userTotals.ContainsKey(userEmail)) {
-                            userTotals[userEmail] = 0;
-                        }
-                        Log.Information("User {User} lost week {Week} {Count} {Cost}", userEmail, week, winners.Count, currentWeeklyCost);
-                        userTotals[userEmail] += winners.Count * currentWeeklyCost;
+                foreach (var result in leaderboard) {
+                    var userId = result.User.Id;
+                    if (result.WeekResults[week - 1].WeekResult != WeekResult.Won) {
+                        //Log.Information("User {User} lost week {Week} {Count} {Cost}", userId, week, winners.Count, currentWeeklyCost);
+                        result.WeekResults[week - 1].Score = -(winners.Count * currentWeeklyCost);
+                    }
+                    else {
+                        Log.Information("User {User} won week {Week} {Count} {Winnings}", userId, week, winners.Count, currentWeeklyCost);
+                        result.WeekResults[week - 1].Score = winners.Count * currentWeeklyCost;
                     }
                 }
                 currentWeeklyCost = baseWeeklyCost;
@@ -173,16 +234,15 @@ public class LeaderboardService : ILeaderboardService {
             // Double the cost for the next week if all users won this week
             else {
                 currentWeeklyCost += baseWeeklyCost;
-                Log.Information("All users won week {Week} Doubling {Juice}", week, currentWeeklyCost);
+                Log.Information("All users won or lost week {Week} Doubling {Juice}", week, currentWeeklyCost);
+                foreach (var result in leaderboard) {
+                    result.WeekResults[week - 1].Score = 0;
+                }
             }
         }
-        foreach (DataRow row in dataTable.Rows) {
-            var userEmail = row["User"].ToString();
-            if (userTotals.ContainsKey(userEmail!))
-                row["Total"] = userTotals[userEmail!];
-            else
-                row["Total"] = 0;
+        foreach (var result in leaderboard) {
+            result.Total = result.WeekResults.Sum(w => w.Score);
         }
-        return dataTable;
+        return leaderboard;
     }
 }

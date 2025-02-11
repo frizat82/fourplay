@@ -1,4 +1,6 @@
 using fourplay.Data;
+using fourplay.Helpers;
+using fourplay.Services.Interfaces;
 using Quartz;
 using Serilog;
 namespace fourplay.Jobs;
@@ -13,9 +15,11 @@ public class NFLSpreadJob : IJob {
         _espn = espn;
     }
     public async Task Execute(IJobExecutionContext context) {
-        // TODO: Implement logic to grab NFL spreads
         Log.Information("Grabbing NFL Spreads at " + DateTime.Now);
         var scoreboard = await _espn.GetScores();
+        if (scoreboard is null)
+            return;
+        var isPostSeason = scoreboard.IsPostSeason();
         var newGames = scoreboard?.Events.SelectMany(x => x.Competitions).Where(y => y.Status.Type.Name == TypeName.StatusScheduled);
         var odds = await _sportsOdds.GetOdds();
         var spreads = new List<NFLSpreads>();
@@ -25,17 +29,18 @@ public class NFLSpreadJob : IJob {
                 //spread.Id = Guid.NewGuid();
                 var ht = result.HomeTeam;
                 var at = result.AwayTeam;
-                if (Helpers.NFLTeamAbbrMapping.ContainsKey(ht.Abbr))
-                    spread.HomeTeam = Helpers.NFLTeamAbbrMapping[ht.Abbr];
+                if (NFLTeamMappingHelpers.NFLTeamAbbrMapping.ContainsKey(ht.Abbr))
+                    spread.HomeTeam = NFLTeamMappingHelpers.NFLTeamAbbrMapping[ht.Abbr];
                 else
                     spread.HomeTeam = ht.Abbr;
-                if (Helpers.NFLTeamAbbrMapping.ContainsKey(ht.Abbr))
-                    spread.AwayTeam = Helpers.NFLTeamAbbrMapping[ht.Abbr];
+                if (NFLTeamMappingHelpers.NFLTeamAbbrMapping.ContainsKey(ht.Abbr))
+                    spread.AwayTeam = NFLTeamMappingHelpers.NFLTeamAbbrMapping[ht.Abbr];
                 else
                     spread.AwayTeam = at.Abbr;
                 spread.GameTime = result.ScheduledTime.UtcDateTime;
                 var cleanHomeSpread = result.SportsBookOdds.Consensus.Spread.Home.Value.Replace("+", "");
                 var cleanAwaySpread = result.SportsBookOdds.Consensus.Spread.Away.Value.Replace("+", "");
+                var cleanOU = result.SportsBookOdds.Consensus.Total.Over.Value.Replace("+", "");
                 if (cleanHomeSpread == "FK") {
                     Log.Error("Error");
                 }
@@ -48,9 +53,14 @@ public class NFLSpreadJob : IJob {
                 if (!Double.TryParse(cleanAwaySpread, out parsedSpread))
                     continue;
                 spread.AwayTeamSpread = parsedSpread;
+                if (!Double.TryParse(cleanOU, out parsedSpread))
+                    continue;
+                spread.OverUnder = parsedSpread;
                 var matchedGame = newGames.Where(x => x.Date == spread.GameTime).SelectMany(x => x.Competitors).Where(y => y.HomeAway == HomeAway.Home).FirstOrDefault(z => z.Team.Abbreviation == spread.HomeTeam);
                 if (matchedGame is not null) {
                     spread.NFLWeek = (int)scoreboard.Week.Number;
+                    if (isPostSeason)
+                        spread.NFLWeek += 18;
                     spread.Season = (int)scoreboard.Season.Year;
                     var record = _context.NFLSpreads.FirstOrDefault(x => x.Season == spread.Season && x.NFLWeek == spread.NFLWeek && x.HomeTeam == spread.HomeTeam);
                     if (record is null) {
@@ -64,17 +74,23 @@ public class NFLSpreadJob : IJob {
             Log.Information("Load NFL Spreads at " + DateTime.Now);
             await _context.NFLSpreads.AddRangeAsync(spreads);
             await _context.SaveChangesAsync();
+            //TODO: remove eventually
+            await UpsertEntitiesAsync(spreads);
         }
         Log.Information("NFL Spreads Complete at " + DateTime.Now);
     }
+    public async Task UpsertEntitiesAsync(IEnumerable<NFLSpreads> entities) {
+        foreach (var entity in entities) {
+            var existingEntity = await _context.NFLSpreads.FindAsync(entity.Season, entity.NFLWeek, entity.HomeTeam);
+            if (existingEntity != null) {
+                // Update the existing entity
+                _context.Entry(existingEntity).CurrentValues.SetValues(entity);
+            }
+            else {
+                // Add the new entity
+                await _context.NFLSpreads.AddAsync(entity);
+            }
+        }
+        await _context.SaveChangesAsync();
+    }
 }
-
-/*
-SQLite error (1299): abort at 17 in [INSERT INTO "NFLSpreads" ("AwayTeam", "AwayTeamSpread", "GameTime", "HomeTeam", "HomeTeamSpread", "NFLWeek", "Season")
-VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
-RETURNING "Id", "DateCreated";]
-[14:00:01 ERR] Failed executing DbCommand (0ms) [Parameters=[@p0='?', @p1='?' (DbType = Double), @p2='?' (DbType = DateTime), @p3='?', @p4='?' (DbType = Double), @p5='?' (DbType = Int32), @p6='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
-INSERT INTO "NFLSpreads" ("AwayTeam", "AwayTeamSpread", "GameTime", "HomeTeam", "HomeTeamSpread", "NFLWeek", "Season")
-VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
-RETURNING "Id", "DateCreated";
-*/
