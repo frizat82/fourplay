@@ -61,8 +61,20 @@ public class NFLSpreadJob : IJob {
             }
         }
         if (spreads.Any()) {
+            Log.Information("Load NFL Spreads at " + DateTime.Now);
             await _context.NFLSpreads.AddRangeAsync(spreads);
             await _context.SaveChangesAsync();
         }
+        Log.Information("NFL Spreads Complete at " + DateTime.Now);
     }
 }
+
+/*
+SQLite error (1299): abort at 17 in [INSERT INTO "NFLSpreads" ("AwayTeam", "AwayTeamSpread", "GameTime", "HomeTeam", "HomeTeamSpread", "NFLWeek", "Season")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id", "DateCreated";]
+[14:00:01 ERR] Failed executing DbCommand (0ms) [Parameters=[@p0='?', @p1='?' (DbType = Double), @p2='?' (DbType = DateTime), @p3='?', @p4='?' (DbType = Double), @p5='?' (DbType = Int32), @p6='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+INSERT INTO "NFLSpreads" ("AwayTeam", "AwayTeamSpread", "GameTime", "HomeTeam", "HomeTeamSpread", "NFLWeek", "Season")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id", "DateCreated";
+*/

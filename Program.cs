@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using fourplay.Areas.Identity;
 using fourplay.Data;
 using Quartz;
 using Quartz.Impl.AdoJobStore;
@@ -32,11 +31,13 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(new SQLiteConnection(connectionString)));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false).AddRoles<IdentityRole>()
+builder.Services.AddDefaultIdentity<IdentityUser>(options => {
+    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = false;
+}).AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 builder.Services.AddHttpClient<IESPNApiService, ESPNApiService>(x => {
     x.BaseAddress = new Uri("http://site.api.espn.com");
 });
@@ -63,7 +64,7 @@ builder.Services.AddAuthentication().AddGoogle(googleOptions => {
     googleOptions.ClientId = builder.Configuration["Google:ClientId"];
     googleOptions.ClientSecret = builder.Configuration["Google:ClientSecret"];
     // Add Picture Support
-    googleOptions.Events.OnCreatingTicket = context => {
+    googleOptions.Events.OnCreatingTicket = (context) => {
         var picture = context.User.GetProperty("picture").GetString();
         context.Identity?.AddClaim(new Claim("picture", picture));
         return Task.CompletedTask;

@@ -9,8 +9,8 @@ public partial class LeaguePicker : ComponentBase {
     private ApplicationDbContext? _db { get; set; } = default!;
     [Inject]
     ILoginHelper _loginHelper { get; set; }
-    private List<LeagueInfo> _leagues { get; set; } = new List<LeagueInfo>();
-    MudListItem _selectedItem;
+    private List<LeagueInfo> _leagues { get; set; } = new();
+    MudListItem<string> _selectedItem;
     object _selectedValue;
     [Inject] Blazored.LocalStorage.ILocalStorageService _localStorage { get; set; }
     public object SelectedValue {

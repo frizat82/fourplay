@@ -1104,8 +1104,8 @@ public partial struct RelUnion {
     public NoteType? Enum;
     public long? Integer;
 
-    public static implicit operator RelUnion(NoteType Enum) => new RelUnion { Enum = Enum };
-    public static implicit operator RelUnion(long Integer) => new RelUnion { Integer = Integer };
+    public static implicit operator RelUnion(NoteType Enum) => new() { Enum = Enum };
+    public static implicit operator RelUnion(long Integer) => new() { Integer = Integer };
 }
 
 internal static class ESPNApiServiceJsonConverter {
@@ -1170,7 +1170,7 @@ internal class MarketEnumConverter : JsonConverter<MarketEnum> {
         return;
     }
 
-    public static readonly MarketEnumConverter Singleton = new MarketEnumConverter();
+    public static readonly MarketEnumConverter Singleton = new();
 }
 
 internal class HomeAwayConverter : JsonConverter<HomeAway> {
@@ -1199,7 +1199,7 @@ internal class HomeAwayConverter : JsonConverter<HomeAway> {
         return;
     }
 
-    public static readonly HomeAwayConverter Singleton = new HomeAwayConverter();
+    public static readonly HomeAwayConverter Singleton = new();
 }
 
 internal class ParseStringConverter : JsonConverter<long> {
@@ -1219,7 +1219,7 @@ internal class ParseStringConverter : JsonConverter<long> {
         return;
     }
 
-    public static readonly ParseStringConverter Singleton = new ParseStringConverter();
+    public static readonly ParseStringConverter Singleton = new();
 }
 
 internal class LeaderAbbreviationConverter : JsonConverter<LeaderAbbreviation> {
@@ -1253,7 +1253,7 @@ internal class LeaderAbbreviationConverter : JsonConverter<LeaderAbbreviation> {
         return;
     }
 
-    public static readonly LeaderAbbreviationConverter Singleton = new LeaderAbbreviationConverter();
+    public static readonly LeaderAbbreviationConverter Singleton = new();
 }
 
 internal class DisplayNameConverter : JsonConverter<DisplayName> {
@@ -1287,7 +1287,7 @@ internal class DisplayNameConverter : JsonConverter<DisplayName> {
         return;
     }
 
-    public static readonly DisplayNameConverter Singleton = new DisplayNameConverter();
+    public static readonly DisplayNameConverter Singleton = new();
 }
 
 internal class RelEnumConverter : JsonConverter<RelEnum> {
@@ -1321,7 +1321,7 @@ internal class RelEnumConverter : JsonConverter<RelEnum> {
         return;
     }
 
-    public static readonly RelEnumConverter Singleton = new RelEnumConverter();
+    public static readonly RelEnumConverter Singleton = new();
 }
 /*
 internal class TionConverter : JsonConverter<Tion>
@@ -1414,7 +1414,7 @@ internal class LeaderNameConverter : JsonConverter<LeaderName> {
         return;
     }
 
-    public static readonly LeaderNameConverter Singleton = new LeaderNameConverter();
+    public static readonly LeaderNameConverter Singleton = new();
 }
 
 internal class ShortDisplayNameConverter : JsonConverter<ShortDisplayName> {
@@ -1448,7 +1448,7 @@ internal class ShortDisplayNameConverter : JsonConverter<ShortDisplayName> {
         return;
     }
 
-    public static readonly ShortDisplayNameConverter Singleton = new ShortDisplayNameConverter();
+    public static readonly ShortDisplayNameConverter Singleton = new();
 }
 
 internal class RecordAbbreviationConverter : JsonConverter<RecordAbbreviation> {
@@ -1477,7 +1477,7 @@ internal class RecordAbbreviationConverter : JsonConverter<RecordAbbreviation> {
         return;
     }
 
-    public static readonly RecordAbbreviationConverter Singleton = new RecordAbbreviationConverter();
+    public static readonly RecordAbbreviationConverter Singleton = new();
 }
 
 internal class RecordNameConverter : JsonConverter<RecordName> {
@@ -1511,7 +1511,7 @@ internal class RecordNameConverter : JsonConverter<RecordName> {
         return;
     }
 
-    public static readonly RecordNameConverter Singleton = new RecordNameConverter();
+    public static readonly RecordNameConverter Singleton = new();
 }
 
 internal class RecordTypeConverter : JsonConverter<RecordType> {
@@ -1545,7 +1545,7 @@ internal class RecordTypeConverter : JsonConverter<RecordType> {
         return;
     }
 
-    public static readonly RecordTypeConverter Singleton = new RecordTypeConverter();
+    public static readonly RecordTypeConverter Singleton = new();
 }
 
 internal class RecordTypeDetailConverter : JsonConverter<RecordTypeDetail> {
@@ -1594,7 +1594,7 @@ internal class RecordTypeDetailConverter : JsonConverter<RecordTypeDetail> {
         return;
     }
 
-    public static readonly RecordTypeDetailConverter Singleton = new RecordTypeDetailConverter();
+    public static readonly RecordTypeDetailConverter Singleton = new();
 }
 
 internal class TextConverter : JsonConverter<Text> {
@@ -1633,7 +1633,7 @@ internal class TextConverter : JsonConverter<Text> {
         return;
     }
 
-    public static readonly TextConverter Singleton = new TextConverter();
+    public static readonly TextConverter Singleton = new();
 }
 
 internal class LangConverter : JsonConverter<Lang> {
@@ -1655,7 +1655,7 @@ internal class LangConverter : JsonConverter<Lang> {
         return;
     }
 
-    public static readonly LangConverter Singleton = new LangConverter();
+    public static readonly LangConverter Singleton = new();
 }
 
 internal class MarketTypeConverter : JsonConverter<MarketType> {
@@ -1680,7 +1680,7 @@ internal class MarketTypeConverter : JsonConverter<MarketType> {
         return;
     }
 
-    public static readonly MarketTypeConverter Singleton = new MarketTypeConverter();
+    public static readonly MarketTypeConverter Singleton = new();
 }
 
 internal class RegionConverter : JsonConverter<Region> {
@@ -1702,7 +1702,7 @@ internal class RegionConverter : JsonConverter<Region> {
         return;
     }
 
-    public static readonly RegionConverter Singleton = new RegionConverter();
+    public static readonly RegionConverter Singleton = new();
 }
 
 internal class ShortNameConverter : JsonConverter<ShortName> {
@@ -1731,7 +1731,7 @@ internal class ShortNameConverter : JsonConverter<ShortName> {
         return;
     }
 
-    public static readonly ShortNameConverter Singleton = new ShortNameConverter();
+    public static readonly ShortNameConverter Singleton = new();
 }
 
 internal class ShortTextConverter : JsonConverter<ShortText> {
@@ -1780,7 +1780,7 @@ internal class ShortTextConverter : JsonConverter<ShortText> {
         return;
     }
 
-    public static readonly ShortTextConverter Singleton = new ShortTextConverter();
+    public static readonly ShortTextConverter Singleton = new();
 }
 
 internal class DeviceConverter : JsonConverter<Device> {
@@ -1819,7 +1819,7 @@ internal class DeviceConverter : JsonConverter<Device> {
         return;
     }
 
-    public static readonly DeviceConverter Singleton = new DeviceConverter();
+    public static readonly DeviceConverter Singleton = new();
 }
 
 internal class NoteTypeConverter : JsonConverter<NoteType> {
@@ -1880,7 +1880,7 @@ internal class NoteTypeConverter : JsonConverter<NoteType> {
         return;
     }
 
-    public static readonly NoteTypeConverter Singleton = new NoteTypeConverter();
+    public static readonly NoteTypeConverter Singleton = new();
 }
 /*
 internal class DisplayClockConverter : JsonConverter<DisplayClock>
@@ -1970,7 +1970,7 @@ internal class DescriptionConverter : JsonConverter<Description> {
         return;
     }
 
-    public static readonly DescriptionConverter Singleton = new DescriptionConverter();
+    public static readonly DescriptionConverter Singleton = new();
 }
 
 internal class TypeNameConverter : JsonConverter<TypeName> {
@@ -2011,7 +2011,7 @@ internal class TypeNameConverter : JsonConverter<TypeName> {
         return;
     }
 
-    public static readonly TypeNameConverter Singleton = new TypeNameConverter();
+    public static readonly TypeNameConverter Singleton = new();
 }
 
 internal class StateConverter : JsonConverter<State> {
@@ -2045,7 +2045,7 @@ internal class StateConverter : JsonConverter<State> {
         return;
     }
 
-    public static readonly StateConverter Singleton = new StateConverter();
+    public static readonly StateConverter Singleton = new();
 }
 
 internal class TypeAbbreviationConverter : JsonConverter<TypeAbbreviation> {
@@ -2067,7 +2067,7 @@ internal class TypeAbbreviationConverter : JsonConverter<TypeAbbreviation> {
         return;
     }
 
-    public static readonly TypeAbbreviationConverter Singleton = new TypeAbbreviationConverter();
+    public static readonly TypeAbbreviationConverter Singleton = new();
 }
 
 internal class LanguageConverter : JsonConverter<Language> {
@@ -2089,7 +2089,7 @@ internal class LanguageConverter : JsonConverter<Language> {
         return;
     }
 
-    public static readonly LanguageConverter Singleton = new LanguageConverter();
+    public static readonly LanguageConverter Singleton = new();
 }
 
 internal class RelUnionConverter : JsonConverter<RelUnion> {
@@ -2167,7 +2167,7 @@ internal class RelUnionConverter : JsonConverter<RelUnion> {
         return;
     }
 
-    public static readonly RelUnionConverter Singleton = new RelUnionConverter();
+    public static readonly RelUnionConverter Singleton = new();
 }
 
 internal class SlugConverter : JsonConverter<Slug> {
@@ -2191,7 +2191,7 @@ internal class SlugConverter : JsonConverter<Slug> {
         return;
     }
 
-    public static readonly SlugConverter Singleton = new SlugConverter();
+    public static readonly SlugConverter Singleton = new();
 }
 
 public class DateOnlyConverter : JsonConverter<DateOnly> {
@@ -2284,7 +2284,7 @@ internal class IsoDateTimeOffsetConverter : JsonConverter<DateTimeOffset> {
     }
 
 
-    public static readonly IsoDateTimeOffsetConverter Singleton = new IsoDateTimeOffsetConverter();
+    public static readonly IsoDateTimeOffsetConverter Singleton = new();
 }
 internal class DateTimeConverterUsingDateTimeParse : JsonConverter<DateTime> {
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {

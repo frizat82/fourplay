@@ -11,7 +11,7 @@ public partial class Scores : ComponentBase {
     [Inject]
     private ApplicationDbContext? _db { get; set; } = default!;
     private ESPNScores? _scores = null;
-    private System.Timers.Timer _timer = new System.Timers.Timer();
+    private System.Timers.Timer _timer = new();
     private List<NFLSpreads>? _odds = null;
     [Inject] Blazored.LocalStorage.ILocalStorageService _localStorage { get; set; }
     private int _leagueId = 0;
@@ -55,7 +55,7 @@ public partial class Scores : ComponentBase {
         return picks.Count();
     }
     private void TimeElapsed(object? sender, System.Timers.ElapsedEventArgs e) => RunTimer();
-    private void ShowDialog(string teamAbbr, string logo) {
+    private Task ShowDialog(string teamAbbr, string logo) {
         var usrNames = _db?.NFLPicks.Where(x => x.LeagueId == _leagueId && x.Season == _scores!.Season.Year
         && x.NFLWeek == _scores.Week.Number && x.Team == teamAbbr).Select(y => y.User.NormalizedUserName).ToList();
         if (usrNames.Count > 0) {
@@ -63,12 +63,13 @@ public partial class Scores : ComponentBase {
             { x => x.UserNames, usrNames },
             { x => x.TeamAbbr, teamAbbr},
             {x => x.Logo, logo}
-        };
-            _dialogService.Show<PickDialog>("User Picks", parameters, new DialogOptions {
+        }; return _dialogService.ShowAsync<PickDialog>("User Picks", parameters, new DialogOptions {
                 CloseOnEscapeKey = true,
                 NoHeader = true, CloseButton = false
             });
         }
+
+        return Task.CompletedTask;
     }
     protected async Task RunTimer() {
         _scores = await _espn.GetScores();

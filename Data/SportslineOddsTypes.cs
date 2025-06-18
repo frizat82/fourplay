@@ -367,7 +367,7 @@ internal class LeagueConverter : JsonConverter<League> {
         throw new Exception("Cannot marshal type League");
     }
 
-    public static readonly LeagueConverter Singleton = new LeagueConverter();
+    public static readonly LeagueConverter Singleton = new();
 }
 
 internal class SportConverter : JsonConverter<Sport> {
@@ -389,7 +389,7 @@ internal class SportConverter : JsonConverter<Sport> {
         throw new Exception("Cannot marshal type Sport");
     }
 
-    public static readonly SportConverter Singleton = new SportConverter();
+    public static readonly SportConverter Singleton = new();
 }
 
 internal class StatusConverter : JsonConverter<Status> {
@@ -411,7 +411,7 @@ internal class StatusConverter : JsonConverter<Status> {
         throw new Exception("Cannot marshal type Status");
     }
 
-    public static readonly StatusConverter Singleton = new StatusConverter();
+    public static readonly StatusConverter Singleton = new();
 }
 
 internal class CompetitionStatusConverter : JsonConverter<CompetitionStatus> {
@@ -439,7 +439,7 @@ internal class CompetitionStatusConverter : JsonConverter<CompetitionStatus> {
         throw new Exception("Cannot marshal type CompetitionStatus");
     }
 
-    public static readonly CompetitionStatusConverter Singleton = new CompetitionStatusConverter();
+    public static readonly CompetitionStatusConverter Singleton = new();
 }
 
 internal class LabelConverter : JsonConverter<Label> {
@@ -478,7 +478,7 @@ internal class LabelConverter : JsonConverter<Label> {
         throw new Exception("Cannot marshal type Label");
     }
 
-    public static readonly LabelConverter Singleton = new LabelConverter();
+    public static readonly LabelConverter Singleton = new();
 }
 
 internal class BookNameConverter : JsonConverter<BookName> {
@@ -526,7 +526,7 @@ internal class BookNameConverter : JsonConverter<BookName> {
         throw new Exception("Cannot marshal type BookName");
     }
 
-    public static readonly BookNameConverter Singleton = new BookNameConverter();
+    public static readonly BookNameConverter Singleton = new();
 }
 
 internal class BookIdConverter : JsonConverter<BookId> {
@@ -570,7 +570,7 @@ internal class BookIdConverter : JsonConverter<BookId> {
         throw new Exception("Cannot marshal type BookId");
     }
 
-    public static readonly BookIdConverter Singleton = new BookIdConverter();
+    public static readonly BookIdConverter Singleton = new();
 }
 
 internal class SideConverter : JsonConverter<Side> {
@@ -609,7 +609,7 @@ internal class SideConverter : JsonConverter<Side> {
         throw new Exception("Cannot marshal type Side");
     }
 
-    public static readonly SideConverter Singleton = new SideConverter();
+    public static readonly SideConverter Singleton = new();
 }
 
 internal class SourceConverter : JsonConverter<Source> {
@@ -640,7 +640,7 @@ internal class SourceConverter : JsonConverter<Source> {
         throw new Exception("Cannot marshal type Source");
     }
 
-    public static readonly SourceConverter Singleton = new SourceConverter();
+    public static readonly SourceConverter Singleton = new();
 }
 
 internal class TypeEnumConverter : JsonConverter<TypeEnum> {
@@ -674,7 +674,7 @@ internal class TypeEnumConverter : JsonConverter<TypeEnum> {
         throw new Exception("Cannot marshal type TypeEnum");
     }
 
-    public static readonly TypeEnumConverter Singleton = new TypeEnumConverter();
+    public static readonly TypeEnumConverter Singleton = new();
 }
 
 internal class CountryNameConverter : JsonConverter<CountryName> {
@@ -696,7 +696,7 @@ internal class CountryNameConverter : JsonConverter<CountryName> {
         throw new Exception("Cannot marshal type CountryName");
     }
 
-    public static readonly CountryNameConverter Singleton = new CountryNameConverter();
+    public static readonly CountryNameConverter Singleton = new();
 }
 
 internal class TvInfoTypeNameConverter : JsonConverter<TvInfoTypeName> {
@@ -718,7 +718,7 @@ internal class TvInfoTypeNameConverter : JsonConverter<TvInfoTypeName> {
         throw new Exception("Cannot marshal type TvInfoTypeName");
     }
 
-    public static readonly TvInfoTypeNameConverter Singleton = new TvInfoTypeNameConverter();
+    public static readonly TvInfoTypeNameConverter Singleton = new();
 }
 
 internal class CountryConverter : JsonConverter<Country?> {
@@ -746,7 +746,7 @@ internal class CountryConverter : JsonConverter<Country?> {
         throw new Exception("Cannot marshal type Country");
     }
 
-    public static readonly CountryConverter Singleton = new CountryConverter();
+    public static readonly CountryConverter Singleton = new();
 }
 
 
