@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "version": "0.2.0",
     "configurations": [
         {
@@ -32,4 +33,11 @@
             "request": "attach"
         }
     ]
+=======
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": []
+>>>>>>> 572d5660688f66d4943c78f3428fdbc2ce410561
 }

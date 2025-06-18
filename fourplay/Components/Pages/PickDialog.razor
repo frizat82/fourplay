@@ -1,0 +1,65 @@
+<MudDialog>
+    <DialogContent>
+        <MudStack AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Row="true">
+            <MudText Typo="Typo.h6">Team: @TeamAbbr</MudText>
+            <MudImage Src="@Logo" Width="50" />
+        </MudStack>
+
+        @if (UserNames.Count > 0)
+        {
+            <MudDivider DividerType="DividerType.Inset" />
+            <MudText Typo="Typo.h6">Spread</MudText>
+            <MudList T="string">
+                @foreach (var user in UserNames)
+                {
+                    <MudListItem Value="@user" Icon="@Icons.Material.Filled.Inbox">
+                        <AvatarContent>
+                            <MudAvatar Color="Color.Tertiary">@user.First()</MudAvatar>
+                        </AvatarContent>
+                        <ChildContent>
+                            @user
+                        </ChildContent>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+
+        @if (UserNamesOver.Count > 0)
+        {
+            <MudDivider DividerType="DividerType.Inset" />
+            <MudText Typo="Typo.h6">Over</MudText>
+            <MudList T="string">
+                @foreach (var user in UserNamesOver)
+                {
+                    <MudListItem Value="@user" Icon="@Icons.Material.Filled.Inbox">
+                        <AvatarContent>
+                            <MudAvatar Color="Color.Tertiary">@user.First()</MudAvatar>
+                        </AvatarContent>
+                        <ChildContent>
+                            @user
+                        </ChildContent>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+
+        @if (UserNamesUnder.Count > 0)
+        {
+            <MudDivider DividerType="DividerType.Inset" />
+            <MudText Typo="Typo.h6">Under</MudText>
+            <MudList T="string">
+                @foreach (var user in UserNamesUnder)
+                {
+                    <MudListItem Value="@user" Icon="@Icons.Material.Filled.Inbox">
+                        <AvatarContent>
+                            <MudAvatar Color="Color.Tertiary">@user.First()</MudAvatar>
+                        </AvatarContent>
+                        <ChildContent>
+                            @user
+                        </ChildContent>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+    </DialogContent>
+</MudDialog>

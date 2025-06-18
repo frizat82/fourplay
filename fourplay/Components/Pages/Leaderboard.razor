@@ -1,0 +1,69 @@
+﻿@page "/leaderboard"
+@using System.Data
+@using fourplay.Models
+@using fourplay.Models.Enum
+
+<PageTitle>Leaderboard</PageTitle>
+<MudContainer>
+    <MudGrid Justify="Justify.FlexStart">
+        <MudItem xs="12">
+            <MudText Align="Align.Center" Typo="Typo.h3">Standings</MudText>
+        </MudItem>
+        <MudSpacer />
+        <MudItem xs="12">
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((!@_loading ? "invisible" : ""))" />
+        </MudItem>
+        <MudItem xs="12">
+            @if (_leaderboardModel.Count > 0)
+            {
+                <MudPaper class="pa-3 full-width" Elevation="3">
+                    <MudTable T="LeaderboardModel" Items="_leaderboardModel" Bordered="true" Dense="true"
+                        ReadOnly="true" Loading="@_loading" LoadingProgressColor="Color.Info" Breakpoint="Breakpoint.None">
+                        <HeaderContent>
+                            <MudTh>User</MudTh>
+                            <MudTh>
+                                <MudTableSortLabel SortBy="new Func<LeaderboardModel, object>(x=>x.Total)" InitialDirection="SortDirection.Descending">Total
+                                </MudTableSortLabel>
+                            </MudTh>
+                            @for (int i = GetMaxWeek(); i > 0; i--)
+                            {
+                                var weekName = $"W{i}";
+                                <MudTh>@weekName</MudTh>
+                            }
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.User.Email</MudTd>
+                            @if (@context.Total > 0)
+                            {
+                                <MudTd Class="border-solid border-2 mud-border-white mud-theme-success">@context.Total</MudTd>
+                            }
+                            else
+                            {
+                                <MudTd Class="border-solid border-2 mud-border-white mud-theme-error">@context.Total</MudTd>
+                            }
+                            @for (int i = GetMaxWeek(); i > 0; i--)
+                            {
+                                var cellValue = @context.WeekResults[i - 1];
+                                if (@cellValue.WeekResult == WeekResult.Won)
+                                {
+
+                                    <MudTd Class="border-solid border-2 mud-border-white mud-theme-success">@cellValue.Score
+                                    </MudTd>
+                                }
+                                else if (@cellValue.WeekResult == WeekResult.MissingPicks)
+                                {
+                                    <MudTd Class="border-solid border-2 mud-border-white mud-theme-warning">@cellValue.Score
+                                    </MudTd>
+                                }
+                                else
+                                {
+                                    <MudTd Class="border-solid border-2 mud-border-white mud-theme-error">@cellValue.Score</MudTd>
+                                }
+                            }
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
+            }
+        </MudItem>
+    </MudGrid>
+</MudContainer>

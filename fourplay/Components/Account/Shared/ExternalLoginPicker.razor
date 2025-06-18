@@ -1,0 +1,65 @@
+﻿@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using MudBlazor
+@using fourplay.Data
+@using MudBlazor.StaticInput
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityRedirectManager RedirectManager
+
+@if (externalLogins.Length == 0)
+{
+    <MudAlert Variant="Variant.Text" Severity="Severity.Warning">There are no external authentication services configured.
+</MudAlert>
+    <MudText Typo="Typo.body1" Class="pt-4">
+        See <MudLink Target="_blank" Href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</MudLink>
+        about setting up this ASP.NET application to support logging in via external services
+    </MudText>
+}
+else
+{
+    <form class="form-horizontal" action="Account/PerformExternalLogin" method="post">
+    <div>
+        <AntiforgeryToken />
+        <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+        <p>
+            @foreach (var provider in externalLogins)
+                {
+                    <MudItem lg="6" xs="12">
+                        <MudPaper class="pa-3" Elevation="15">
+                            <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name"
+                                title="Log in using your @provider.DisplayName account">
+                                <MudIcon Icon="@GetIcon(@provider.Name)" Title="@provider.DisplayName" />
+                                <div>&nbsp;&nbsp;@provider.DisplayName</div>
+                            </button>
+                        </MudPaper>
+                    </MudItem>
+
+                }
+            </p>
+        </div>
+    </form>
+}
+
+@code {
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+    private AuthenticationScheme[] externalLogins = [];
+
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        externalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToArray();
+    }
+    private string GetIcon(string providerName)
+    {
+        if (providerName == "Google")
+            return @Icons.Custom.Brands.Google;
+        if (providerName == "Apple")
+            return @Icons.Custom.Brands.Apple;
+        if (providerName == "Facebook")
+            return @Icons.Custom.Brands.Facebook;
+        return "";
+    }
+
+}

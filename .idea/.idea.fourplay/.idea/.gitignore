@@ -3,8 +3,13 @@
 /workspace.xml
 # Rider ignored files
 /modules.xml
+<<<<<<< HEAD
 /contentModel.xml
 /projectSettingsUpdater.xml
+=======
+/projectSettingsUpdater.xml
+/contentModel.xml
+>>>>>>> 572d5660688f66d4943c78f3428fdbc2ce410561
 /.idea.fourplay.iml
 # Editor-based HTTP Client requests
 /httpRequests/

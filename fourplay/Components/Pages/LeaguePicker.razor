@@ -1,0 +1,42 @@
+@page "/leagues"
+
+<PageTitle>Leagues</PageTitle>
+
+<MudContainer>
+    <MudGrid>
+        <MudItem xs="12">
+            <MudText Align="Align.Center" Typo="Typo.h3">Pick a League</MudText>
+        </MudItem>
+        <MudSpacer />
+        <MudItem xs="12">
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="@((!@_loading ? "invisible" : ""))" />
+        </MudItem>
+        <MudSpacer />
+        <MudItem lg="6" xs="12">
+            <MudPaper Class="border-solid border-2 mud-border-primary ma-4 pa-4" Elevation="3">
+                @if (!_loading && _leagues.Count() == 0)
+                {
+
+                    <MudText Align="Align.Center" Typo="Typo.h3">Not Assigned to Any Leagues, Contact Admin</MudText>
+                }
+                else
+                {
+                    <MudList T="int" SelectedValueChanged="OnSelectedValuesChanged" SelectedValue="@_selectedValue"
+                        SelectionMode="SelectionMode.SingleSelection" Color="@Color.Info">
+                        @foreach (var league in _leagues)
+                        {
+                            <MudListItem Value="@league.Id" Icon="@Icons.Material.Filled.Inbox">
+                                <AvatarContent>
+                                    <MudAvatar Color="Color.Tertiary">@league.LeagueName.First()</MudAvatar>
+                                </AvatarContent>
+                                <ChildContent>
+                                    @league.LeagueName
+                                </ChildContent>
+                            </MudListItem>
+                        }
+                    </MudList>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>

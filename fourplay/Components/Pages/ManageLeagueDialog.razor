@@ -1,0 +1,15 @@
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="_leagueName" Label="League" Variant="Variant.Outlined"></MudTextField>
+        <MudTextField @bind-Value="_juice" T="int?" Label="Juice" Variant="Variant.Outlined"></MudTextField>
+        <MudTextField @bind-Value="_juiceDivisional" T="int?" Label="Juice Divisional" Variant="Variant.Outlined">
+        </MudTextField>
+        <MudTextField @bind-Value="_juiceConference" T="int?" Label="Juice Conference" Variant="Variant.Outlined">
+        </MudTextField>
+        <MudTextField @bind-Value="_season" T="int?" Label="Season" Variant="Variant.Outlined"></MudTextField>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Disabled="@IsEnabled()" Color="Color.Error" OnClick="AddMapping">Add League</MudButton>
+    </DialogActions>
+</MudDialog>
